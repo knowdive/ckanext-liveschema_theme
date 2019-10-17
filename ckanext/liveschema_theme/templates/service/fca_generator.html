@@ -1,0 +1,8 @@
+{% extends "page.html" %}
+
+{% block subtitle %}{{ _("FCA Generator") }}{% endblock %}
+
+{% block breadcrumb_content %}
+  <li>{{ h.nav_link(_('Services'), controller='ckanext.liveschema_theme.plugin:LiveSchemaGroupController', action='search') }}</li>
+  <li class="active"><a href="{{ h.url_for_static('/service/fca_generator') }}">FCA Generator</li>
+{% endblock %}

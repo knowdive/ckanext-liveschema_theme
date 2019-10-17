@@ -1,0 +1,35 @@
+{% ckan_extends %}
+
+{% block footer_content %}
+    <div class="row" align="center">
+        <div class="col-md-4 attribution">
+            <p class="col-md-3"></p>
+            <p class="col-md-6"><a href="http://knowdive.disi.unitn.it/"><img class="img-responsive img-fluid" src="http://knowdive.disi.unitn.it/wp-content/uploads/cropped-logo_small.png"></img></a></p>
+            <p class="col-md-3"></p>
+            <p class="col-md-12">
+                Address:
+                <br>
+                    <a href="http://knowdive.disi.unitn.it/">Knowdive</a>, <a href="http://www.unitn.it/" target="_blank" rel="noopener">University of Trento</a>,
+                <br>
+                38123 Povo, Trento, Italy
+            </p>
+        </div>
+        <div class="col-md-4 footer-links">
+            <ul class="list-unstyled">
+                <li></li>
+                <li><a href="http://liveschema.eu/">{{ _('LiveSchema') }}</a></li>
+                <li><a href="http://datascientia.disi.unitn.it/">{{ _('DataScientia') }}</a></li>
+                <li><a href="http://knowdive.disi.unitn.it/">{{ _('KnowDive') }}</a></li>
+                <li><a href="{{ h.url_for_static('/pages/contacts') }}">Contacts</a></li>
+            </ul>
+        </div>
+        <div class="col-md-4 attribution">
+            {% block footer_attribution %}
+                <p>{% trans %}<strong>Powered by</strong> <a class="hide-text ckan-footer-logo" href="http://ckan.org">CKAN</a>{% endtrans %}</p>
+            {% endblock %}
+        </div>
+    </div>
+    <div class="row" align="center">
+        <p>Copyright © 2019 KnowDive Group - University of Trento</p>
+    </div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% set intro = g.site_intro_text %}
+
+<div class="module-content box">
+    <header>
+        {% if intro %}
+            {{ h.render_markdown(intro) }}
+        {% else %}
+            <h1 class="page-heading">{{ _("Why LiveSchema?") }}</h1>
+            <p>Ontology repository to handle vocabularies.</p>
+            <p>Solution to support the process of managing diversity in reference knowledge resources.</p>
+            <p>LiveSchema offers thoroughly developed state-of-the-art standard solutions in this field such as
+                browse, search, access, metadata exploration, and so on. Moreover LiveSchema will also supply developers with new and more advanced services such as
+                the aggregation of ontologies from different sources, an auto-updating procedure, a visualization mechanism,
+                and a process for the production of new knowledge. </p>
+            <p>Thanks to this set of tools offered, LiveSchema aim to
+                help the analysis and re-use of existing vocabularies in order to
+                obtain newly generated ontologies that will best suit the personal needs of the users.</p>
+        {% endif %}
+    </header>
+</div>

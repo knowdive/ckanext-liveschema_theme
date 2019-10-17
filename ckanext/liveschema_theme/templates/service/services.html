@@ -1,0 +1,7 @@
+{% extends "page.html" %}
+
+{% block subtitle %}{{ _("Services") }}{% endblock %}
+
+{% block breadcrumb_content %}
+  <li class="active">{{ h.nav_link(_('Services'), controller='ckanext.liveschema_theme.plugin:LiveSchemaGroupController', action='search') }}</li>
+{% endblock %}
