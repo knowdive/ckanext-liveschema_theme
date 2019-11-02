@@ -21,7 +21,7 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/boffomarco/ckanext-liveschema_theme',
+    url='https://github.com/knowdive/ckanext-liveschema_theme',
 
     # Author details
     author='''Boffo Marco''',

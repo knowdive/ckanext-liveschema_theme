@@ -3,5 +3,56 @@
 {% block subtitle %}{{ _("Services") }}{% endblock %}
 
 {% block breadcrumb_content %}
-  <li class="active">{{ h.nav_link(_('Services'), controller='ckanext.liveschema_theme.plugin:LiveSchemaGroupController', action='search') }}</li>
+  <li class="active">{{ h.nav_link(_('Services'), controller='ckanext.liveschema_theme.plugin:LiveSchemaController', action='index') }}</li>
+{% endblock %}
+
+{% block primary_content %}
+  <article class="module module-content">
+    <header>
+      <h1>Services</h1>
+    </header>
+      <ul class="media-grid" data-module="media-grid">
+
+          {# Uploader #}
+          <li class="media-item">
+            <img src="https://cdn.pixabay.com/photo/2016/01/03/00/43/upload-1118929_960_720.png" alt="Uploader" class="img-responsive media-image">
+            <h3 class="media-heading">LiveSchema Updater</h3>
+              <p>
+                Scrape the Catalogs searching for new information in order to have an always updated system. 
+              </p>
+            <a href="/service/updater" title="Go to LiveSchema Updater" class="media-view">
+              <span>Go to the LiveSchema Updater</span>
+            </a>
+          </li>
+      
+          {# FCA_Generator #}
+          <li class="media-item">
+            <img src="http://www.cs.ubbcluj.ro/icfca14/wp-content/uploads/Screen-Shot-2013-06-27-at-1.17.18-PM.png" alt="FCA_Generator" class="img-responsive media-image">
+            <h3 class="media-heading">FCA Generator</h3>
+              <p>
+                Generate the FCA matrix from a given Dataset.
+              </p>
+            <a href="/service/fca_generator" title="Go to the FCA Generator" class="media-view">
+              <span>Go to the FCA Generator</span>
+            </a>
+          </li>
+      
+          {# Cue_Generator #}
+          <li class="media-item">
+            <img src="https://www.infolytik.com/wp-content/uploads/2017/01/icon-search.png" alt="Cue_Generator" class="img-responsive media-image">
+            <h3 class="media-heading">Cue Generator</h3>
+              <p>
+                Extract Cue metrics from a given Dataset
+              </p>
+            <a href="/service/cue_generator" title="Go to the Cue Generator" class="media-view">
+              <span>Go to the Cue Generator</span>
+            </a>
+          </li>
+      
+        </ul>
+  </article>
+{% endblock %}
+
+{% block secondary_content %}
+  {% snippet "service/snippets/helper_services.html" %}
 {% endblock %}

@@ -1,12 +1,27 @@
 {% ckan_extends %}
 
+{% block header_logo %} 
+    {% if g.site_logo %}
+        <a class="logo" href="{{ h.url_for('home.index') }}">
+            <img src="http://knowdive.disi.unitn.it/wp-content/uploads/cropped-logo_small.png" alt="{{ g.site_title }}" title="{{ g.site_title }}" />
+        </a>
+    {% else %}
+        <h1>
+            <a href="{{ h.url_for('home.index') }}">{{ g.site_title }}</a>
+        </h1>
+        {% if g.site_description %}
+            <h2>{{ g.site_description }}</h2>
+        {% endif %} 
+    {% endif %} 
+{% endblock %}
+
 {% block header_site_navigation_tabs %}
-    {{ h.build_nav_main( ('search', _('Datasets')), ('organizations_index', _('Organizations')), ('ckanext_liveschema_theme_service', _('Services')),
+    {{ h.build_nav_main( ('search', _('Datasets')), ('organizations_index', _('Organizations')), ('ckanext_liveschema_theme_services', _('Services')),
     ('group_index', _('Groups')), ('home.about', _('About')) ) }} 
 {% endblock %}
 
 {% block header_site_search %}
-    {% if request.path != "/" %}
+    {% if request.path != "/" and request.path != "/dataset" %}
         <form class="section site-search simple-input" action="{% url_for controller='package', action='search' %}" method="get">
             <div class="field">
                 <label for="field-sitewide-search">{% block header_site_search_label %}{{ _('Search Datasets') }}{% endblock %}</label>

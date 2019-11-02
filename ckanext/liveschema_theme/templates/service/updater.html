@@ -1,0 +1,21 @@
+{% extends "page.html" %}
+
+{% block subtitle %}{{ _("LiveSchema Updater") }}{% endblock %}
+
+{% block breadcrumb_content %}
+  <li>{{ h.nav_link(_('Services'), controller='ckanext.liveschema_theme.plugin:LiveSchemaController', action='index') }}</li>
+  <li class="active"><a href="{{ h.url_for_static('/service/updater') }}">LiveSchema Updater</a></li>
+{% endblock %}
+
+{% block primary_content %}
+  <article class="module module-content">
+    <header>
+      <h1>LiveSchema Updater</h1>
+    </header>
+    <a class="btn btn-primary btn-lg" href="{{ h.url_for_static('/service/update') }}" title="updateLiveSchema"><i class="icon-refresh"></i> Update LiveSchema <i class="icon-refresh"></i></a>
+  </article>
+{% endblock %}
+
+{% block secondary_content %}
+  {% snippet "service/snippets/helper_update.html" %}
+{% endblock %}

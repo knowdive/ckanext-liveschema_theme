@@ -2,11 +2,11 @@
    these badges work. The necessary Travis and Coverage config files have been
    generated for you.
 
-.. image:: https://travis-ci.org/boffomarco/ckanext-liveschema_theme.svg?branch=master
-    :target: https://travis-ci.org/boffomarco/ckanext-liveschema_theme
+.. image:: https://travis-ci.org/knowdive/ckanext-liveschema_theme.svg?branch=master
+    :target: https://travis-ci.org/knowdive/ckanext-liveschema_theme
 
-.. image:: https://coveralls.io/repos/boffomarco/ckanext-liveschema_theme/badge.svg
-  :target: https://coveralls.io/r/boffomarco/ckanext-liveschema_theme
+.. image:: https://coveralls.io/repos/knowdive/ckanext-liveschema_theme/badge.svg
+  :target: https://coveralls.io/r/knowdive/ckanext-liveschema_theme
 
 .. image:: https://pypip.in/download/ckanext-liveschema_theme/badge.svg
     :target: https://pypi.python.org/pypi//ckanext-liveschema_theme/
@@ -90,10 +90,10 @@ Development Installation
 To install ckanext-liveschema_theme for development, activate your CKAN virtualenv and
 do::
 
-    git clone https://github.com/boffomarco/ckanext-liveschema_theme.git
+    git clone https://github.com/knowdive/ckanext-liveschema_theme.git
     cd ckanext-liveschema_theme
     python setup.py develop
-    pip install -r dev-requirements.txt
+    pip install -r requirements.txt
 
 
 -----------------

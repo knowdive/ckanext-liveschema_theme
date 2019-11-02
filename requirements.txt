@@ -1,0 +1,4 @@
+# Python packages to install to execute the services of LiveSchema
+bs4
+pandas
+rdflib

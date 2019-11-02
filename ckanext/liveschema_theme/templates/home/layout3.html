@@ -9,7 +9,17 @@
               <ul>
                 {% for org in h.liveschema_theme_most_popular_catalogs() %}
                   <li>
-                    <a href="/organization/{{ org.name }}">{{ org.title }}</a> has <a href="/dataset?organization={{ org.name }}">{{ org.package_count}} {% if org.package_count==1 %}dataset{% else %}datasets{% endif %}</a>
+                    <a href="{{ h.url_for('organization_read', action='read', id=org.name) }}">
+                      <h3>{{ org.title }}</h3>
+                    </a>
+                    {% if org.description %}
+                      <p>
+                        {{ h.markdown_extract(org.description, extract_length=140) }}
+                      </p>
+                    {% else %}
+                      <p>{{ _('This organization has no description') }}</p>
+                    {% endif %}
+                      <strong><a href="/dataset?organization={{ org.name }}">{{ org.package_count}} {% if org.package_count==1 %}dataset{% else %}datasets{% endif %}</a></strong>
                   </li>
                   <br />
                 {% endfor %}
