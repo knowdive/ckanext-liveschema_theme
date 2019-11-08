@@ -2,5 +2,6 @@
 
 {% block content_primary_nav %}
     {{ h.build_nav_icon('dataset_read', _('Dataset'), id=pkg.name) }}
+    {{ h.build_nav_icon('ckanext_liveschema_theme_graph', _('Graph'), id=pkg.name) }}
     {{ h.build_nav_icon('dataset_activity', _('Activity Stream'), id=pkg.name) }}
 {% endblock %}

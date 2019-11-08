@@ -1,0 +1,146 @@
+/* =====================================================
+   The "account masthead" bar across the top of the site
+   ===================================================== */
+
+.account-masthead {
+    background-color: rgba(58, 58, 58, 1);
+    background-image: url(../../../base/images/bg.png);
+}
+/* The "bubble" containing the number of new notifications. */
+.account-masthead .account .notifications a span {
+    background-color: black;
+}
+/* The text and icons in the user account info. */
+.account-masthead .account ul li a {
+    color: rgba(234, 234, 234, 1);
+}
+/* The user account info text and icons, when the user's pointer is hovering
+   over them. */
+.account-masthead .account ul li a:hover {
+    color: rgba(234, 234, 234, 1);
+    background-color: black;
+}
+
+
+/* ========================================================================
+   The main masthead bar that contains the site logo, nav links, and search
+   ======================================================================== */
+
+.masthead {
+    background-color: rgba(255, 255, 255, 1);
+    background: rgba(255, 255, 255, 1);
+}
+
+/* The "active" navigation pill (for example, when you're on the /dataset page
+   the "Datasets" link is active). */
+.masthead .navigation .nav-pills li a {
+    color: rgba(58, 58, 58, 1);
+    background-color: rgba(255, 255, 255, 1);
+}
+
+/* The "navigation pills" in the masthead (the links to Datasets,
+   Organizations, etc) when the user's pointer hovers over them. */
+.masthead .navigation .nav-pills li a:hover {
+    background-color: rgba(255, 255, 255, 1);
+    color: rgba(2, 116, 190, 1);
+}
+.homepage .module-search .search-giant input {
+    border-color: rgba(58, 58, 58, 1);
+}
+/* The "active" navigation pill (for example, when you're on the /dataset page
+   the "Datasets" link is active). */
+.masthead .navigation .nav-pills li.active a {
+    color: rgba(2, 116, 190, 1);
+    background-color: rgba(255, 255, 255, 1);
+}
+/* The "box shadow" effect that appears around the search box when it
+   has the keyboard cursor's focus. */
+.masthead input[type="text"]:focus {
+    -webkit-box-shadow: inset 0px 0px 2px 0px rgba(0, 0, 0, 0.7);
+    box-shadow: inset 0px 0px 2px 0px rgba(0, 0, 0, 0.7);
+}.masthead input[type="text"] {
+    border-color: rgba(58, 58, 58, 1);
+}
+
+
+/* ===========================================
+   The content in the middle of the front page
+   =========================================== */
+
+/* Change the colors of the "Search Your Data" box. */
+.homepage .module-search .module-content {
+    color: rgba(58, 58, 58, 1);
+    background-color: white;
+}
+/* Change the background color of the "Popular Tags" box. */
+.homepage .module-search .tags {
+    background-color: rgba(58, 58, 58, 1);
+    background-image: url(../../../base/images/bg.png);
+}
+.homepage .module-search .tags a:hover {
+    background-color: rgba(2, 116, 190, 1);
+}
+/* Remove some padding. This makes the bottom edges of the "Welcome to CKAN"
+   and "Search Your Data" boxes line up. */
+.module-content:last-child {
+    padding-bottom: 0px;
+}
+.homepage .module-search {
+    padding: 0px;
+}
+/* Add a border line between the top and bottom halves of the front page. */
+.homepage [role="main"] {
+    border-top: 1px solid rgb(204, 204, 204);
+}
+
+
+/* ====================================
+   The footer at the bottom of the site
+   ==================================== */
+
+.site-footer,
+body {
+    background-color: rgba(58, 58, 58, 1);
+}
+/* The text in the footer. */
+.site-footer,
+.site-footer label,
+.site-footer small {
+    color: rgba(234, 234, 234, 1);
+}
+/* The link texts in the footer. */
+.site-footer a {
+    color: rgba(234, 234, 234, 1);
+}
+
+
+/* ====================================
+   The button's colors
+   ==================================== */
+.btn-primary {
+    color: white;
+    background-color: rgba(58, 58, 58, 1);
+    border-color: black;
+}
+
+.btn-primary:hover {
+    background-color: rgba(50, 50, 50, 1);
+}
+
+/* ====================================
+   The faceted elements color for the search
+   ==================================== */
+.nav-item.active>a, .nav-aside li.active a {
+    background-color: rgba(2, 116, 190, 1);
+}
+
+.pill{
+    background-color: rgba(2, 116, 190, 1);
+}
+
+/* ====================================
+   The links
+   ==================================== */
+a {
+    color: rgba(2, 116, 190, 1);
+}

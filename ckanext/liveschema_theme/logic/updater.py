@@ -15,6 +15,11 @@ import ckan.plugins.toolkit as toolkit
 
 import ckan.lib.helpers as helpers
 
+import ckan.model as model
+
+# Get the variable of context from toolkit
+c = toolkit.c
+
 # encoding: utf-8
 import sys
 reload(sys)
@@ -22,12 +27,10 @@ sys.setdefaultencoding('utf8')
 
 
 # Main function used to update LiveSchema
-def updateLiveSchema():
+def updateLiveSchema():    
     # Get the list of catalogs and datasets to use to check the current state of LiveSchema
-    catalogs = toolkit.get_action('organization_list')(
-        data_dict={})
-    datasets = toolkit.get_action('package_list')(
-        data_dict={})
+    catalogs = toolkit.get_action('organization_list')(data_dict={})
+    datasets = toolkit.get_action('package_list')(data_dict={})
 
     # Set the admin key of LiveSchema
     CKAN_KEY = "0587249a-c6e6-4b75-914a-075d88b16932"
@@ -40,9 +43,17 @@ def updateLiveSchema():
     #print("rvs")
     scrapeRVS(CKAN_KEY, catalogs, datasets)
 
-    # Scrape the the Others excel file from github
-    #print("others")
-    scrapeOthers(CKAN_KEY, catalogs, datasets)
+    # Scrape the DERI Repository
+    #print("deri")
+    scrapeDERI(CKAN_KEY, catalogs, datasets)
+
+    # Scrape Knowdive
+    #print("knowdive")
+    scrapeKnowDive(CKAN_KEY, catalogs, datasets)
+
+    # Scrape the the Others excel file from the GitHub Repository
+    #print("GitHub Repository")
+    scrapeGitHub(CKAN_KEY, catalogs, datasets)
 
     # Scrape the LOV Repository
     #print("lov")
@@ -56,7 +67,7 @@ def scrapeFinto(CKAN_KEY, catalogs, datasets):
     if "finto" in catalogs:
         # If it is then get its relative information and datasets
         cataFinto = toolkit.get_action('organization_show')(
-            data_dict={"id": "finto", "include_datasets": True, "include_dataset_count": False, "include_extras": False, "include_users": False, "include_groups": False, "include_tags": False, "include_followers": False})
+            data_dict={"id": "finto", "include_datasets": False, "include_dataset_count": False, "include_extras": False, "include_users": False, "include_groups": False, "include_tags": False, "include_followers": False})
     else:
         # Otherwise create the catalog for Finto
         cataFinto = toolkit.get_action('organization_create')(
@@ -66,8 +77,67 @@ def scrapeFinto(CKAN_KEY, catalogs, datasets):
                 "title": "FINnish Thesaurus and Ontology service",
                 "image_url": "https://eepos.finna.fi/themes/custom/images/Finto-logo_eng.png?_=1511945761",
                 "extras": [{"key": "URL", "value": "http://finto.fi/en/"}],
-                "packages": [],
                 "description": "Finto is a Finnish thesaurus and ontology service, which enables both the publication and browsing of vocabularies. The service also offers interfaces for integrating the thesauri and ontologies into other applications and systems."})
+
+    # Set the URL you want to webscrape from
+    url = "http://finto.fi/"
+    # Connect to the URL
+    response = requests.get(url+"en/")
+    # Parse HTML and save to BeautifulSoup object
+    soup = BeautifulSoup(response.text, "html.parser")
+    # Select the categories of all the vocabularies
+    categories = soup.findAll("div", {"class": "vocab-category"})
+    # Iterate over each category
+    for category in categories:
+        # Get the of the tag from the title of category
+        tagName = category("h2")[0].text
+        # Iterate over each vocabulary in that category
+        for vocab in category("a"):
+            # Get the page of the vocabulary
+            responseVoc = requests.get(url+vocab["href"])
+            # Parse the page of the vocabulary
+            soupVoc = BeautifulSoup(responseVoc.text, "html.parser")
+
+            # Iterate over each link of the vocabulary and save the link (TURTLE format preferred)
+            for a in soupVoc("div", {"class":"download-links"})[0]("a"):
+                if(a and a.text == "RDF/XML"):
+                    link = a["href"]
+                if(a and a.text == "TURTLE"):
+                    link = a["href"]
+            # Iterate over each row of the metadata table to obtain title, description, last modified, language, homepage, uri if available
+            for tr in soupVoc("table", {"class":"table"})[0].find_all("tr"):
+                th = tr.find_all("th")  
+                if th and th[0].text == "TITLE":
+                    title = tr.find_all("td")[0].text
+                if th and th[0].text == "DESCRIPTION":
+                    description = tr.find_all("td")[0].text
+                if th and th[0].text == "LAST MODIFIED":
+                    lastModified = tr.find_all("td")[0].text
+                if th and th[0].text == "LANGUAGE":
+                    language = tr.find_all("td")[0].text
+                if th and th[0].text == "HOMEPAGE":
+                    homepage = tr.find_all("td")[0].text
+                if th and th[0].text == "URI":
+                    uri = tr.find_all("td")[0].text
+
+            # Create the package as a dict
+            package = dict(extras=list())
+            # Fill the package information
+            package["url"] = url + link
+            package["name"] = "finto_" + vocab["href"].split("/")[0].lower().replace(" ","-").replace(".","-").replace(";","-").replace("\\","").replace("/","").replace(":","").replace("*","").replace("?","").replace("\"","").replace("<","").replace(">","").replace("|","")
+            package["title"] = title
+            package["notes"] = description
+            package["owner_org"] = cataFinto["id"]
+            package["version"] = "1"
+            package["tags"] = [{"name": tagName}]
+            package["extras"].append({"key": "issued", "value": lastModified})
+            package["extras"].append({"key": "language", "value": language})
+            package["extras"].append({"key": "contact_uri", "value": homepage})
+            package["extras"].append({"key": "uri", "value": uri})
+            package["extras"].append({"key": "Reference Catalog URL", "value": url+vocab["href"]})
+
+            # Check if the dataset has to be updated
+            checkPackage(CKAN_KEY, datasets, package)
 
 
 # Script to scrape the RVS repository
@@ -77,7 +147,7 @@ def scrapeRVS(CKAN_KEY, catalogs, datasets):
     if "rvs" in catalogs:
         # If it is then get its relative information and datasets
         cataRVS = toolkit.get_action('organization_show')(
-            data_dict={"id": "rvs", "include_datasets": True, "include_dataset_count": False, "include_extras": False, "include_users": False, "include_groups": False, "include_tags": False, "include_followers": False})
+            data_dict={"id": "rvs", "include_datasets": False, "include_dataset_count": False, "include_extras": False, "include_users": False, "include_groups": False, "include_tags": False, "include_followers": False})
     else:
         # Otherwise create the catalog for RVS
         cataRVS = toolkit.get_action('organization_create')(
@@ -87,32 +157,116 @@ def scrapeRVS(CKAN_KEY, catalogs, datasets):
                 "title": "Research Vocabularies Australia",
                 "image_url": "https://ardc.edu.au/wp-content/themes/ardc/img/ardc_logo.svg",
                 "extras": [{"key": "URL", "value": "https://vocabs.ands.org.au/"}],
-                "packages": [],
                 "description": "Research Vocabularies Australia is the controlled vocabulary discovery service of the Australian Research Data Commons (ARDC). ARDC is supported by the Australian Government through the National Collaborative Research Infrastructure Strategy Program."})
+    #[TODO]
 
-
-# Script to scrape the Others excel file from github
-def scrapeOthers(CKAN_KEY, catalogs, datasets):
-    # Check if the Others excel file from github is present on LiveSchema
-    cataOthers = ""
-    if "other" in catalogs:
+# Script to scrape the DERI repository
+def scrapeDERI(CKAN_KEY, catalogs, datasets):
+    # Check if DERI is present on LiveSchema
+    cataDERI = ""
+    if "deri" in catalogs:
         # If it is then get its relative information and datasets
-        cataOthers = toolkit.get_action('organization_show')(
-            data_dict={"id": "other", "include_datasets": True, "include_dataset_count": False, "include_extras": False, "include_users": False, "include_groups": False, "include_tags": False, "include_followers": False})
+        cataDERI = toolkit.get_action('organization_show')(
+            data_dict={"id": "deri", "include_datasets": False, "include_dataset_count": False, "include_extras": False, "include_users": False, "include_groups": False, "include_tags": False, "include_followers": False})
     else:
-        # Otherwise create the catalog for the Other excel file from github
-        cataOthers = toolkit.get_action('organization_create')(
-            data_dict={"name": "other",
-                "id": "other",
-                "title": "Other Vocabularies",
+        # Otherwise create the catalog for DERI
+        cataDERI = toolkit.get_action('organization_create')(
+            data_dict={"name": "deri",
+                "id": "deri",
                 "state": "active",
-                "extras": [{"key": "URL", "value": "https://github.com/knowdive/resources/blob/master/otherVocabs.xlsx"}],
-                "packages": []})
-        # Get the newly created organizations with the empty packages
-        cataOthers = toolkit.get_action('organization_show')(
-            data_dict={"id": "other", "include_datasets": True, "include_dataset_count": False, "include_extras": False, "include_users": False, "include_groups": False, "include_tags": False, "include_followers": False})
-    
-    # Get the other vocabularies from the Excel file from github
+                "title": "DERI Vocabularies",
+                "image_url": "http://vocab.deri.ie/sites/default/files/logo.png",
+                "extras": [{"key": "URL", "value": "http://vocab.deri.ie/"}],
+                "description": "DERI Vocabularies is a URI space for RDF Schema vocabularies and OWL ontologies maintained at DERI, the Digital Enterprise Research Institute at NUI Galway, Ireland. The site is operated by DERI's Linked Data Research Centre."})
+
+    # Set the URL you want to webscrape from
+    url = "http://vocab.deri.ie/"
+
+    # Set the starting and ending page to scrape, that updates dynamically
+    page = 0
+    end = 1
+
+    # Scrape every page from the vocabs tab of LOV
+    while page < end:
+        # Connect to the URL
+        response = requests.get(url+"node?page=" + str(page))
+        # Parse HTML and save to BeautifulSoup object
+        soup = BeautifulSoup(response.text, "html.parser")
+        # Update the page index
+        page += 1
+        # If it is not the last page then update the end index
+        if(len(soup("li", {"class": "pager-next"})) > 0):
+            end += 1
+        # Iterate over the vocabularies
+        for vocab in soup.findAll("div", {"class": "vocabulary-node"}):
+            # Get the vocabulary page
+            responseVoc = requests.get(url + vocab("a")[0]["href"][1:])
+            # Parse HTML and save to BeautifulSoup object
+            soup = BeautifulSoup(responseVoc.text, "html.parser")
+
+            # search for the div containing all the information needed
+            voc = soup("div", {"class":"SearchContainer"})            
+
+            # Create the package as a dict
+            package = dict(extras=list())
+
+            # Get and save the title from the page to the package, if available
+            title = soup("h2")
+            if title:
+                title = title[0].text
+                package["title"] = title
+
+            # Get and save the description from the page to the package, if available
+            description = soup("div", {"id":"abstract"})
+            if description:
+                description = description[0].text[9:]
+                package["notes"] = description
+
+            # Get and save the namespace from the page to the package, if available
+            namespace = soup("div", {"id":"namespace-value"})
+            if namespace:
+                namespace = namespace[0].text
+                package["extras"].append({"key": "contact_uri", "value": namespace})
+                package["extras"].append({"key": "uri", "value": namespace})
+
+            # Get and save the lastModified from the page to the package, if available
+            lastModified = soup("div", {"id":"last-update-value"})
+            if lastModified:
+                lastModified = lastModified[0].text
+                package["extras"].append({"key": "issued", "value": lastModified})
+
+            # Fill the package with the remaining information needed
+            package["url"] = url + vocab("a")[0]["href"][1:] + ".ttl"
+            package["name"] = "deri_" + vocab("a")[0]["href"][1:].split("/")[0].lower().replace(" ","-").replace(".","-").replace(";","-").replace("\\","").replace("/","").replace(":","").replace("*","").replace("?","").replace("\"","").replace("<","").replace(">","").replace("|","")
+            package["owner_org"] = cataDERI["id"]
+            package["version"] = "1"
+            package["extras"].append({"key": "Reference Catalog URL", "value": url + vocab("a")[0]["href"][1:]})
+
+            # Check if the dataset has to be updated
+            checkPackage(CKAN_KEY, datasets, package)
+            
+
+
+# Script to scrape KnowDive
+def scrapeKnowDive(CKAN_KEY, catalogs, datasets):
+    # Check if the KnowDive is present on LiveSchema
+    cataKnowDive = ""
+    if "knowdive" in catalogs:
+        # If it is then get its relative information and datasets
+        cataKnowDive = toolkit.get_action('organization_show')(
+            data_dict={"id": "knowdive", "include_datasets": False, "include_dataset_count": False, "include_extras": False, "include_users": False, "include_groups": False, "include_tags": False, "include_followers": False})
+    else:
+        # Otherwise create the catalog for the KnowDive
+        cataKnowDive = toolkit.get_action('organization_create')(
+            data_dict={"name": "knowdive",
+                "id": "knowdive",
+                "title": "KnowDive Vocabularies",
+                "state": "active",
+                "image_url": "http://knowdive.disi.unitn.it/wp-content/uploads/cropped-logo_small.png",
+                "description": "Vocabularies developed by the Knowdive Research group", 
+                "extras": [{"key": "URL", "value": "http://knowdive.disi.unitn.it/"}]})
+                    
+    # Get the KnowDive vocabularies from the Excel file from github
     vocabs = pd.read_excel("https://raw.githubusercontent.com/knowdive/resources/master/otherVocabs.xlsx")
     # Iterate for every vocabulary read from the Excel file
     for index, row in vocabs.iterrows():
@@ -120,11 +274,49 @@ def scrapeOthers(CKAN_KEY, catalogs, datasets):
         # Create the package as a dict
         package = dict(extras=list())
         # Add the metadata of the dataset
-        package["url"] = row["Link"]
-        package["name"] = "other_" + row["prefix"].lower().replace(" ","-").replace(".","-").replace(";","-").replace("\\","").replace("/","").replace(":","").replace("*","").replace("?","").replace("\"","").replace("<","").replace(">","").replace("|","")
+        package["url"] = row["Link"]+"#"    # They are just example datasets 
+        package["private"] = True
+        package["name"] = "knowdive_" + row["prefix"].lower().replace(" ","-").replace(".","-").replace(";","-").replace("\\","").replace("/","").replace(":","").replace("*","").replace("?","").replace("\"","").replace("<","").replace(">","").replace("|","")
         package["title"] = row["prefix"]
         package["notes"] = row["Title"]
-        package["owner_org"] = cataOthers["id"]
+        package["owner_org"] = cataKnowDive["id"]
+        package["version"] = row["VersionName"]
+        package["extras"].append({"key": "issued", "value": row["VersionDate"]})
+        package["extras"].append({"key": "language", "value": row["Languages"]})
+        package["extras"].append({"key": "contact_uri", "value": row["URI"]})
+        # Check if the dataset has to be updated
+        checkPackage(CKAN_KEY, datasets, package)
+
+
+# Script to scrape the Others excel file from GitHub Repository
+def scrapeGitHub(CKAN_KEY, catalogs, datasets):
+    # Check if the Others excel file from github is present on LiveSchema
+    cataGitHub = ""
+    if "other" in catalogs:
+        # If it is then get its relative information and datasets
+        cataGitHub = toolkit.get_action('organization_show')(
+            data_dict={"id": "github", "include_datasets": False, "include_dataset_count": False, "include_extras": False, "include_users": False, "include_groups": False, "include_tags": False, "include_followers": False})
+    else:
+        # Otherwise create the catalog for the Other excel file from github
+        cataGitHub = toolkit.get_action('organization_create')(
+            data_dict={"name": "github",
+                "id": "github",
+                "title": "GitHub Repository",
+                "state": "active",
+                "extras": [{"key": "URL", "value": "https://github.com/knowdive/resources/blob/master/otherVocabs.xlsx"}]})
+                    
+    # Get the other vocabularies from the Excel file from github
+    vocabs = pd.read_excel("https://raw.githubusercontent.com/knowdive/resources/master/otherVocabs.xlsx")
+    # Iterate for every vocabulary read from the Excel file
+    for index, row in vocabs.iterrows():
+        # Create the package as a dict
+        package = dict(extras=list())
+        # Add the metadata of the dataset
+        package["url"] = row["Link"]
+        package["name"] = "github_" + row["prefix"].lower().replace(" ","-").replace(".","-").replace(";","-").replace("\\","").replace("/","").replace(":","").replace("*","").replace("?","").replace("\"","").replace("<","").replace(">","").replace("|","")
+        package["title"] = row["prefix"]
+        package["notes"] = row["Title"]
+        package["owner_org"] = cataGitHub["id"]
         package["version"] = row["VersionName"]
         package["extras"].append({"key": "issued", "value": row["VersionDate"]})
         package["extras"].append({"key": "language", "value": row["Languages"]})
@@ -140,7 +332,7 @@ def scrapeLOV(CKAN_KEY, catalogs, datasets):
     if "lov" in catalogs:
         # If it is then get its relative information and datasets
         cataLOV = toolkit.get_action('organization_show')(
-            data_dict={"id": "lov", "include_datasets": True, "include_dataset_count": False, "include_extras": False, "include_users": False, "include_groups": False, "include_tags": False, "include_followers": False})
+            data_dict={"id": "lov", "include_datasets": False, "include_dataset_count": False, "include_extras": False, "include_users": False, "include_groups": False, "include_tags": False, "include_followers": False})
     else:
         # Otherwise create the catalog for LOV
         cataLOV = toolkit.get_action('organization_create')(
@@ -150,7 +342,6 @@ def scrapeLOV(CKAN_KEY, catalogs, datasets):
                 "title": "Linked Open Vocabulary",
                 "image_url": "https://lov.linkeddata.es/img/icon-LOV.png",
                 "extras": [{"key": "URL", "value": "https://lov.linkeddata.es/dataset/lov"}],
-                "packages": [],
                 "description": "LOV started in 2011, in the framework of a French research project (http://datalift.org). Its main initial objective was to help publishers and users of linked data and vocabularies to assess what was available for their needs, to reuse it as far as possible, and to insert their own vocabulary production seamlessly in the ecosystem."})
         
     # Set the URL you want to webscrape from
@@ -316,6 +507,13 @@ def checkPackage(CKAN_KEY, datasets, package):
                     a = True
                     break
 
+        # If there are different numbers of tags fields
+        if("tags" in package.keys() and len(CKANpackage["tags"])!= len(package["tags"])):
+            # Update the tags
+            CKANpackage["tags"] =  package["tags"]
+            # Set the online version as outdated
+            a = True
+
         # If the online version is outdated
         if(a):
             # Update the online version of the package
@@ -353,34 +551,33 @@ def addResources(CKAN_KEY, package, action):
 
     try:
         # Serialize the vocabulary in n3
-        g.serialize(destination=str(os.path.join("/tmp/", package["name"] + ".n3")), format="n3")
+        g.serialize(destination=str(os.path.join("ckanext/liveschema_theme/public/resources/", package["name"] + ".n3")), format="n3")
         # Add the serialized n3 file to LiveSchema
         requests.post(CKAN_URL+"/api/3/action/resource_"+action,
                 data={"package_id":package["name"], "format": "n3", "name": package["name"]+".n3"},
                 headers={"X-CKAN-API-Key": CKAN_KEY},
-                files=[("upload", file("/tmp/"+package["name"]+".n3"))])
+                files=[("upload", file("ckanext/liveschema_theme/public/resources/"+package["name"]+".n3"))])
         # Remove the temporary n3 file from the server
-        os.remove("/tmp/"+package["name"]+".n3")
+        os.remove("ckanext/liveschema_theme/public/resources/"+package["name"]+".n3")
     except Exception as e:
         # In case of an error during the graph's serialization, print the error
         print(str(e) + "\n")
 
-    
     try:
         # Serialize the vocabulary in rdf
-        g.serialize(destination=str(os.path.join("/tmp/", package["name"] + ".rdf")), format="pretty-xml")
+        g.serialize(destination=str(os.path.join("ckanext/liveschema_theme/public/resources/", package["name"] + ".rdf")), format="pretty-xml")
         # Add the serialized rdf file to LiveSchema     
         requests.post(CKAN_URL+"/api/3/action/resource_"+action,
                     data={"package_id":package["name"], "format": "rdf", "name": package["name"]+".rdf"},
                     headers={"X-CKAN-API-Key": CKAN_KEY},
-                    files=[("upload", file("/tmp/"+package["name"]+".rdf"))])
+                    files=[("upload", file("ckanext/liveschema_theme/public/resources/"+package["name"]+".rdf"))])
         # Remove the temporary rdf file from the server
-        os.remove("/tmp/"+package["name"]+".rdf")
+        os.remove("ckanext/liveschema_theme/public/resources/"+package["name"]+".rdf")
     except Exception as e:
         # In case of an error during the graph's serialization, print the error
         print(str(e) + "\n")
 
-
+    # Create the list for inserting every triple of the vocabulary
     list_ = list()
     # For each statement present in the graph obtained store the triples
     index = 0
@@ -406,7 +603,6 @@ def addResources(CKAN_KEY, package, action):
             if(not len(objectTerm) and len(objectTerm.split(".")) > 1):
                 objectTerm = objectTerm.split(".")[-2]
 
-        
         # Save the statement to the List to be added to the DataFrame
         list_.insert(index,{"Subject": subject, "Predicate": predicate, "Object": object_, "SubjectTerm": subjectTerm, "PredicateTerm": predicateTerm, "ObjectTerm": objectTerm, "Domain": package["name"], "Domain Version": package["version"]})
         index += 1
@@ -414,13 +610,13 @@ def addResources(CKAN_KEY, package, action):
     # Create the DataFrame to save the vocabs' information
     DTF = pd.DataFrame(list_, columns=["Subject", "Predicate", "Object", "SubjectTerm", "PredicateTerm", "ObjectTerm", "Domain", "Domain Version"])
     # Parse the DataFrame into the csv file
-    DTF.to_csv(os.path.normpath(os.path.expanduser("/tmp/" + package["name"] + ".csv")))
+    DTF.to_csv(os.path.normpath(os.path.expanduser("ckanext/liveschema_theme/public/resources/" + package["name"] + ".csv")))
 
     # Upload the csv file to LiveSchema
     requests.post(CKAN_URL+"/api/3/action/resource_"+action,
                 data={"package_id":package["name"], "format": "csv", "name": package["name"]+".csv"},
                 headers={"X-CKAN-API-Key": CKAN_KEY},
-                files=[("upload", file("/tmp/" + package["name"] + ".csv"))])
+                files=[("upload", file("ckanext/liveschema_theme/public/resources/" + package["name"] + ".csv"))])
 
     # Remove the temporary csv file from the server
-    os.remove("/tmp/" + package["name"] + ".csv")
+    os.remove("ckanext/liveschema_theme/public/resources/" + package["name"] + ".csv")

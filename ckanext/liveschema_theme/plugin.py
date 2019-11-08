@@ -5,11 +5,12 @@ import ckan.plugins as plugins
 import ckan.plugins.toolkit as toolkit
 
 from ckan.plugins import IRoutes, implements, SingletonPlugin
-from ckan.lib.base import BaseController
 from ckan.config.routing import SubMapper
 
 # Import the package for the update function from the logic folder
-from ckanext.liveschema_theme.logic.updater import updateLiveSchema
+import ckanext.liveschema_theme.logic.updater
+import ckanext.liveschema_theme.logic.auth
+import ckanext.liveschema_theme.logic.action
 
 # Get the biggest catalogs ordered by the number of contained datasets
 def most_popular_catalogs():
@@ -20,8 +21,8 @@ def most_popular_catalogs():
     catalogs = toolkit.get_action('organization_list')(
         data_dict={'sort': 'package_count desc', 'all_fields': True})
 
-    # Truncate the list to the 10 most popular catalogs only.
-    catalogs = catalogs[:10]
+    # Truncate the list to the 5 most popular catalogs only.
+    catalogs = catalogs[:5]
 
     # Return the list of catalogs
     return catalogs
@@ -70,6 +71,13 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         # that CKAN will use this plugin's custom static files.
         toolkit.add_public_directory(config, 'public')
 
+        # Register this plugin's fanstatic directory with CKAN.
+        # Here, 'fanstatic' is the path to the fanstatic directory
+        # (relative to this plugin.py file), and 'liveschema_theme' is the name
+        # that we'll use to refer to this fanstatic directory from CKAN
+        # templates.
+        toolkit.add_resource('fanstatic', 'liveschema_theme')
+
     # Declare that this plugin will implement ITemplateHelpers.
     plugins.implements(plugins.ITemplateHelpers)
 
@@ -90,7 +98,7 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         # the names below based on the dataset.type ('dataset' is the default type)
 
         # Define the custom Controller for the routes of ckanext_LiveSchema_theme
-        LiveSchemaController = 'ckanext.liveschema_theme.plugin:LiveSchemaController'
+        LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
 
         # Define the list of new routes to be added
         map.connect('ckanext_liveschema_theme_services', '/service', controller=LiveSchemaController, action='index')
@@ -98,51 +106,27 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         map.connect('ckanext_liveschema_theme_cue_generator', '/service/cue_generator', controller=LiveSchemaController, action='cue_generator')
         map.connect('ckanext_liveschema_theme_updater', '/service/updater', controller=LiveSchemaController, action='updater')
         map.connect('ckanext_liveschema_theme_update', '/service/update', controller=LiveSchemaController, action='update')
+        map.connect('ckanext_liveschema_theme_graph', '/dataset/graph/{id}', controller=LiveSchemaController, action='graph', ckan_icon='arrows-alt')
         
         # Return the new configuration to the default handler of the routers
         return map
 
-# Base Controller to handle the new routes for the services of LiveSchema
-class LiveSchemaController(BaseController):
+    # Add authorization functions for the services
+    plugins.implements(plugins.IAuthFunctions)
 
-    # Define the behaviour of the index of services
-    def index(self):
-        return toolkit.render('service/services.html')
+    def get_auth_functions(self):
+        return {
+            'ckanext_liveschema_theme_services': ckanext.liveschema_theme.logic.auth.services,
+            'ckanext_liveschema_theme_updater': ckanext.liveschema_theme.logic.auth.updater,
+            'ckanext_liveschema_theme_update': ckanext.liveschema_theme.logic.auth.update
+        }
 
-    # Define the behaviour of the fca generator
-    def fca_generator(self):
-        # If the page has to handle the form resulting from the service
-        if toolkit.request.method == 'POST' and toolkit.request.params['dataset']:
-            # Get the selected dataset
-            dataset = toolkit.request.params['dataset']
-            # Go to the dataset page
-            return toolkit.redirect_to(controller='package', action='read',
-                    id=dataset)
-        # Render the page of the service
-        return toolkit.render('service/fca_generator.html')
-    
+    # Add functions for the services
+    plugins.implements(plugins.IActions)
 
-    # Define the behaviour of the cue generator
-    def cue_generator(self):
-        # If the page has to handle the form resulting from the service
-        if toolkit.request.method == 'POST' and toolkit.request.params['dataset']:
-            # Get the selected dataset
-            dataset = toolkit.request.params['dataset']
-            # Go to the dataset page
-            return toolkit.redirect_to(controller='package', action='read',
-                    id=dataset)
-        # Render the page of the service
-        return toolkit.render('service/cue_generator.html')
-
-    # Define the behaviour of the updater service
-    def updater(self):
-        # Render the page of the service
-        return toolkit.render('service/updater.html')
-
-    # Define the behaviour of the update function
-    def update(self):
-        # Enqueue the script to be executed by the background worker
-        toolkit.enqueue_job(updateLiveSchema, title="LiveSchemaUpdater", queue=u'default')
-        #updateLiveSchema()
-        # Redirect to the index
-        return toolkit.redirect_to("../")
+    def get_actions(self):
+        action_functions = {
+            'ckanext_liveschema_theme_update':
+                ckanext.liveschema_theme.logic.action.update
+        }
+        return action_functions

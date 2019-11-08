@@ -1,9 +1,21 @@
 {% ckan_extends %}
 
 {% block links -%}
-    <link rel="shortcut icon" href="http://knowdive.disi.unitn.it/wp-content/uploads/2018/04/cropped-kn2-1024x614-4-32x32.png" />
+    <link rel="shortcut icon" href="http://datascientia.disi.unitn.it/wp-content/uploads/2018/05/cropped-kidf-192x192.png" />
 {% endblock -%}
 
 {% block page %}
     <div>Some other page content</div>
+{% endblock %}
+
+{% block styles %}
+    {# Import liveschema_theme.css using Fanstatic.
+        'liveschema_theme/' is the name that the liveschema_theme/fanstatic directory
+        was registered with when the toolkit.add_resource() function was called.
+        'liveschema_theme.css' is the path to the CSS file, relative to the root of
+        the fanstatic directory. #}
+    {% resource 'liveschema_theme/liveschema_theme.css' %}
+
+    {{ super() }}
+
 {% endblock %}
