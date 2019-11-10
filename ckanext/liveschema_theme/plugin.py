@@ -30,28 +30,56 @@ def most_popular_catalogs():
 # Get the list of datasets that have the relative csv file
 def dataset_selection():
     '''Return a list of the datasets with their relative resources.'''
-
-    # Get a list of all the datasets.
-    datasets = toolkit.get_action('package_list')(
-        data_dict={})
-
+    
     # Create the list of datasets that have the relative csv file to return
     dataSetSelection = list()
-
-    # Iterate over every datasets
-    for data in datasets:
-        # Get the information about every dataset
-        dataSet = toolkit.get_action('package_show')(
-            data_dict={"id": data})
-        # Iterate over every resource of the dataset
-        for res in dataSet["resources"]:
-            # Check if they have the relative csv file
-            if(res["format"]=="CSV"):
-                # Append the dataset with the basic information about it
-                dataSetSelection.append({"name": data, "link": res["url"], "title": dataSet["title"]})
+    # Use searchLimit and index in order to get all the datasets, overcoming the limit of 1000 rows
+    searchLimit = True
+    index = 0
+    while(searchLimit):
+        searchLimit = False
+        # Get a list of 1000 datasets
+        datasets = toolkit.get_action('package_search')(
+            data_dict={"sort":"title_string asc", "include_private": True, "start": index*1000, "rows": 1000})
+        # Reset the index if the number of results reach the limit of rows
+        if(len(datasets["results"]) == 1000):
+            searchLimit = True
+            index = index + 1
+        # Iterate over every datasets
+        for dataset in datasets["results"]:
+            # Iterate over every resource of the dataset
+            for res in dataset["resources"]:
+                # Check if they have the relative csv file
+                if(res["format"] == "CSV" and res["name"] == dataset["name"]+".csv"):
+                    # Append the dataset with the basic information about it
+                    dataSetSelection.append({"name": dataset["name"], "link": res["url"], "title": dataset["title"] + " [" + dataset["organization"]["title"] + "]"})
+                    break
 
     # Return the list of datasets that have the relative csv file to return
     return dataSetSelection
+
+
+# Get the list of catalogs with their relative title
+def catalog_selection():
+    '''Return a list of the catalogs with their relative title.'''
+
+    # Get a list of all the catalogs
+    catalogs = toolkit.get_action('organization_list')(
+        data_dict={})
+
+    # Create the list of catalogs with their relative title
+    catalogsSelection = list()
+
+    # Iterate over every catalogs
+    for name in catalogs:
+        # Get the information about every catalogs
+        catalog = toolkit.get_action('organization_show')(
+            data_dict={"id": name})
+        # Store the catalog with its title
+        catalogsSelection.append({"name": name, "title": catalog["title"]})
+
+    # Return the list of catalogs with their relative title
+    return catalogsSelection
 
 
 class LiveSchemaThemePlugin(plugins.SingletonPlugin):
@@ -87,7 +115,9 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         # Template helper function names should begin with the name of the
         # extension they belong to, to avoid clashing with functions from
         # other extensions.
-        return {'liveschema_theme_most_popular_catalogs': most_popular_catalogs, 'liveschema_theme_dataset_selection': dataset_selection}   
+        return {'liveschema_theme_most_popular_catalogs': most_popular_catalogs, 
+            'liveschema_theme_dataset_selection': dataset_selection, 
+            'liveschema_theme_catalog_selection': catalog_selection }   
 
     # Edit the Routes of CKAN to add custom ones for the services
     implements(IRoutes, inherit=True)
@@ -105,7 +135,6 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         map.connect('ckanext_liveschema_theme_fca_generator', '/service/fca_generator', controller=LiveSchemaController, action='fca_generator')
         map.connect('ckanext_liveschema_theme_cue_generator', '/service/cue_generator', controller=LiveSchemaController, action='cue_generator')
         map.connect('ckanext_liveschema_theme_updater', '/service/updater', controller=LiveSchemaController, action='updater')
-        map.connect('ckanext_liveschema_theme_update', '/service/update', controller=LiveSchemaController, action='update')
         map.connect('ckanext_liveschema_theme_graph', '/dataset/graph/{id}', controller=LiveSchemaController, action='graph', ckan_icon='arrows-alt')
         
         # Return the new configuration to the default handler of the routers
@@ -117,8 +146,8 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
     def get_auth_functions(self):
         return {
             'ckanext_liveschema_theme_services': ckanext.liveschema_theme.logic.auth.services,
-            'ckanext_liveschema_theme_updater': ckanext.liveschema_theme.logic.auth.updater,
-            'ckanext_liveschema_theme_update': ckanext.liveschema_theme.logic.auth.update
+            'ckanext_liveschema_theme_fca_generator': ckanext.liveschema_theme.logic.auth.fca_generator,
+            'ckanext_liveschema_theme_updater': ckanext.liveschema_theme.logic.auth.updater
         }
 
     # Add functions for the services
@@ -126,7 +155,9 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
 
     def get_actions(self):
         action_functions = {
-            'ckanext_liveschema_theme_update':
-                ckanext.liveschema_theme.logic.action.update
+            'ckanext_liveschema_theme_fca_generator':
+                ckanext.liveschema_theme.logic.action.fca_generator,
+            'ckanext_liveschema_theme_updater':
+                ckanext.liveschema_theme.logic.action.updater
         }
         return action_functions

@@ -12,10 +12,37 @@
     <header>
       <h1>LiveSchema Updater</h1>
     </header>
-    <a class="btn btn-primary btn-lg" href="{{ h.url_for_static('/service/update') }}" title="updateLiveSchema"><i class="icon-refresh"></i> Update LiveSchema <i class="icon-refresh"></i></a>
+    <form action="/service/updater" method="post">
+      <label for="select2">
+        Select the catalogs to update
+      </label>
+      <br />
+      <select class="js-example-basic-multiple js-example-responsive" style="width: 50%" id="select2" multiple="multiple" name="catalogs">
+        {% for catalog in h.liveschema_theme_catalog_selection() %}
+          <option value="{{ catalog.name }}">{{ catalog.title }}</option>
+        {% endfor %}
+      </select>
+      <br />
+      <br />
+      <button class="btn btn-primary btn-lg"> 
+        <i class="fa fa-refresh" aria-hidden="true"></i>
+          Update LiveSchema 
+        <i class="fa fa-refresh" aria-hidden="true"></i>
+      </button>
+    
+  </form>
   </article>
+
+  {% resource 'liveschema_theme/updater.js' %}
+
+  {% resource 'liveschema_theme/select2/select2.js' %}
 {% endblock %}
 
 {% block secondary_content %}
   {% snippet "service/snippets/helper_update.html" %}
+{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    {% resource 'liveschema_theme/select2/select2.css' %}
 {% endblock %}

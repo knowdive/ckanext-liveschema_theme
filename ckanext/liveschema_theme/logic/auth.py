@@ -7,10 +7,11 @@ def services(context, data_dict):
     # All users can access the services page
     return {'success': True}
 
-def updater(context, data_dict):
-    # sysadmins only
-    return {'success': False}
+@toolkit.auth_allow_anonymous_access
+def fca_generator(context, data_dict):
+    # All users can access the services page
+    return {'success': True}
 
-def update(context, data_dict):
+def updater(context, data_dict):
     # sysadmins only
     return {'success': False}

@@ -15,8 +15,6 @@ import ckan.plugins.toolkit as toolkit
 
 import ckan.lib.helpers as helpers
 
-import ckan.model as model
-
 # Get the variable of context from toolkit
 c = toolkit.c
 
@@ -27,37 +25,46 @@ sys.setdefaultencoding('utf8')
 
 
 # Main function used to update LiveSchema
-def updateLiveSchema():    
+def updateLiveSchema(data_dict):    
     # Get the list of catalogs and datasets to use to check the current state of LiveSchema
     catalogs = toolkit.get_action('organization_list')(data_dict={})
     datasets = toolkit.get_action('package_list')(data_dict={})
+
+    # Get the catalogs to update from the form
+    catalogsSelection = data_dict["catalogsSelection"]
 
     # Set the admin key of LiveSchema
     CKAN_KEY = "0587249a-c6e6-4b75-914a-075d88b16932"
 
     # Scrape the Finto Repository
-    #print("finto")
-    scrapeFinto(CKAN_KEY, catalogs, datasets)
+    if "finto" in catalogsSelection:
+        #print("finto")
+        scrapeFinto(CKAN_KEY, catalogs, datasets)
 
     # Scrape the RVS Repository
-    #print("rvs")
-    scrapeRVS(CKAN_KEY, catalogs, datasets)
+    if "rvs" in catalogsSelection:
+        #print("rvs")
+        scrapeRVS(CKAN_KEY, catalogs, datasets)
 
     # Scrape the DERI Repository
-    #print("deri")
-    scrapeDERI(CKAN_KEY, catalogs, datasets)
+    if "deri" in catalogsSelection:
+        #print("deri")
+        scrapeDERI(CKAN_KEY, catalogs, datasets)
 
     # Scrape Knowdive
-    #print("knowdive")
-    scrapeKnowDive(CKAN_KEY, catalogs, datasets)
+    if "knowdive" in catalogsSelection:
+        #print("knowdive")
+        scrapeKnowDive(CKAN_KEY, catalogs, datasets)
 
     # Scrape the the Others excel file from the GitHub Repository
-    #print("GitHub Repository")
-    scrapeGitHub(CKAN_KEY, catalogs, datasets)
+    if "github" in catalogsSelection:
+        #print("github")
+        scrapeGitHub(CKAN_KEY, catalogs, datasets)
 
     # Scrape the LOV Repository
-    #print("lov")
-    scrapeLOV(CKAN_KEY, catalogs, datasets)
+    if "lov" in catalogsSelection:
+        #print("lov")
+        scrapeLOV(CKAN_KEY, catalogs, datasets)
 
 
 # Script to scrape the Finto repository

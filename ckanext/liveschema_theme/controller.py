@@ -47,12 +47,35 @@ class LiveSchemaController(BaseController):
     # Define the behaviour of the fca generator
     def fca_generator(self):
         # If the page has to handle the form resulting from the service
-        if request.method == 'POST' and request.params['dataset']:
+        if request.method == 'POST' and "dataset" in request.params.keys():
             # Get the selected dataset
-            dataset = request.params['dataset']
+            dataset = request.params['dataset'].split(",")
+            dataset_name = dataset[0]
+            dataset_link = dataset[1]
+
+            strPredicates = request.params.get('strPredicates', " ")
+
+            # Build the context using the information obtained by session and user
+            context = {'model': model, 'session': model.Session,
+                       'user': c.user or c.author}
+
+            # Check if the user has the access to this page
+            try:
+                check_access('ckanext_liveschema_theme_fca_generator', context, data_dict={})
+            # Otherwise abort with NotAuthorized message
+            except NotAuthorized:
+                abort(401, _('User not authorized to view page'))
+
+            # Execute the update action
+            get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"dataset_name": dataset_name ,"dataset_link": dataset_link, "strPredicates": strPredicates})
+
             # Go to the dataset page
             return redirect_to(controller='package', action='read',
-                    id=dataset)
+                    id=dataset_name)
+
+            # Go to the index
+            return redirect_to(("../resources/FCA.csv"))
+
         # Render the page of the service
         return render('service/fca_generator.html')
     
@@ -60,12 +83,13 @@ class LiveSchemaController(BaseController):
     # Define the behaviour of the cue generator
     def cue_generator(self):
         # If the page has to handle the form resulting from the service
-        if request.method == 'POST' and request.params['dataset']:
+        if request.method == 'POST' and "dataset" in request.params.keys():
             # Get the selected dataset
             dataset = request.params['dataset']
             # Go to the dataset page
             return redirect_to(controller='package', action='read',
                     id=dataset)
+
         # Render the page of the service
         return render('service/cue_generator.html')
 
@@ -74,6 +98,28 @@ class LiveSchemaController(BaseController):
         # Build the context using the information obtained by session and user
         context = {'model': model, 'session': model.Session,
                    'user': c.user or c.author}
+
+
+        # If the page has to handle the form resulting from the service
+        if request.method == 'POST' and "catalogs" in request.params.keys():
+            # Check if the user has the access to this page
+            try:
+                check_access('ckanext_liveschema_theme_fca_generator', context, data_dict={})
+            # Otherwise abort with NotAuthorized message
+            except NotAuthorized:
+                abort(401, _('User not authorized to view page'))
+
+            catalogsSelection = list()
+
+            for key, value in request.params.iteritems():
+                catalogsSelection.append(value)
+            
+            # Execute the update action
+            get_action('ckanext_liveschema_theme_updater')(context, data_dict={"catalogsSelection": catalogsSelection})
+
+            # Redirect to the index
+            return redirect_to("../")
+
         # Check if the user has the access to this page
         try:
             check_access('ckanext_liveschema_theme_updater', context, {})
@@ -83,24 +129,6 @@ class LiveSchemaController(BaseController):
 
         # Render the page of the service
         return render('service/updater.html')
-
-    # Define the behaviour of the update function
-    def update(self):
-        # Build the context using the information obtained by session and user
-        context = {'model': model, 'session': model.Session,
-                   'user': c.user or c.author}
-        # Check if the user has the access to this page
-        try:
-            check_access('ckanext_liveschema_theme_update', context, data_dict={})
-        # Otherwise abort with NotAuthorized message
-        except NotAuthorized:
-            abort(401, _('User not authorized to view page'))
-
-        # Execute the update action
-        get_action('ckanext_liveschema_theme_update')(context, data_dict={})
-        
-        # Redirect to the index
-        return redirect_to("../")
     
     # Define the behaviour of the graph visualization tool
     def graph(self, id):
@@ -125,7 +153,7 @@ class LiveSchemaController(BaseController):
             # Set the link for the information
             #[TODO] Once deployed, link should have the url of the LiveSchema's relative resource instead of the url
             link = c.pkg_dict['url']
-        # Otherwise return 
+        # Otherwise return the relative error codes
         except NotFound:
             abort(404, _('Dataset not found'))
         except NotAuthorized:

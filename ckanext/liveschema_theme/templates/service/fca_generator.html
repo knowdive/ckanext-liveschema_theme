@@ -14,25 +14,44 @@
     </header>
     <h3>Select a DataSet: </h3>
     <form action="/service/fca_generator" method="post">
-      <div class="row">
-          <div class="col-sm-4">
-              <select id="select_2" name="dataset" style="width:100%">
-                  {% for dataset in h.liveschema_theme_dataset_selection() %}
-                    <option value="{{  dataset.name }}">{{  dataset.title }}</option>
-                  {% endfor %}
-              </select>
-          </div>
-      </div>
+      <label for="predicates">
+        Select the predicates to consider for the FCA Matrix (optional)
+      </label>
       <br />
-      <div class="row">
-          <div class="col-sm-4">
-              <input type="submit" class="btn btn-primary btn-block" name="fca_generate" value="FCA Generation">
-          </div>
-      </div>
+      <input type="text" name="strPredicates" placeholder="Both URI or last term accepted" id="predicates" style="width: 50%">
+      <br>
+      <label for="select2">
+        Select the dataset for the FCA Matrix generation
+      </label>
+      <br />
+      <select class="js-example-basic-single js-states js-example-responsive" style="width: 50%" id="select2" name="dataset">
+          {% for dataset in h.liveschema_theme_dataset_selection() %}
+            <option value="{{ dataset.name }},{{ dataset.link }}">{{ dataset.title }}</option>
+          {% endfor %}
+      </select>
+      <br />
+      <br />
+      <button class="btn btn-primary btn-lg"> 
+        <i class="fa fa-table" aria-hidden="true"></i>
+          Generate the FCA Matrix
+        <i class="fa fa-table" aria-hidden="true"></i>
+      </button>
+      <br />
+      <br />
     </form>
   </article>
+
+
+  {% resource 'liveschema_theme/fca_generator.js' %}
+
+  {% resource 'liveschema_theme/select2/select2.js' %}
 {% endblock %}
 
 {% block secondary_content %}
   {% snippet "service/snippets/helper_fca.html" %}
+{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    {% resource 'liveschema_theme/select2/select2.css' %}
 {% endblock %}
