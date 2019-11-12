@@ -107,7 +107,7 @@ def generateFCA(data_dict):
     CKAN_URL = CKAN[0]+"://" + CKAN[1]
 
     # Set the admin key of LiveSchema
-    CKAN_KEY = "0587249a-c6e6-4b75-914a-075d88b16932"
+    CKAN_KEY = "873daee2-3cd4-4621-9079-730f01609ce1"
 
     dataset = toolkit.get_action('package_show')(
         data_dict={"id": data_dict["dataset_name"]})

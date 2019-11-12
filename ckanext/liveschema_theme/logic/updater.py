@@ -34,7 +34,7 @@ def updateLiveSchema(data_dict):
     catalogsSelection = data_dict["catalogsSelection"]
 
     # Set the admin key of LiveSchema
-    CKAN_KEY = "0587249a-c6e6-4b75-914a-075d88b16932"
+    CKAN_KEY = "873daee2-3cd4-4621-9079-730f01609ce1"
 
     # Scrape the Finto Repository
     if not catalogsSelection or "finto" in catalogsSelection:
