@@ -73,9 +73,6 @@ class LiveSchemaController(BaseController):
             return redirect_to(controller='package', action='read',
                     id=dataset_name)
 
-            # Go to the index
-            return redirect_to(("../resources/FCA.csv"))
-
         # Render the page of the service
         return render('service/fca_generator.html')
     

@@ -37,32 +37,32 @@ def updateLiveSchema(data_dict):
     CKAN_KEY = "0587249a-c6e6-4b75-914a-075d88b16932"
 
     # Scrape the Finto Repository
-    if "finto" in catalogsSelection:
+    if not catalogsSelection or "finto" in catalogsSelection:
         #print("finto")
         scrapeFinto(CKAN_KEY, catalogs, datasets)
 
     # Scrape the RVS Repository
-    if "rvs" in catalogsSelection:
+    if not catalogsSelection or "rvs" in catalogsSelection:
         #print("rvs")
         scrapeRVS(CKAN_KEY, catalogs, datasets)
 
     # Scrape the DERI Repository
-    if "deri" in catalogsSelection:
+    if not catalogsSelection or "deri" in catalogsSelection:
         #print("deri")
         scrapeDERI(CKAN_KEY, catalogs, datasets)
 
     # Scrape Knowdive
-    if "knowdive" in catalogsSelection:
+    if not catalogsSelection or "knowdive" in catalogsSelection:
         #print("knowdive")
         scrapeKnowDive(CKAN_KEY, catalogs, datasets)
 
     # Scrape the the Others excel file from the GitHub Repository
-    if "github" in catalogsSelection:
+    if not catalogsSelection or "github" in catalogsSelection:
         #print("github")
         scrapeGitHub(CKAN_KEY, catalogs, datasets)
 
     # Scrape the LOV Repository
-    if "lov" in catalogsSelection:
+    if not catalogsSelection or "lov" in catalogsSelection:
         #print("lov")
         scrapeLOV(CKAN_KEY, catalogs, datasets)
 
@@ -558,28 +558,28 @@ def addResources(CKAN_KEY, package, action):
 
     try:
         # Serialize the vocabulary in n3
-        g.serialize(destination=str(os.path.join("ckanext/liveschema_theme/public/resources/", package["name"] + ".n3")), format="n3")
+        g.serialize(destination=str(os.path.join("ckanext/liveschema_theme/public/", package["name"] + ".n3")), format="n3")
         # Add the serialized n3 file to LiveSchema
         requests.post(CKAN_URL+"/api/3/action/resource_"+action,
                 data={"package_id":package["name"], "format": "n3", "name": package["name"]+".n3"},
                 headers={"X-CKAN-API-Key": CKAN_KEY},
-                files=[("upload", file("ckanext/liveschema_theme/public/resources/"+package["name"]+".n3"))])
+                files=[("upload", file("ckanext/liveschema_theme/public/"+package["name"]+".n3"))])
         # Remove the temporary n3 file from the server
-        os.remove("ckanext/liveschema_theme/public/resources/"+package["name"]+".n3")
+        os.remove("ckanext/liveschema_theme/public/"+package["name"]+".n3")
     except Exception as e:
         # In case of an error during the graph's serialization, print the error
         print(str(e) + "\n")
 
     try:
         # Serialize the vocabulary in rdf
-        g.serialize(destination=str(os.path.join("ckanext/liveschema_theme/public/resources/", package["name"] + ".rdf")), format="pretty-xml")
+        g.serialize(destination=str(os.path.join("ckanext/liveschema_theme/public/", package["name"] + ".rdf")), format="pretty-xml")
         # Add the serialized rdf file to LiveSchema     
         requests.post(CKAN_URL+"/api/3/action/resource_"+action,
                     data={"package_id":package["name"], "format": "rdf", "name": package["name"]+".rdf"},
                     headers={"X-CKAN-API-Key": CKAN_KEY},
-                    files=[("upload", file("ckanext/liveschema_theme/public/resources/"+package["name"]+".rdf"))])
+                    files=[("upload", file("ckanext/liveschema_theme/public/"+package["name"]+".rdf"))])
         # Remove the temporary rdf file from the server
-        os.remove("ckanext/liveschema_theme/public/resources/"+package["name"]+".rdf")
+        os.remove("ckanext/liveschema_theme/public/"+package["name"]+".rdf")
     except Exception as e:
         # In case of an error during the graph's serialization, print the error
         print(str(e) + "\n")
@@ -617,13 +617,13 @@ def addResources(CKAN_KEY, package, action):
     # Create the DataFrame to save the vocabs' information
     DTF = pd.DataFrame(list_, columns=["Subject", "Predicate", "Object", "SubjectTerm", "PredicateTerm", "ObjectTerm", "Domain", "Domain Version"])
     # Parse the DataFrame into the csv file
-    DTF.to_csv(os.path.normpath(os.path.expanduser("ckanext/liveschema_theme/public/resources/" + package["name"] + ".csv")))
+    DTF.to_csv(os.path.normpath(os.path.expanduser("ckanext/liveschema_theme/public/" + package["name"] + ".csv")))
 
     # Upload the csv file to LiveSchema
     requests.post(CKAN_URL+"/api/3/action/resource_"+action,
                 data={"package_id":package["name"], "format": "csv", "name": package["name"]+".csv"},
                 headers={"X-CKAN-API-Key": CKAN_KEY},
-                files=[("upload", file("ckanext/liveschema_theme/public/resources/" + package["name"] + ".csv"))])
+                files=[("upload", file("ckanext/liveschema_theme/public/" + package["name"] + ".csv"))])
 
     # Remove the temporary csv file from the server
-    os.remove("ckanext/liveschema_theme/public/resources/" + package["name"] + ".csv")
+    os.remove("ckanext/liveschema_theme/public/" + package["name"] + ".csv")

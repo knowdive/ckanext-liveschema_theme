@@ -34,7 +34,7 @@ def generateFCA(data_dict):
         # Check if the triple has to be saved, if there is a predicate selection then checks if that predicate has to be saved
         bool_ = False
         # If there is no predicate selection then save every triple
-        strPredicates = data_dict.get("strPredicates", " ")
+        strPredicates = data_dict["strPredicates"]
         if(len(strPredicates.split()) == 0):
             bool_ = True
         # If there is a predicate selection then check if that predicate has to be saved
@@ -100,7 +100,7 @@ def generateFCA(data_dict):
     
     # Return the DataFrame for RapidMiner usage
     # Parse the FCA matrix into the csv file
-    matrix.to_csv(os.path.normpath(os.path.expanduser("ckanext/liveschema_theme/public/resources/" + data_dict["dataset_name"]+"_FCA.csv")))
+    matrix.to_csv(os.path.normpath(os.path.expanduser("ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_FCA.csv")))
 
     # Get the link of LiveSchema
     CKAN = helpers.get_site_protocol_and_host()
@@ -121,14 +121,22 @@ def generateFCA(data_dict):
                 data_dict={"id": res["id"]})
             break
 
+    # Add the description of the FCA Matrix specifying the (eventual) set of predicates for the filtering process
+    description = "FCA Matrix containing the information of"
+    if(len(data_dict["strPredicates"].split()) == 0):
+        description = description + " all the triples"
+    else:
+        strPredicates = ", ".join(data_dict.get("strPredicates", " ").split())
+        description = description + " the filtered triples, which have the following predicates: " + strPredicates
+
     # Upload the csv file to LiveSchema
     requests.post(CKAN_URL+"/api/3/action/resource_create",
-                data={"package_id": data_dict["dataset_name"], "format": "csv", "name": data_dict["dataset_name"]+"_FCA.csv"},
+                data={"package_id": data_dict["dataset_name"], "format": "csv", "name": data_dict["dataset_name"]+"_FCA.csv", "description": description},
                 headers={"X-CKAN-API-Key": CKAN_KEY},
-                files=[("upload", file("ckanext/liveschema_theme/public/resources/" + data_dict["dataset_name"]+"_FCA.csv"))])
+                files=[("upload", file("ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_FCA.csv"))])
 
     # Remove the temporary csv file from the server
-    os.remove("ckanext/liveschema_theme/public/resources/" + data_dict["dataset_name"]+"_FCA.csv")
+    os.remove("ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_FCA.csv")
 
 # Function that tokenize on capitalLetters the SubjectTerm, obtaining the simple words of its composition as strings separated by " "
 def tokenTerm(term):
