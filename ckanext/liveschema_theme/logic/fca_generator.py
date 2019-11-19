@@ -100,7 +100,7 @@ def generateFCA(data_dict):
     
     # Return the DataFrame for RapidMiner usage
     # Parse the FCA matrix into the csv file
-    matrix.to_csv(os.path.normpath(os.path.expanduser("ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_FCA.csv")))
+    matrix.to_csv(os.path.normpath(os.path.expanduser("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_FCA.csv")))
 
     # Get the link of LiveSchema
     CKAN = helpers.get_site_protocol_and_host()
@@ -133,10 +133,10 @@ def generateFCA(data_dict):
     requests.post(CKAN_URL+"/api/3/action/resource_create",
                 data={"package_id": data_dict["dataset_name"], "format": "csv", "name": data_dict["dataset_name"]+"_FCA.csv", "description": description},
                 headers={"X-CKAN-API-Key": CKAN_KEY},
-                files=[("upload", file("ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_FCA.csv"))])
+                files=[("upload", file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_FCA.csv"))])
 
     # Remove the temporary csv file from the server
-    os.remove("ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_FCA.csv")
+    os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_FCA.csv")
 
 # Function that tokenize on capitalLetters the SubjectTerm, obtaining the simple words of its composition as strings separated by " "
 def tokenTerm(term):
