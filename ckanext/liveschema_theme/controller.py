@@ -96,9 +96,8 @@ class LiveSchemaController(BaseController):
         context = {'model': model, 'session': model.Session,
                    'user': c.user or c.author}
 
-
         # If the page has to handle the form resulting from the service
-        if request.method == 'POST' and "catalogs" in request.params.keys():
+        if request.method == 'POST':
             # Check if the user has the access to this page
             try:
                 check_access('ckanext_liveschema_theme_fca_generator', context, data_dict={})
@@ -106,10 +105,12 @@ class LiveSchemaController(BaseController):
             except NotAuthorized:
                 abort(401, _('User not authorized to view page'))
 
+            # List of catalogs to update
             catalogsSelection = list()
-
-            for key, value in request.params.iteritems():
-                catalogsSelection.append(value)
+            # Add the chosen catalogs obtained by the form
+            if "catalogs" in request.params.keys():
+                for key, value in request.params.iteritems():
+                    catalogsSelection.append(value)
             
             # Execute the update action
             get_action('ckanext_liveschema_theme_updater')(context, data_dict={"catalogsSelection": catalogsSelection})

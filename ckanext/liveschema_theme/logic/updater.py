@@ -299,7 +299,7 @@ def scrapeKnowDive(CKAN_KEY, catalogs, datasets):
 def scrapeGitHub(CKAN_KEY, catalogs, datasets):
     # Check if the Others excel file from github is present on LiveSchema
     cataGitHub = ""
-    if "other" in catalogs:
+    if "github" in catalogs:
         # If it is then get its relative information and datasets
         cataGitHub = toolkit.get_action('organization_show')(
             data_dict={"id": "github", "include_datasets": False, "include_dataset_count": False, "include_extras": False, "include_users": False, "include_groups": False, "include_tags": False, "include_followers": False})
