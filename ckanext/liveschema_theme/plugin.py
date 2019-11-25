@@ -27,12 +27,13 @@ def most_popular_catalogs():
     # Return the list of catalogs
     return catalogs
 
-# Get the list of datasets that have the relative csv file
-def dataset_selection():
-    '''Return a list of the datasets with their relative resources.'''
+# Get the list of datasets that have the requested resource_type file
+def dataset_selection(resource_type):
+    '''Return a list of the datasets with their requested resource_type.'''
     
-    # Create the list of datasets that have the relative csv file to return
-    dataSetSelection = list()
+    # Create the list of datasets that have the requested resource_type file
+    dataSetSelectionOK = list()
+    dataSetSelectionNO = list()
     # Use searchLimit and index in order to get all the datasets, overcoming the limit of 1000 rows
     searchLimit = True
     index = 0
@@ -40,23 +41,36 @@ def dataset_selection():
         searchLimit = False
         # Get a list of 1000 datasets
         datasets = toolkit.get_action('package_search')(
-            data_dict={"sort":"title_string asc", "include_private": True, "start": index*1000, "rows": 1000})
+            data_dict={"include_private": True, "start": index*1000, "rows": 1000})
         # Reset the index if the number of results reach the limit of rows
         if(len(datasets["results"]) == 1000):
             searchLimit = True
             index = index + 1
         # Iterate over every datasets
         for dataset in datasets["results"]:
+            datasetSelected = ""
             # Iterate over every resource of the dataset
             for res in dataset["resources"]:
-                # Check if they have the relative csv file
-                if(res["format"] == "CSV" and res["name"] == dataset["name"]+".csv"):
-                    # Append the dataset with the basic information about it
-                    dataSetSelection.append({"name": dataset["name"], "link": res["url"], "title": dataset["title"] + " [" + dataset["organization"]["title"] + "]"})
-                    break
+                # Check if they have the relative parsed csv file
+                if("resource_type" in res.keys() and res["resource_type"] == resource_type):
+                    # Create the dictionary with the resource information
+                    datasetSelected = {"name": dataset["name"], "link": res["url"], "title": dataset["title"] + " [" + dataset["organization"]["title"] + "]"}
+            # If the dataset does not have the required resource_type
+            if(datasetSelected):
+                # Append the dataset to the selection
+                dataSetSelectionOK.append(datasetSelected)
+            # If the dataset does not have the required resource_type
+            else:
+                # Create the dictionary without link, specifying the need of the resource_type in the title
+                datasetSelected = {"name": dataset["name"], "link": "", "title": dataset["title"] + " [" + dataset["organization"]["title"] + "], " + resource_type + " needed"}
+                # Append the dataset to the selection
+                dataSetSelectionNO.append(datasetSelected)
 
+    # Order the datasets
+    dataSetSelectionOK.sort(key = lambda i: (i['title']))
+    dataSetSelectionNO.sort(key = lambda i: (i['title']))
     # Return the list of datasets that have the relative csv file to return
-    return dataSetSelection
+    return dataSetSelectionOK + dataSetSelectionNO
 
 
 # Get the list of catalogs with their relative title
@@ -134,9 +148,17 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         map.connect('ckanext_liveschema_theme_services', '/service', controller=LiveSchemaController, action='index')
         map.connect('ckanext_liveschema_theme_fca_generator', '/service/fca_generator', controller=LiveSchemaController, action='fca_generator')
         map.connect('ckanext_liveschema_theme_cue_generator', '/service/cue_generator', controller=LiveSchemaController, action='cue_generator')
+        map.connect('ckanext_liveschema_theme_visualization_generator', '/service/visualization_generator', controller=LiveSchemaController, action='visualization_generator')
+        map.connect('ckanext_liveschema_theme_fca_generator_id', '/service/fca_generator/{id}', controller=LiveSchemaController, action='fca_generator')
+        map.connect('ckanext_liveschema_theme_cue_generator_id', '/service/cue_generator/{id}', controller=LiveSchemaController, action='cue_generator')
+        map.connect('ckanext_liveschema_theme_visualization_generator_id', '/service/visualization_generator/{id}', controller=LiveSchemaController, action='visualization_generator')
         map.connect('ckanext_liveschema_theme_updater', '/service/updater', controller=LiveSchemaController, action='updater')
+        map.connect('ckanext_liveschema_theme_fca', '/dataset/fca/{id}', controller=LiveSchemaController, action='fca', ckan_icon='table')
+        map.connect('ckanext_liveschema_theme_cue', '/dataset/cue/{id}', controller=LiveSchemaController, action='cue', ckan_icon='info')
+        map.connect('ckanext_liveschema_theme_visualization', '/dataset/visualization/{id}', controller=LiveSchemaController, action='visualization', ckan_icon='image')
         map.connect('ckanext_liveschema_theme_graph', '/dataset/graph/{id}', controller=LiveSchemaController, action='graph', ckan_icon='arrows-alt')
-        
+        map.connect('ckanext_liveschema_theme_query', '/dataset/query/{id}', controller=LiveSchemaController, action='query', ckan_icon='search')
+
         # Return the new configuration to the default handler of the routers
         return map
 
@@ -147,6 +169,8 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         return {
             'ckanext_liveschema_theme_services': ckanext.liveschema_theme.logic.auth.services,
             'ckanext_liveschema_theme_fca_generator': ckanext.liveschema_theme.logic.auth.fca_generator,
+            'ckanext_liveschema_theme_cue_generator': ckanext.liveschema_theme.logic.auth.cue_generator,
+            'ckanext_liveschema_theme_visualization_generator': ckanext.liveschema_theme.logic.auth.visualization_generator,
             'ckanext_liveschema_theme_updater': ckanext.liveschema_theme.logic.auth.updater
         }
 
@@ -157,7 +181,13 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         action_functions = {
             'ckanext_liveschema_theme_fca_generator':
                 ckanext.liveschema_theme.logic.action.fca_generator,
+            'ckanext_liveschema_theme_cue_generator':
+                ckanext.liveschema_theme.logic.action.cue_generator,
+            'ckanext_liveschema_theme_visualization_generator':
+                ckanext.liveschema_theme.logic.action.visualization_generator,
             'ckanext_liveschema_theme_updater':
-                ckanext.liveschema_theme.logic.action.updater
+                ckanext.liveschema_theme.logic.action.updater,
+            'ckanext_liveschema_theme_query':
+                ckanext.liveschema_theme.logic.action.query
         }
         return action_functions

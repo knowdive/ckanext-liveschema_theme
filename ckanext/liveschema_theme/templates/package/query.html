@@ -1,0 +1,38 @@
+{% extends "package/read_base.html" %}
+
+{% block subtitle %}{{ _('Query') }} - {{ super() }}{% endblock %}
+
+{% block primary_content_inner %}
+  <h1 class="hide-heading">{% block page_heading %}{{ _('Query') }}{% endblock %}</h1>
+  <header>
+    <h1>Query</h1>
+  </header>
+  {% if N3Resource %}
+    <form action="/dataset/query/{{ pkg.name }}" method="post">
+        <label for="predicates">
+        Write the SPARQL Query
+        </label>
+        <br />
+        <textarea name="query" rows="10" cols="100">{{ query }}</textarea>
+        <br />
+        <button class="btn btn-primary btn-lg"> 
+            Query
+        </button>
+        <br />
+        <br />
+        {% if result %}
+          <h3>Result of {{ number }} rows: </h3>
+          <p>
+            {% for res in result.split("-_-") %}
+              {{ res }}
+              <br />
+            {% endfor %}
+          </p>
+        {% endif %}
+    </form>
+    <br />
+  {% else %}
+      <h3>No N3 resources available </h3>
+      <br />
+  {% endif %}
+{% endblock %}

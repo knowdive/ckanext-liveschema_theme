@@ -97,6 +97,10 @@
 .homepage [role="main"] {
     border-top: 1px solid rgb(204, 204, 204);
 }
+/* Diminish the padding */
+.page-header.module-content {
+    padding: 10px;
+}
 
 
 /* ====================================

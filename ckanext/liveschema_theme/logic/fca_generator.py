@@ -18,13 +18,11 @@ def generateFCA(data_dict):
     # Sort the DataFrame
     triples = triples.sort_values("Object")
 
-    # Create the DataFrame used to create the FCA matrix  
-    matrix = pd.DataFrame(columns=["Type", "TypeTerm", "Properties", "PropertiesTerms", "PropertiesTokens"])
+    # Create the DataFrame used to create the FCA matrix
+    matrix = pd.DataFrame(columns=["TypeTerm", "PropertiesTokens"])
 
     # Create the strings used to store multiple values in the same row, using " - " as separator
     obj = ""
-    prop = ""
-    propTerms = ""
     propTokens = ""
     # Dictionary used to store the triple
     dict_ = dict()
@@ -44,29 +42,22 @@ def generateFCA(data_dict):
                     bool_ = True
                     break
         # Check if the triple has to be saved
-        if(bool_ == True):
+        if(bool_ and "http" == str(row["Subject"])[0:4] and "http" == str(row["Object"])[0:4] or "label" == str(row["PredicateTerm"])):
             # If the object value on the row has changed(first row or a new object)
             if(row["Object"] != obj):
                 # If the name of the object is not null
                 if(len(obj)):
                     # Add to the dictionary the latest values of the row
-                    dict_["Properties"] = prop[2:] 
-                    dict_["PropertiesTerms"] = propTerms[3:] 
                     dict_["PropertiesTokens"] = propTokens[3:] 
                     # Store the row in the matrix
                     matrix = matrix.append(dict_, ignore_index=True)
                 # Reset the name of the new object
                 obj = row["Object"]
                 # Reset the other values of the row
-                prop = ""
-                propTerms = ""
                 propTokens = ""
                 # Store in the dictionary the fixed values of the row
-                dict_ = {"Type": " " + row["Object"], "TypeTerm": row["ObjectTerm"]}
-            
-            # Add the info on the row to the strings containing multiple values
-            prop = prop + " - " + row["Subject"]
-            propTerms = propTerms + " - " + row["SubjectTerm"]
+                #dict_ = {"Type": " " + row["Object"], "TypeTerm": row["ObjectTerm"]}
+                dict_ = {"TypeTerm": row["ObjectTerm"]}
             
             # Tokenize on capitalLetters the SubjectTerm obtaining the simple words of its composition as strings separated by " "
             pTok = tokenTerm(row["SubjectTerm"])
@@ -74,8 +65,6 @@ def generateFCA(data_dict):
             propTokens = propTokens + " - " + pTok
 
     # Update the last row with the latest info
-    dict_["Properties"] = prop[2:] 
-    dict_["PropertiesTerms"] = propTerms[3:] 
     dict_["PropertiesTokens"] = propTokens[3:] 
     # Store the last row in the matrix
     matrix = matrix.append(dict_, ignore_index=True)
@@ -98,7 +87,9 @@ def generateFCA(data_dict):
             # Update the value of the cell in the row of the matrix with tok as column(obtaining the number of token for that row)
             matrix.at[index, tok] = matrix.at[index, tok] + 1
     
-    # Return the DataFrame for RapidMiner usage
+    # Drop PropertiesTokens since it is no more useful
+    matrix.drop("PropertiesTokens", axis=1, inplace=True)
+
     # Parse the FCA matrix into the csv file
     matrix.to_csv(os.path.normpath(os.path.expanduser("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_FCA.csv")))
 
@@ -107,19 +98,10 @@ def generateFCA(data_dict):
     CKAN_URL = CKAN[0]+"://" + CKAN[1]
 
     # Set the admin key of LiveSchema
-    CKAN_KEY = "873daee2-3cd4-4621-9079-730f01609ce1"
+    CKAN_KEY = data_dict["apikey"]
 
     dataset = toolkit.get_action('package_show')(
         data_dict={"id": data_dict["dataset_name"]})
-
-    # Iterate over every resource of the dataset
-    for res in dataset["resources"]:
-        # Check if they have the relative FCA matrix file
-        if(res["format"] == "CSV" and res["name"] == dataset["name"]+"_FCA.csv"):
-            # Delete the current FCA matrix
-            dataset = toolkit.get_action('resource_delete')(
-                data_dict={"id": res["id"]})
-            break
 
     # Add the description of the FCA Matrix specifying the (eventual) set of predicates for the filtering process
     description = "FCA Matrix containing the information of"
@@ -129,9 +111,18 @@ def generateFCA(data_dict):
         strPredicates = ", ".join(data_dict.get("strPredicates", " ").split())
         description = description + " the filtered triples, which have the following predicates: " + strPredicates
 
+    i = dataset["num_resources"] - 9
+    # Iterate over every resource of the dataset
+    for res in dataset["resources"]:
+        # Check if they have the relative FCA matrix file
+        if(res["description"] == description or (i > 0 and "resource_type" in res.keys() and res["resource_type"] == "FCA")):
+            i -= 1
+            # Delete the older FCA matrix
+            dataset = toolkit.get_action('resource_delete')(data_dict={"id": res["id"]})
+
     # Upload the csv file to LiveSchema
     requests.post(CKAN_URL+"/api/3/action/resource_create",
-                data={"package_id": data_dict["dataset_name"], "format": "csv", "name": data_dict["dataset_name"]+"_FCA.csv", "description": description},
+                data={"package_id": data_dict["dataset_name"], "format": "FCA", "name": data_dict["dataset_name"]+"_FCA.csv", "description": description, "resource_type": "FCA"},
                 headers={"X-CKAN-API-Key": CKAN_KEY},
                 files=[("upload", file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_FCA.csv"))])
 

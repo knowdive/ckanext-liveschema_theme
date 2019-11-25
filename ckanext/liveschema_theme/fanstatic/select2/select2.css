@@ -479,3 +479,12 @@
   
   .select2-container--classic.select2-container--open .select2-dropdown {
     border-color: #5897fb; }
+
+
+  .select2-result-selectable.ok{
+    background-color: #00a000a0;
+  }
+
+  .select2-result-selectable.no{
+    background-color: #ff7700a0;
+  }

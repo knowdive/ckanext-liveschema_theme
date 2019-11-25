@@ -1,0 +1,25 @@
+<section id="dataset-resources" class="resources">
+    <h3>{{ _('Resources') }}</h3>
+    {% block resource_list %}
+    {% if resources %}
+        <ul class="{% block resource_list_class %}resource-list{% endblock %}">
+        {% block resource_list_inner %}
+            {% set can_edit = h.check_access('package_update', {'id':pkg.id }) %}
+            {% for resource in resources %}
+                {% if "resource_type" in resource.keys() and (resource["resource_type"] == "Serialized n3" or resource["resource_type"] == "Serialized rdf" or resource["resource_type"] == "Parsed csv") %}
+                    {% snippet 'package/snippets/resource_item.html', res=resource, pkg=pkg, can_edit=can_edit %}
+                {% endif %}
+            {% endfor %}
+        {% endblock %}
+        </ul>
+    {% else %}
+        {% if h.check_access('resource_create', {'package_id': pkg['id']}) %}
+            {% trans url=h.url_for(controller='package', action='new_resource', id=pkg.name) %}
+            <p class="empty">This dataset has no data, <a href="{{ url }}">why not add some?</a></p>
+            {% endtrans %}
+        {% else %}
+            <p class="empty">{{ _('This dataset has no data') }}</p>
+        {% endif %}
+    {% endif %}
+    {% endblock %}
+</section>

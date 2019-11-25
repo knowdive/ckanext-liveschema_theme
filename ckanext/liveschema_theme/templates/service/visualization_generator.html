@@ -1,21 +1,21 @@
 {% extends "page.html" %}
 
-{% block subtitle %}{{ _("Cue Generator") }}{% endblock %}
+{% block subtitle %}{{ _("Visualization Generator") }}{% endblock %}
 
 {% block breadcrumb_content %}
   <li>{{ h.nav_link(_('Services'), controller='ckanext.liveschema_theme.controller:LiveSchemaController', action='index') }}</li>
-  <li class="active"><a href="{{ h.url_for_static('/service/cue_generator') }}">Cue Generator</a></li>
+  <li class="active"><a href="{{ h.url_for_static('/service/visualization_generator') }}">Visualization Generator</a></li>
 {% endblock %}
 
 {% block primary_content %}
   <article class="module module-content">
     <header>
-      <h1>Cue Generator</h1>
+      <h1>Visualization Generator</h1>
     </header>
     <h3>Select a DataSet: </h3>
-    <form action="/service/cue_generator" method="post">
+    <form action="/service/visualization_generator" method="post">
       <label for="select2">
-        Select the dataset for the cue generation
+        Select the dataset for the visualization generation
       </label>
       <br />
       <select class="js-example-basic-single js-states js-example-responsive" style="width: 50%" id="select2" name="dataset">
@@ -27,7 +27,7 @@
       <br />
       <br />
       <button class="btn btn-primary btn-lg"> 
-          Generate the Cue Metrics
+          Generate the Visualization resource
       </button>
       <br />
       <br />
@@ -40,7 +40,7 @@
 {% endblock %}
 
 {% block secondary_content %}
-  {% snippet "service/snippets/helper_cue.html" %}
+  {% snippet "service/snippets/helper_fca.html" %}
 {% endblock %}
 
 {% block styles %}

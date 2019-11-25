@@ -1,0 +1,10 @@
+{% extends "package/read_base.html" %}
+
+{% block subtitle %}{{ _('Visualization') }} - {{ super() }}{% endblock %}
+
+{% block primary_content_inner %}
+  <h1 class="hide-heading">{% block page_heading %}{{ _('Visualization') }}{% endblock %}</h1>
+  <h3>No Visualization resource available </h3>
+  <p>Please generate one using the <a href="/service/visualization_generator/{{ pkg.name }}">Visualization Generator service</a></p>
+  <br />
+{% endblock %}

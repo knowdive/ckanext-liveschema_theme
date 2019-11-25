@@ -18,31 +18,29 @@
         Select the predicates to consider for the FCA Matrix (optional)
       </label>
       <br />
-      <input type="text" name="strPredicates" placeholder="Both URI or last term accepted" id="predicates" style="width: 50%">
-      <br>
+      <input type="text" name="strPredicates" placeholder="Both URI or last term accepted, case sensitive" id="predicates" style="width: 50%">
+      <br />
       <label for="select2">
         Select the dataset for the FCA Matrix generation
       </label>
       <br />
       <select class="js-example-basic-single js-states js-example-responsive" style="width: 50%" id="select2" name="dataset">
-          {% for dataset in h.liveschema_theme_dataset_selection() %}
-            <option value="{{ dataset.name }},{{ dataset.link }}">{{ dataset.title }}</option>
+          <option></option>
+          {% for dataset in h.liveschema_theme_dataset_selection("Parsed csv") %}
+            <option value="{{ dataset.name }},{{ dataset.link }}" class="{% if dataset.link == "" %}no{% else %}ok{% endif %}"{% if id and id == dataset.name %}selected="selected"{% endif %}>{{ dataset.title }}</option>
           {% endfor %}
       </select>
       <br />
       <br />
       <button class="btn btn-primary btn-lg"> 
-        <i class="fa fa-table" aria-hidden="true"></i>
           Generate the FCA Matrix
-        <i class="fa fa-table" aria-hidden="true"></i>
       </button>
       <br />
       <br />
     </form>
   </article>
 
-
-  {% resource 'liveschema_theme/fca_generator.js' %}
+  {% resource 'liveschema_theme/select2_singleDataset.js' %}
 
   {% resource 'liveschema_theme/select2/select2.js' %}
 {% endblock %}

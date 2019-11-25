@@ -34,36 +34,36 @@ def updateLiveSchema(data_dict):
     catalogsSelection = data_dict["catalogsSelection"]
 
     # Set the admin key of LiveSchema
-    CKAN_KEY = "873daee2-3cd4-4621-9079-730f01609ce1"
+    CKAN_KEY = data_dict["apikey"]
 
     # Scrape the Finto Repository
     if not catalogsSelection or "finto" in catalogsSelection:
-        #print("finto")
+        print("finto")
         scrapeFinto(CKAN_KEY, catalogs, datasets)
 
     # Scrape the RVS Repository
     if not catalogsSelection or "rvs" in catalogsSelection:
-        #print("rvs")
+        print("rvs")
         scrapeRVS(CKAN_KEY, catalogs, datasets)
 
     # Scrape the DERI Repository
     if not catalogsSelection or "deri" in catalogsSelection:
-        #print("deri")
+        print("deri")
         scrapeDERI(CKAN_KEY, catalogs, datasets)
 
     # Scrape Knowdive
     if not catalogsSelection or "knowdive" in catalogsSelection:
-        #print("knowdive")
+        print("knowdive")
         scrapeKnowDive(CKAN_KEY, catalogs, datasets)
 
     # Scrape the the Others excel file from the GitHub Repository
     if not catalogsSelection or "github" in catalogsSelection:
-        #print("github")
+        print("github")
         scrapeGitHub(CKAN_KEY, catalogs, datasets)
 
     # Scrape the LOV Repository
     if not catalogsSelection or "lov" in catalogsSelection:
-        #print("lov")
+        print("lov")
         scrapeLOV(CKAN_KEY, catalogs, datasets)
 
 
@@ -561,7 +561,7 @@ def addResources(CKAN_KEY, package, action):
         g.serialize(destination=str(os.path.join("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/", package["name"] + ".n3")), format="n3")
         # Add the serialized n3 file to LiveSchema
         requests.post(CKAN_URL+"/api/3/action/resource_"+action,
-                data={"package_id":package["name"], "format": "n3", "name": package["name"]+".n3"},
+                data={"package_id":package["name"], "format": "n3", "name": package["name"]+".n3", "resource_type": "Serialized n3", "description": "Serialized n3 format of the dataset"},
                 headers={"X-CKAN-API-Key": CKAN_KEY},
                 files=[("upload", file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/"+package["name"]+".n3"))])
         # Remove the temporary n3 file from the server
@@ -575,7 +575,7 @@ def addResources(CKAN_KEY, package, action):
         g.serialize(destination=str(os.path.join("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/", package["name"] + ".rdf")), format="pretty-xml")
         # Add the serialized rdf file to LiveSchema     
         requests.post(CKAN_URL+"/api/3/action/resource_"+action,
-                    data={"package_id":package["name"], "format": "rdf", "name": package["name"]+".rdf"},
+                    data={"package_id":package["name"], "format": "RDF", "name": package["name"]+".rdf", "resource_type": "Serialized rdf", "description": "Serialized rdf format of the dataset"},
                     headers={"X-CKAN-API-Key": CKAN_KEY},
                     files=[("upload", file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/"+package["name"]+".rdf"))])
         # Remove the temporary rdf file from the server
@@ -621,7 +621,7 @@ def addResources(CKAN_KEY, package, action):
 
     # Upload the csv file to LiveSchema
     requests.post(CKAN_URL+"/api/3/action/resource_"+action,
-                data={"package_id":package["name"], "format": "csv", "name": package["name"]+".csv"},
+                data={"package_id":package["name"], "format": "CSV", "name": package["name"]+".csv", "resource_type": "Parsed csv", "description": "Parsed csv containing all the triples of the dataset"},
                 headers={"X-CKAN-API-Key": CKAN_KEY},
                 files=[("upload", file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".csv"))])
 
