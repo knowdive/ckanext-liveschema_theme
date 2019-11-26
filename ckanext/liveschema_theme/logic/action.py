@@ -1,6 +1,7 @@
 # Import libraries
 import ckan.plugins.toolkit as toolkit
 
+import rdflib
 from rdflib import Graph
 from rdflib.util import guess_format
 
@@ -35,21 +36,26 @@ def visualization_generator(context, data_dict):
 
 # Define the action of query of LiveSchema
 def query(context, data_dict):
-
-    #return "Work in Progress"
+    # Get the resource and query from the form
     N3Resource = data_dict["N3Resource"]
     query = data_dict["query"]
-    # Try to create the graph to analyze the vocabulary
     try:
+        # Try to create the graph to analyze the vocabulary
         g = Graph()
         result = g.parse(N3Resource["url"], format=guess_format("n3"), publicID=N3Resource["name"])
-
+        # Query the dataset
         qres = g.query(query)
 
-        result = ""
+        # Save the result of the query
+        result = list()
         for row in qres:
-            result = result + " -_- " + str(row)
-
+            rowRes = list()
+            for res in row:
+                if(res):
+                    rowRes.append(res.toPython())
+            result.append(rowRes)
+        # Return the result of the query
         return result
     except Exception as e:  
-        return "Exception: " +str(e)
+        # Return the exception
+        return [["Exception: " +str(e)]]

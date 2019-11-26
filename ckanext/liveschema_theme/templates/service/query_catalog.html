@@ -1,14 +1,26 @@
-{% extends "package/read_base.html" %}
+{% extends "page.html" %}
 
-{% block subtitle %}{{ _('Query') }} - {{ super() }}{% endblock %}
+{% block subtitle %}{{ _("Query Catalog") }}{% endblock %}
+
+{% block breadcrumb_content %}
+  <li>{{ h.nav_link(_('Services'), controller='ckanext.liveschema_theme.controller:LiveSchemaController', action='index') }}</li>
+  <li class="active"><a href="{{ h.url_for_static('/service/query_catalog') }}">Query Catalog</a></li>
+{% endblock %}
 
 {% block primary_content_inner %}
   <h1 class="hide-heading">{% block page_heading %}{{ _('Query') }}{% endblock %}</h1>
   <header>
     <h1>Query</h1>
   </header>
-  {% if N3Resource %}
-    <form action="/dataset/query/{{ pkg.name }}" method="post">
+  
+{% endblock %}
+
+{% block primary_content %}
+  <article class="module module-content">
+    <header>
+      <h1>Query Catalog</h1>
+    </header>
+    <form action="/service/query_catalog" method="post">
         <label for="query">
         Write the SPARQL Query
         </label>
@@ -36,8 +48,13 @@
         {% endif %}
     </form>
     <br />
-  {% else %}
-      <h3>No N3 resources available </h3>
-      <br />
-  {% endif %}
+{% endblock %}
+
+{% block secondary_content %}
+  {% snippet "service/snippets/helper_query.html" %}
+{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    {% resource 'liveschema_theme/select2/select2.css' %}
 {% endblock %}

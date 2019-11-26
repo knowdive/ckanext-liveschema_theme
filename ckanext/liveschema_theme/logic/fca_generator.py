@@ -42,7 +42,7 @@ def generateFCA(data_dict):
                     bool_ = True
                     break
         # Check if the triple has to be saved
-        if(bool_ and "http" == str(row["Subject"])[0:4] and "http" == str(row["Object"])[0:4] or "label" == str(row["PredicateTerm"])):
+        if(bool_ and "http" == str(row["Subject"])[0:4] and "http" == str(row["Object"])[0:4]):
             # If the object value on the row has changed(first row or a new object)
             if(row["Object"] != obj):
                 # If the name of the object is not null

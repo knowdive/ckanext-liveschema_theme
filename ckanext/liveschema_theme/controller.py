@@ -358,9 +358,42 @@ class LiveSchemaController(BaseController):
             return render('package/no_visualization.html',
                         {'dataset_type': dataset_type, 'pkg' : c.pkg_dict}) 
 
-                        
 
 
+    # Define the behaviour of the graph visualization tool
+    def query_catalog(self):
+        # Build the context using the information obtained by session and user
+        context = {'model': model, 'session': model.Session,
+                   'user': c.user, 'for_view': True,
+                   'auth_user_obj': c.userobj}
+
+        # If the page has to handle the form resulting from the service
+        if request.method == 'POST' and "query" in request.params.keys():
+            # Get the given query
+            query = request.params['query']
+
+            # Execute the query action
+            result = list()
+            if query:
+
+                CKAN = helpers.get_site_protocol_and_host()
+                CKAN_URL = CKAN[0]+"://" + CKAN[1]
+                result = get_action('ckanext_liveschema_theme_query')(context, data_dict={'N3Resource': {'name': "Catalog", 'url': CKAN_URL+"/catalog.n3"}, "query": query})
+
+            # Go to the dataset page
+            return render('service/query_catalog.html',
+                        {'query': query,  'result': result, 'number': len(result), 'pkg' : c.pkg_dict}) 
+        # Example query
+        query = "PREFIX dcat:  <http://www.w3.org/ns/dcat#> \n" + \
+                "# Get the title of all the Datasets of LiveSchema \n" + \
+                "SELECT ?title \n" + \
+                "WHERE { \n" + \
+                "\t?vocab a dcat:Dataset . \n" + \
+                "\t?vocab dct:title ?title. \n" + \
+                "} ORDER BY ?title"
+        # Render the page of the no_visualization page
+        return render('service/query_catalog.html',
+                    {'query': query, 'pkg' : c.pkg_dict}) 
 
 
     # Define the behaviour of the graph visualization tool
@@ -395,15 +428,19 @@ class LiveSchemaController(BaseController):
             # Get the given query
             query = request.params['query']
 
-            # Execute the update action
+            # Execute the query action
             result = list()
             if query:
                 result = get_action('ckanext_liveschema_theme_query')(context, data_dict={'N3Resource': N3Resource, "query": query})
 
             # Go to the dataset page
             return render('package/query.html',
-                        {'dataset_type': dataset_type, 'N3Resource': N3Resource, 'query': query,  'result': result, 'number': len(result.split("-_-")) - 1, 'pkg' : c.pkg_dict}) 
-
+                        {'dataset_type': dataset_type, 'N3Resource': N3Resource, 'query': query, 'result': result, 'number': len(result), 'pkg' : c.pkg_dict}) 
+        query = "# Get all the triples of the dataset\n" + \
+                "SELECT ?Subject ?Predicate ?Object\n" + \
+                "WHERE {\n" + \
+                "\t?Subject ?Predicate ?Object\n" + \
+                "}\n"
         # Render the page of the no_visualization page
         return render('package/query.html',
-                    {'dataset_type': dataset_type, 'N3Resource': N3Resource, 'query': '',  'result': '', 'pkg' : c.pkg_dict}) 
+                    {'dataset_type': dataset_type, 'N3Resource': N3Resource, 'query': query, 'pkg': c.pkg_dict}) 

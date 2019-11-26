@@ -149,6 +149,7 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         map.connect('ckanext_liveschema_theme_fca_generator', '/service/fca_generator', controller=LiveSchemaController, action='fca_generator')
         map.connect('ckanext_liveschema_theme_cue_generator', '/service/cue_generator', controller=LiveSchemaController, action='cue_generator')
         map.connect('ckanext_liveschema_theme_visualization_generator', '/service/visualization_generator', controller=LiveSchemaController, action='visualization_generator')
+        map.connect('ckanext_liveschema_theme_query_catalog', '/service/query_catalog', controller=LiveSchemaController, action='query_catalog')
         map.connect('ckanext_liveschema_theme_fca_generator_id', '/service/fca_generator/{id}', controller=LiveSchemaController, action='fca_generator')
         map.connect('ckanext_liveschema_theme_cue_generator_id', '/service/cue_generator/{id}', controller=LiveSchemaController, action='cue_generator')
         map.connect('ckanext_liveschema_theme_visualization_generator_id', '/service/visualization_generator/{id}', controller=LiveSchemaController, action='visualization_generator')
