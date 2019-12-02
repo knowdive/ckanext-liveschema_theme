@@ -18,7 +18,7 @@ def generateVisualization(data_dict):
     matrix = pd.read_csv(data_dict["dataset_link"])
     
     # Create the DataFrame used to save the occurrences of the Names present on the Element row
-    #DF = pd.DataFrame(columns=["Element", "Names"])
+    DF = pd.DataFrame(columns=["Element", "Names"])
 
     # Use a list to create the visualization file
     typeLists = list()
@@ -36,7 +36,7 @@ def generateVisualization(data_dict):
             i+=1
         
         # Save the correlation between Element and Names
-        #SDF = DF.append({"Element": str(row["TypeTerm"]), "Names": propertiesTokens}, ignore_index=True)
+        SDF = DF.append({"Element": str(row["TypeTerm"]), "Names": propertiesTokens}, ignore_index=True)
 
         #Add the term to the list with its tokens
         typeLists.append((str(row["TypeTerm"]) + " " +  " ".join(propertiesTokens)).split())
@@ -75,7 +75,7 @@ def generateVisualization(data_dict):
                 files=[("upload", file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_Visualization.csv"))])
 
 
-    """
+    
     # Create the DataFrame used to save the table used to identify common Elements between Names
     DTF = pd.DataFrame(columns=["total", "Names", "number", "Elements"])
     # Create the set used to check if new Names has to be added or if existing Names has to be updated
@@ -106,29 +106,30 @@ def generateVisualization(data_dict):
 
     DTF.to_csv("corss.csv")
 
-    # [TODO] think about a more complex selection
+    # [TODO] To think about a more complex selection
     for index_, row in DTF.iterrows():
         if(row["total"] == 4):
             colSelection = row["Names"]
+
+            ##loading data
+            data = pd.read_csv("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_Visualization.csv", dtype='unicode')
+            #Make a direction to the temporary file(which is created for generating plots)
+            dir_ = "src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/resources/"
+
+
+            for column in data:
+                if( column not in colSelection):
+                    data.drop(column, axis=1, inplace=True)
+
+
+            file_name = sep_file(dir_,data)
+            plot_Venn(file_name)
+
+            #del_file(dir_,data)
+
             break
 
-    ##loading data
-    data = pd.read_csv("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_Visualization.csv", dtype='unicode')
-    #Make a direction to the temporary file(which is created for generating plots)
-    dir_ = "src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/resources/"
-
-
-    for column in data:
-        if( column not in colSelection):
-            data.drop(column, axis=1, inplace=True)
-
-
-    file_name = sep_file(dir_,data)
-    plot_Venn(file_name)
-
-    #del_file(dir_,data)
-
-    """
+            
 
     # Remove the temporary csv file from the server
     os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_Visualization.csv")

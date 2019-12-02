@@ -22,16 +22,19 @@ def updater(context, data_dict):
 # Define the action of fca_generator of LiveSchema
 def fca_generator(context, data_dict):
     # Enqueue the script to be executed by the background worker
+    #resource_patch
     enqueue_job(ckanext.liveschema_theme.logic.fca_generator.generateFCA, args=[data_dict], title="generateFCA", queue=u'default', timeout=-1)
 
 # Define the action of fca_generator of LiveSchema
 def cue_generator(context, data_dict):
     # Enqueue the script to be executed by the background worker
+    #resource_patch
     enqueue_job(ckanext.liveschema_theme.logic.cue_generator.generateCue, args=[data_dict], title="generateCue", queue=u'default', timeout=-1)
 
 # Define the action of fca_generator of LiveSchema
 def visualization_generator(context, data_dict):
     # Enqueue the script to be executed by the background worker
+    #resource_patch
     enqueue_job(ckanext.liveschema_theme.logic.visualization_generator.generateVisualization, args=[data_dict], title="generateVisualization", queue=u'default', timeout=-1)
 
 # Define the action of query of LiveSchema

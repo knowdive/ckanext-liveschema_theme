@@ -13,31 +13,49 @@
       <h1>FCA Generator</h1>
     </header>
     <h3>Select a DataSet: </h3>
-    <form action="/service/fca_generator" method="post">
-      <label for="predicates">
-        Select the predicates to consider for the FCA Matrix (optional)
-      </label>
-      <br />
-      <input type="text" name="strPredicates" placeholder="Both URI or last term accepted, case sensitive" id="predicates" style="width: 50%">
-      <br />
-      <label for="select2">
-        Select the dataset for the FCA Matrix generation
-      </label>
-      <br />
-      <select class="js-example-basic-single js-states js-example-responsive" style="width: 50%" id="select2" name="dataset">
-          <option></option>
-          {% for dataset in h.liveschema_theme_dataset_selection("Parsed csv") %}
-            <option value="{{ dataset.name }},{{ dataset.link }}" class="{% if dataset.link == "" %}no{% else %}ok{% endif %}"{% if id and id == dataset.name %}selected="selected"{% endif %}>{{ dataset.title }}</option>
-          {% endfor %}
-      </select>
-      <br />
-      <br />
-      <button class="btn btn-primary btn-lg"> 
-          Generate the FCA Matrix
-      </button>
-      <br />
-      <br />
-    </form>
+    <div class="col-sm-7">
+      <form action="/service/fca_generator" method="post">
+        <label for="predicates">
+          Select the predicates to consider for the FCA Matrix (optional)
+        </label>
+        <br />
+        <input type="text" name="strPredicates" placeholder="Both URI or last term accepted, case sensitive" id="predicates" style="width: 100%">
+        <br />
+        <br />
+        <label for="select2">
+          Select the dataset for the FCA Matrix generation
+        </label>
+        <br />
+        <select class="js-example-basic-single js-states js-example-responsive" style="width: 100%" id="select2" name="dataset">
+            <option></option>
+            {% for dataset in h.liveschema_theme_dataset_selection("Parsed csv") %}
+              <option value="{{ dataset.name }},{{ dataset.link }}" class="{% if dataset.link == "" %}no{% else %}ok{% endif %}"{% if id and id == dataset.name %}selected="selected"{% endif %}>{{ dataset.title }}</option>
+            {% endfor %}
+        </select>
+        <br />
+        <br />
+        <button class="btn btn-primary btn-lg"> 
+            Generate the FCA Matrix
+        </button>
+        <br />
+        <br />
+      </form>
+    </div>
+    {% if alert %}
+      <div class="col-sm-5">
+        <div class="alert alert-warning" role="alert">
+          <strong>FCA Needed</strong>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <hr />
+          You need to generate the FCA Matrix 
+          <br />
+          before using the {{ alert }} service
+        </div>
+      </div>
+    {% endif %}
+    {{ args }}
   </article>
 
   {% resource 'liveschema_theme/select2_singleDataset.js' %}

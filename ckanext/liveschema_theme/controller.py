@@ -82,9 +82,14 @@ class LiveSchemaController(BaseController):
             return redirect_to(controller=LiveSchemaController, action='fca',
                     id=dataset_name)
 
-        # Render the page of the service
+        # Render the page of the service, setting the relative alert
+        alert = ""
+        if(len(id.split("."))>1):
+            alert = id.split(".")
+            id = alert[0]
+            alert = alert[1]
         return render('service/fca_generator.html',
-                      {'id': id})
+                      {'id': id, "alert": alert})
 
     # Define the behaviour of the cue generator
     def cue_generator(self, id = ""):
@@ -100,7 +105,7 @@ class LiveSchemaController(BaseController):
                 # Redirect to the page for the generation of that resurce
                 LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
                 return redirect_to(controller=LiveSchemaController, action='fca_generator',
-                    id=dataset_name)
+                    id=dataset_name+".Cue Metrics")
 
             # Build the context using the information obtained by session and user
             context = {'model': model, 'session': model.Session,
@@ -140,7 +145,7 @@ class LiveSchemaController(BaseController):
                 # Redirect to the page for the generation of that resurce
                 LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
                 return redirect_to(controller=LiveSchemaController, action='fca_generator',
-                    id=dataset_name)
+                    id=dataset_name+".Visualization")
 
             # Build the context using the information obtained by session and user
             context = {'model': model, 'session': model.Session,

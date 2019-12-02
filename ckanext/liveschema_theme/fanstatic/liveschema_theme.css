@@ -99,7 +99,9 @@
 }
 /* Diminish the padding */
 .page-header.module-content {
-    padding: 10px;
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-left: 10px;
 }
 
 
