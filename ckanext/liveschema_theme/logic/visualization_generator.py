@@ -53,29 +53,14 @@ def generateVisualization(data_dict):
 
     # Set the admin key of LiveSchema
     CKAN_KEY = data_dict["apikey"]
-
-    dataset = toolkit.get_action('package_show')(
-        data_dict={"id": data_dict["dataset_name"]})
-
-    # Iterate over every resource of the dataset
-    for res in dataset["resources"]:
-        # Check if they have the relative FCA matrix file
-        if("resource_type" in res.keys() and res["resource_type"] == "Visualization"):
-            # Delete the current FCA matrix
-            dataset = toolkit.get_action('resource_delete')(
-                data_dict={"id": res["id"]})
-
-    # Add the description of the Cue metrics of the dataset
-    description = "Visualization input"
-
+    
     # Upload the csv file to LiveSchema
-    requests.post(CKAN_URL+"/api/3/action/resource_create",
-                data={"package_id": data_dict["dataset_name"], "format": "VIS", "name": data_dict["dataset_name"]+"_Visualization.csv", "description": description, "resource_type": "Visualization"},
+    requests.post(CKAN_URL+"/api/3/action/resource_patch",
+                data={"id": data_dict["res_id"], "format": "VIS"},
                 headers={"X-CKAN-API-Key": CKAN_KEY},
                 files=[("upload", file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_Visualization.csv"))])
 
 
-    
     # Create the DataFrame used to save the table used to identify common Elements between Names
     DTF = pd.DataFrame(columns=["total", "Names", "number", "Elements"])
     # Create the set used to check if new Names has to be added or if existing Names has to be updated
@@ -133,6 +118,15 @@ def generateVisualization(data_dict):
 
     # Remove the temporary csv file from the server
     os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_Visualization.csv")
+
+    # Get the final version of the package
+    CKANpackage = toolkit.get_action('package_show')(
+            data_dict={"id": data_dict["dataset_name"]})
+    # Iterate over all the resources
+    for resource in CKANpackage["resources"]:
+        # Remove eventual temp resources left in case of error
+        if resource["format"] == "temp" and (resource["resource_type"] == "Visualization"):
+            toolkit.get_action("resource_delete")(data_dict={"id":resource["id"]})
 
 
 #Separate a csv file into target input files

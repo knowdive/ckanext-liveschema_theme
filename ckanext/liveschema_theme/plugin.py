@@ -159,6 +159,7 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         map.connect('ckanext_liveschema_theme_visualization', '/dataset/visualization/{id}', controller=LiveSchemaController, action='visualization', ckan_icon='image')
         map.connect('ckanext_liveschema_theme_graph', '/dataset/graph/{id}', controller=LiveSchemaController, action='graph', ckan_icon='arrows-alt')
         map.connect('ckanext_liveschema_theme_query', '/dataset/query/{id}', controller=LiveSchemaController, action='query', ckan_icon='search')
+        map.connect('ckanext_liveschema_theme_reset', '/dataset/reset/{id}', controller=LiveSchemaController, action='reset')
 
         # Return the new configuration to the default handler of the routers
         return map
@@ -189,6 +190,8 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
             'ckanext_liveschema_theme_updater':
                 ckanext.liveschema_theme.logic.action.updater,
             'ckanext_liveschema_theme_query':
-                ckanext.liveschema_theme.logic.action.query
+                ckanext.liveschema_theme.logic.action.query,
+            'ckanext_liveschema_theme_reset':
+                ckanext.liveschema_theme.logic.action.reset
         }
         return action_functions

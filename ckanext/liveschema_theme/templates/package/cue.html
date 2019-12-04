@@ -11,8 +11,8 @@
     <ul class="{% block resource_list_class %}resource-list{% endblock %}">
       {% snippet 'package/snippets/resource_item.html', res=cueResource, pkg=pkg, can_edit=can_edit %}
     </ul>
-
-    <section class="additional-info">
+    {% if cueResource.format == "CUE" %}
+      <section class="additional-info">
         <table class="table table-striped table-bordered table-condensed">
           <thead>
             <tr>
@@ -40,7 +40,7 @@
           </tbody>
         </table>
       </section>
-    
+    {% endif %}
   {% else %}
     <h3>No Cue resource available </h3>
     <p>Please generate one using the <a href="/service/cue_generator/{{ pkg.name }}">Cue Generator service</a></p>

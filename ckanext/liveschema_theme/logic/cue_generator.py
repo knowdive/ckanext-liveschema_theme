@@ -139,26 +139,20 @@ def generateCue(data_dict):
     # Set the admin key of LiveSchema
     CKAN_KEY = data_dict["apikey"]
 
-    dataset = toolkit.get_action('package_show')(
-        data_dict={"id": data_dict["dataset_name"]})
-
-    # Iterate over every resource of the dataset
-    for res in dataset["resources"]:
-        # Check if they have the relative Cue matrix file
-        if("resource_type" in res.keys() and res["resource_type"] == "Cue"):
-            # Delete the current Cue matrix
-            dataset = toolkit.get_action('resource_delete')(
-                data_dict={"id": res["id"]})
-            break
-
-    # Add the description of the Cue metrics of the dataset
-    description = "Cue metrics of the dataset"
-
     # Upload the csv file to LiveSchema
-    requests.post(CKAN_URL+"/api/3/action/resource_create",
-                data={"package_id": data_dict["dataset_name"], "format": "CUE", "name": data_dict["dataset_name"]+"_Cue.csv", "description": description, "resource_type": "Cue"},
+    c = requests.post(CKAN_URL+"/api/3/action/resource_patch",
+                data={"id": data_dict["res_id"], "format": "CUE"},
                 headers={"X-CKAN-API-Key": CKAN_KEY},
                 files=[("upload", file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_Cue.csv"))])
 
     # Remove the temporary csv file from the server
     os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_Cue.csv")
+
+    # Get the final version of the package
+    CKANpackage = toolkit.get_action('package_show')(
+            data_dict={"id": data_dict["dataset_name"]})
+    # Iterate over all the resources
+    for resource in CKANpackage["resources"]:
+        # Remove eventual temp resources left in case of error
+        if resource["format"] == "temp" and (resource["resource_type"] == "Cue"):
+            toolkit.get_action("resource_delete")(data_dict={"id":resource["id"]})
