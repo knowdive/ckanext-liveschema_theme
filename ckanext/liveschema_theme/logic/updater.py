@@ -580,15 +580,6 @@ def checkPackage(CKAN_KEY, datasets, package):
 
         # Update the resources of that package
         addResources(id, CKAN_KEY, package)
-        
-        # Get the final version of the package
-        CKANpackage = toolkit.get_action('package_show')(
-                data_dict={"id": package["name"]})
-        # Iterate over all the resources
-        for resource in CKANpackage["resources"]:
-            # Remove eventual temp resources left
-            if resource["format"] == "temp" and (resource["resource_type"] == "Serialized n3" or resource["resource_type"] == "Serialized rdf" or resource["resource_type"] == "Parsed csv"):
-                toolkit.get_action("resource_delete")(data_dict={"id":resource["id"]})
 
 # Procedure to add the resources of the given package
 def addResources(id, CKAN_KEY, package):
@@ -605,6 +596,9 @@ def addResources(id, CKAN_KEY, package):
     except Exception as e:
         # In case of an error during the graph's initiation, print the error and return an empty list
         print(str(e) + "\n")    
+
+        # Remove the eventual temp resources left
+        removeTemp(package["name"])
         return 
 
     # Get the link of LiveSchema
@@ -682,3 +676,17 @@ def addResources(id, CKAN_KEY, package):
 
     # Remove the temporary csv file from the server
     os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".csv")
+
+    # Remove the eventual temp resources left
+    removeTemp(package["name"])
+
+# Remove the eventual temp resources left
+def removeTemp(name):
+    # Get the final version of the package
+    CKANpackage = toolkit.get_action('package_show')(
+            data_dict={"id": name})
+    # Iterate over all the resources
+    for resource in CKANpackage["resources"]:
+        # Remove eventual temp resources left
+        if resource["format"] == "temp" and (resource["resource_type"] == "Serialized n3" or resource["resource_type"] == "Serialized rdf" or resource["resource_type"] == "Parsed csv"):
+            toolkit.get_action("resource_delete")(data_dict={"id":resource["id"]})

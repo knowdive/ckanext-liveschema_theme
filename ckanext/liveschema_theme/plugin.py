@@ -52,7 +52,7 @@ def dataset_selection(resource_type):
             # Iterate over every resource of the dataset
             for res in dataset["resources"]:
                 # Check if they have the relative parsed csv file
-                if("resource_type" in res.keys() and res["resource_type"] == resource_type):
+                if("resource_type" in res.keys() and res["resource_type"] == resource_type and "format" in res.keys() and res["format"] != "temp"):
                     # Create the dictionary with the resource information
                     datasetSelected = {"name": dataset["name"], "link": res["url"], "title": dataset["title"] + " [" + dataset["organization"]["title"] + "]"}
             # If the dataset does not have the required resource_type
