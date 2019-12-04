@@ -155,3 +155,22 @@ body {
 a {
     color: rgba(2, 116, 190, 1);
 }
+
+/* ====================================
+   The format tags
+   ==================================== */
+.label[data-format*=n3] {
+    background-color: rgba(2, 116, 190, 1);
+}
+
+.label[data-format*=fca] {
+    background-color: green;
+}
+
+.label[data-format*=cue] {
+    background-color: red;
+}
+
+.label[data-format*=vis] {
+    background-color: #af0089;
+}

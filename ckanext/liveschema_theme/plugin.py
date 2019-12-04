@@ -145,7 +145,7 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
 
         # Define the list of new routes to be added
-        map.connect('ckanext_liveschema_theme_services', '/service', controller=LiveSchemaController, action='index')
+        map.connect('ckanext_liveschema_theme_services', '/service', controller=LiveSchemaController, action='services')
         map.connect('ckanext_liveschema_theme_fca_generator', '/service/fca_generator', controller=LiveSchemaController, action='fca_generator')
         map.connect('ckanext_liveschema_theme_cue_generator', '/service/cue_generator', controller=LiveSchemaController, action='cue_generator')
         map.connect('ckanext_liveschema_theme_visualization_generator', '/service/visualization_generator', controller=LiveSchemaController, action='visualization_generator')
@@ -160,6 +160,7 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         map.connect('ckanext_liveschema_theme_graph', '/dataset/graph/{id}', controller=LiveSchemaController, action='graph', ckan_icon='arrows-alt')
         map.connect('ckanext_liveschema_theme_query', '/dataset/query/{id}', controller=LiveSchemaController, action='query', ckan_icon='search')
         map.connect('ckanext_liveschema_theme_reset', '/dataset/reset/{id}', controller=LiveSchemaController, action='reset')
+        map.connect('ckanext_liveschema_theme_contact', '/contact', controller=LiveSchemaController, action='contact')
 
         # Return the new configuration to the default handler of the routers
         return map

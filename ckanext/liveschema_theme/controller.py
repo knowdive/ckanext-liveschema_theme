@@ -33,7 +33,7 @@ ValidationError = logic.ValidationError
 class LiveSchemaController(BaseController):
 
     # Define the behaviour of the index of services
-    def index(self):
+    def services(self):
         # Build the context using the information obtained by session and user
         context = {'model': model, 'session': model.Session,
                    'user': c.user or c.author}
@@ -558,3 +558,7 @@ class LiveSchemaController(BaseController):
         # Redirect to the package read page
         return redirect_to(controller='package', action='read',
             id=id)
+
+    # Define the behaviour of the contact service
+    def contact(self):
+        return render('service/contact.html')

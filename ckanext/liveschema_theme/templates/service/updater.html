@@ -3,7 +3,7 @@
 {% block subtitle %}{{ _("LiveSchema Updater") }}{% endblock %}
 
 {% block breadcrumb_content %}
-  <li>{{ h.nav_link(_('Services'), controller='ckanext.liveschema_theme.controller:LiveSchemaController', action='index') }}</li>
+  <li>{{ h.nav_link(_('Services'), controller='ckanext.liveschema_theme.controller:LiveSchemaController', action='services') }}</li>
   <li class="active"><a href="{{ h.url_for_static('/service/updater') }}">LiveSchema Updater</a></li>
 {% endblock %}
 

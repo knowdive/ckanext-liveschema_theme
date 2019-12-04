@@ -1,0 +1,44 @@
+{% extends "page.html" %}
+
+{% block subtitle %}{{ _("Contact us") }}{% endblock %}
+
+{% block secondary %}{% endblock %}
+
+{% block primary %}
+    <section class="module-content">
+        <h1 class="page-heading">Contact us </h1>
+        <strong>Thank you for your interest in LiveSchema</strong>
+        <form action="/contact" method="post" style="margin: 25px">
+            <p>
+                <br />
+                <label> Your Name (required) </label>
+                <br />
+                <input type="text" name="name" value="" size="40" class="required" aria-required="true" aria-invalid="false" required style="width: 100%"/>
+            </p>
+            <p>
+                <br />
+                <label> Your eMail (required) </label>
+                <br />
+                <input type="text" name="mail" value="" size="40" class="required" aria-required="true" aria-invalid="false" required style="width: 100%"/>
+            </p>
+            <p>
+                <br />
+                <label> Your Institution (required)</label>
+                <br />
+                <input type="text" name="institution" value="" size="40" class="required" aria-required="true" aria-invalid="false" required style="width: 100%"/>
+            </p>
+            <p>
+                <br />
+                <label> Your Message (required)</label>
+                <br />
+                <textarea name="message" cols="40" rows="10" class="required" aria-required="true" aria-invalid="false" required style="width: 100%"></textarea>
+            </p>
+            <p>
+                <button class="btn btn-lg btn-info" value="Send">Send</button>
+            </p>
+        </form>
+        
+        
+
+    </section>
+{% endblock %}
