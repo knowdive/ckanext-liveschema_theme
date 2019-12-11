@@ -15,6 +15,8 @@ import ckan.plugins.toolkit as toolkit
 
 import ckan.lib.helpers as helpers
 
+import cgi
+
 # Get the variable of context from toolkit
 c = toolkit.c
 
@@ -33,42 +35,39 @@ def updateLiveSchema(data_dict):
     # Get the catalogs to update from the form
     catalogsSelection = data_dict["catalogsSelection"]
 
-    # Set the admin key of LiveSchema
-    CKAN_KEY = data_dict["apikey"]
-
     # Scrape the Finto Repository
     if not catalogsSelection or "finto" in catalogsSelection:
         print("finto")
-        scrapeFinto(CKAN_KEY, catalogs, datasets)
+        scrapeFinto(catalogs, datasets)
 
     # Scrape the RVS Repository
     if not catalogsSelection or "rvs" in catalogsSelection:
         print("rvs")
-        scrapeRVS(CKAN_KEY, catalogs, datasets)
+        scrapeRVS(catalogs, datasets)
 
     # Scrape the DERI Repository
     if not catalogsSelection or "deri" in catalogsSelection:
         print("deri")
-        scrapeDERI(CKAN_KEY, catalogs, datasets)
+        scrapeDERI(catalogs, datasets)
 
     # Scrape Knowdive
     if not catalogsSelection or "knowdive" in catalogsSelection:
         print("knowdive")
-        scrapeKnowDive(CKAN_KEY, catalogs, datasets)
+        scrapeKnowDive(catalogs, datasets)
 
     # Scrape the the Others excel file from the GitHub Repository
     if not catalogsSelection or "github" in catalogsSelection:
         print("github")
-        scrapeGitHub(CKAN_KEY, catalogs, datasets)
+        scrapeGitHub(catalogs, datasets)
 
     # Scrape the LOV Repository
     if not catalogsSelection or "lov" in catalogsSelection:
         print("lov")
-        scrapeLOV(CKAN_KEY, catalogs, datasets)
+        scrapeLOV(catalogs, datasets)
 
 
 # Script to scrape the Finto repository
-def scrapeFinto(CKAN_KEY, catalogs, datasets):
+def scrapeFinto(catalogs, datasets):
     # Check if FINTO is present on LiveSchema
     cataFinto = ""
     if "finto" in catalogs:
@@ -144,11 +143,11 @@ def scrapeFinto(CKAN_KEY, catalogs, datasets):
             package["extras"].append({"key": "Reference Catalog URL", "value": url+vocab["href"]})
 
             # Check if the dataset has to be updated
-            checkPackage(CKAN_KEY, datasets, package)
+            checkPackage(datasets, package)
 
 
 # Script to scrape the RVS repository
-def scrapeRVS(CKAN_KEY, catalogs, datasets):
+def scrapeRVS(catalogs, datasets):
     # Check if RVS is present on LiveSchema
     cataRVS = ""
     if "rvs" in catalogs:
@@ -168,7 +167,7 @@ def scrapeRVS(CKAN_KEY, catalogs, datasets):
     #[TODO]
 
 # Script to scrape the DERI repository
-def scrapeDERI(CKAN_KEY, catalogs, datasets):
+def scrapeDERI(catalogs, datasets):
     # Check if DERI is present on LiveSchema
     cataDERI = ""
     if "deri" in catalogs:
@@ -250,12 +249,12 @@ def scrapeDERI(CKAN_KEY, catalogs, datasets):
             package["extras"].append({"key": "Reference Catalog URL", "value": url + vocab("a")[0]["href"][1:]})
 
             # Check if the dataset has to be updated
-            checkPackage(CKAN_KEY, datasets, package)
+            checkPackage(datasets, package)
             
 
 
 # Script to scrape KnowDive
-def scrapeKnowDive(CKAN_KEY, catalogs, datasets):
+def scrapeKnowDive(catalogs, datasets):
     # Check if the KnowDive is present on LiveSchema
     cataKnowDive = ""
     if "knowdive" in catalogs:
@@ -292,11 +291,11 @@ def scrapeKnowDive(CKAN_KEY, catalogs, datasets):
         package["extras"].append({"key": "language", "value": row["Languages"]})
         package["extras"].append({"key": "contact_uri", "value": row["URI"]})
         # Check if the dataset has to be updated
-        checkPackage(CKAN_KEY, datasets, package)
+        checkPackage(datasets, package)
 
 
 # Script to scrape the Others excel file from GitHub Repository
-def scrapeGitHub(CKAN_KEY, catalogs, datasets):
+def scrapeGitHub(catalogs, datasets):
     # Check if the Others excel file from github is present on LiveSchema
     cataGitHub = ""
     if "github" in catalogs:
@@ -329,11 +328,11 @@ def scrapeGitHub(CKAN_KEY, catalogs, datasets):
         package["extras"].append({"key": "language", "value": row["Languages"]})
         package["extras"].append({"key": "contact_uri", "value": row["URI"]})
         # Check if the dataset has to be updated
-        checkPackage(CKAN_KEY, datasets, package)
+        checkPackage(datasets, package)
 
 
 # Script to scrape the LOV repository
-def scrapeLOV(CKAN_KEY, catalogs, datasets):
+def scrapeLOV(catalogs, datasets):
     # Check if LOV is present on LiveSchema
     cataLOV = ""
     if "lov" in catalogs:
@@ -361,12 +360,12 @@ def scrapeLOV(CKAN_KEY, catalogs, datasets):
     while page < end:
         # Get the #page with the vocabs list
         link = url+"/dataset/lov/vocabs?&page="+str(page)
-        end = vocabList(CKAN_KEY, cataLOV, datasets, link, url, end)
+        end = vocabList(cataLOV, datasets, link, url, end)
         # Iterate the next page if there were vocabs in this page, otherwise end the program here
         page += 1
 
 # Get all the vocabulary of that page
-def vocabList(CKAN_KEY, cataLOV, datasets, link, url, end):
+def vocabList(context, cataLOV, datasets, link, url, end):
     # Connect to the URL
     response = requests.get(link)
     # Parse HTML and save to BeautifulSoup object
@@ -383,11 +382,11 @@ def vocabList(CKAN_KEY, cataLOV, datasets, link, url, end):
             #time.sleep(.500) 
             #oldLink = link
             link = voc[i].a["href"]
-            vocabMeta(CKAN_KEY, cataLOV, datasets, url+link)
+            vocabMeta(cataLOV, datasets, url+link)
     return end
 
 # Get all the info from the vocabulary page
-def vocabMeta(CKAN_KEY, cataLOV, datasets, link):
+def vocabMeta(cataLOV, datasets, link):
     # Pause the code for a sec
     #time.sleep(.500)
     # Connect to the URL
@@ -473,13 +472,13 @@ def vocabMeta(CKAN_KEY, cataLOV, datasets, link):
                 package["extras"].append({"key": "modified", "value": versionEnd})
 
         # Check if the dataset has to be updated
-        checkPackage(CKAN_KEY, datasets, package)
+        checkPackage(datasets, package)
 
     # Delete the package at every iteration 
     del package
 
 # Procedure to check the package to update for LiveSchema
-def checkPackage(CKAN_KEY, datasets, package):
+def checkPackage(datasets, package):
     print(package["name"])
 
     # Boolean used to verify if the online resources need to be updated
@@ -579,10 +578,10 @@ def checkPackage(CKAN_KEY, datasets, package):
         id = {'n3_id': N3Resource['id'], 'rdf_id': RDFResource['id'], 'csv_id': CSVResource['id']}
 
         # Update the resources of that package
-        addResources(id, CKAN_KEY, package)
+        addResources(id, package)
 
 # Procedure to add the resources of the given package
-def addResources(id, CKAN_KEY, package):
+def addResources(id, package):
     # Try to create the graph to analyze the vocabulary
     try:
         g = Graph()
@@ -601,18 +600,20 @@ def addResources(id, CKAN_KEY, package):
         removeTemp(package["name"])
         return 
 
-    # Get the link of LiveSchema
-    CKAN = helpers.get_site_protocol_and_host()
-    CKAN_URL = CKAN[0]+"://" + CKAN[1]
-
     try:
         # Serialize the vocabulary in n3
         g.serialize(destination=str(os.path.join("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/", package["name"] + ".n3")), format="n3")
         # Add the serialized n3 file to LiveSchema
-        requests.post(CKAN_URL+"/api/3/action/resource_patch",
-                    data={"id": id["n3_id"], "format": "N3"},
-                headers={"X-CKAN-API-Key": CKAN_KEY},
-                files=[("upload", file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".n3"))])
+        upload = cgi.FieldStorage()
+        upload.filename = package["name"] + ".n3"
+        upload.file = file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".n3")
+        data = {
+            "id": id["n3_id"], 
+            "format": "N3",
+            'url': package["name"] + ".n3", #'will-be-overwritten-automatically',
+            'upload': upload
+        }
+        toolkit.get_action('resource_patch')(context = {'ignore_auth': True}, data_dict=data)
         # Remove the temporary n3 file from the server
         os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".n3")
     except Exception as e:
@@ -623,10 +624,16 @@ def addResources(id, CKAN_KEY, package):
         # Serialize the vocabulary in rdf
         g.serialize(destination=str(os.path.join("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/", package["name"] + ".rdf")), format="pretty-xml")
         # Add the serialized rdf file to LiveSchema     
-        requests.post(CKAN_URL+"/api/3/action/resource_patch",
-                    data={"id": id["rdf_id"], "format": "RDF"},
-                    headers={"X-CKAN-API-Key": CKAN_KEY},
-                    files=[("upload", file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".rdf"))])
+        upload = cgi.FieldStorage()
+        upload.filename = package["name"] + ".rdf"
+        upload.file = file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".rdf")
+        data = {
+            "id": id["rdf_id"], 
+            "format": "RDF",
+            'url': package["name"] + ".rdf", #'will-be-overwritten-automatically',
+            'upload': upload
+        }
+        toolkit.get_action('resource_patch')(context = {'ignore_auth': True}, data_dict=data)
         # Remove the temporary rdf file from the server
         os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".rdf")
     except Exception as e:
@@ -669,10 +676,16 @@ def addResources(id, CKAN_KEY, package):
     DTF.to_csv(os.path.normpath(os.path.expanduser("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".csv")))
 
     # Upload the csv file to LiveSchema
-    requests.post(CKAN_URL+"/api/3/action/resource_patch",
-                data={"id": id["csv_id"], "format": "CSV"},
-                headers={"X-CKAN-API-Key": CKAN_KEY},
-                files=[("upload", file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".csv"))])
+    upload = cgi.FieldStorage()
+    upload.filename = package["name"] + ".csv"
+    upload.file = file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".csv")
+    data = {
+        "id": id["csv_id"],
+        "format": "CSV",
+        'url': package["name"] + ".csv", #'will-be-overwritten-automatically',
+        'upload': upload
+    }
+    toolkit.get_action('resource_patch')(context = {'ignore_auth': True}, data_dict=data)
 
     # Remove the temporary csv file from the server
     os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".csv")
@@ -689,4 +702,4 @@ def removeTemp(name):
     for resource in CKANpackage["resources"]:
         # Remove eventual temp resources left
         if resource["format"] == "temp" and (resource["resource_type"] == "Serialized n3" or resource["resource_type"] == "Serialized rdf" or resource["resource_type"] == "Parsed csv"):
-            toolkit.get_action("resource_delete")(data_dict={"id":resource["id"]})
+            toolkit.get_action("resource_delete")(context = {"ignore_auth": True}, data_dict={"id":resource["id"]})

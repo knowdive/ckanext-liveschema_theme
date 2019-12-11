@@ -12,7 +12,7 @@
       {% snippet 'package/snippets/resource_item.html', res=visualizationResource, pkg=pkg, can_edit=can_edit %}
     </ul>
   {% else %}
-    <h3>No Visualization resource available </h3>
+    <h3>No Visualization resource available</h3>
     <p>Please generate one using the <a href="/service/visualization_generator/{{ pkg.name }}">Visualization Generator service</a></p>
   {% endif %}
   <br />

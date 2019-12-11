@@ -28,7 +28,7 @@ def most_popular_catalogs():
     return catalogs
 
 # Get the list of datasets that have the requested resource_type file
-def dataset_selection(resource_type):
+def dataset_selection(ok, no, resource_type):
     '''Return a list of the datasets with their requested resource_type.'''
     
     # Create the list of datasets that have the requested resource_type file
@@ -54,7 +54,7 @@ def dataset_selection(resource_type):
                 # Check if they have the relative parsed csv file
                 if("resource_type" in res.keys() and res["resource_type"] == resource_type and "format" in res.keys() and res["format"] != "temp"):
                     # Create the dictionary with the resource information
-                    datasetSelected = {"name": dataset["name"], "link": res["url"], "title": dataset["title"] + " [" + dataset["organization"]["title"] + "]"}
+                    datasetSelected = {"name": dataset["name"], "link": res["url"], "btn": ok, "title": dataset["title"] + " [" + dataset["organization"]["title"] + "]"}
             # If the dataset does not have the required resource_type
             if(datasetSelected):
                 # Append the dataset to the selection
@@ -62,7 +62,7 @@ def dataset_selection(resource_type):
             # If the dataset does not have the required resource_type
             else:
                 # Create the dictionary without link, specifying the need of the resource_type in the title
-                datasetSelected = {"name": dataset["name"], "link": "", "title": dataset["title"] + " [" + dataset["organization"]["title"] + "], " + resource_type + " needed"}
+                datasetSelected = {"name": dataset["name"], "link": "", "btn": no, "title": dataset["title"] + " [" + dataset["organization"]["title"] + "], " + resource_type + " needed"}
                 # Append the dataset to the selection
                 dataSetSelectionNO.append(datasetSelected)
 
@@ -192,6 +192,8 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
                 ckanext.liveschema_theme.logic.action.updater,
             'ckanext_liveschema_theme_query':
                 ckanext.liveschema_theme.logic.action.query,
+            'ckanext_liveschema_theme_visualization_lotus':
+                ckanext.liveschema_theme.logic.action.visualization_lotus,
             'ckanext_liveschema_theme_reset':
                 ckanext.liveschema_theme.logic.action.reset
         }

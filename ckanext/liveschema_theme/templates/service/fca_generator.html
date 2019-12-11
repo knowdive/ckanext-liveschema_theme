@@ -28,8 +28,8 @@
         <br />
         <select class="js-example-basic-single js-states js-example-responsive" style="width: 100%" id="select2" name="dataset">
             <option></option>
-            {% for dataset in h.liveschema_theme_dataset_selection("Parsed csv") %}
-              <option value="{{ dataset.name }},{{ dataset.link }}" class="{% if dataset.link == "" %}no{% else %}ok{% endif %}"{% if id and id == dataset.name %}selected="selected"{% endif %}>{{ dataset.title }}</option>
+            {% for dataset in h.liveschema_theme_dataset_selection("Generate the FCA Matrix", "First reset the resources", "Parsed csv") %}
+              <option value="{{ dataset.name }},{{ dataset.link }},{{ dataset.btn }}" class="{% if dataset.link == "" %}no{% else %}ok{% endif %}"{% if id and id == dataset.name %}selected="selected"{% endif %}>{{ dataset.title }}</option>
             {% endfor %}
         </select>
         <br />

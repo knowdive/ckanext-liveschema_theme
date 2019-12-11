@@ -1,16 +1,17 @@
 # Import libraries
 import pandas as pd
 import os
-import requests
 
 import ckan.plugins.toolkit as toolkit
 
 import ckan.lib.helpers as helpers
 
+import cgi
+
 
 # Function that generate the Cue file
 def generateCue(data_dict):
-    # Create the dataframe from the CSV file
+    # Create the dataframe from the FCA file
     matrix = pd.read_csv(data_dict["dataset_link"])
 
     # Generate the resulting DataFrame having as words the tokenized columns of the matrix, and a total of 0 for every row
@@ -132,18 +133,17 @@ def generateCue(data_dict):
     # Parse the Cue data into the csv file
     cue.to_csv(os.path.normpath(os.path.expanduser("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_Cue.csv")))
 
-    # Get the link of LiveSchema
-    CKAN = helpers.get_site_protocol_and_host()
-    CKAN_URL = CKAN[0]+"://" + CKAN[1]
-
-    # Set the admin key of LiveSchema
-    CKAN_KEY = data_dict["apikey"]
-
     # Upload the csv file to LiveSchema
-    c = requests.post(CKAN_URL+"/api/3/action/resource_patch",
-                data={"id": data_dict["res_id"], "format": "CUE"},
-                headers={"X-CKAN-API-Key": CKAN_KEY},
-                files=[("upload", file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_Cue.csv"))])
+    upload = cgi.FieldStorage()
+    upload.filename = data_dict["dataset_name"]+"_Cue.csv"
+    upload.file = file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_Cue.csv")
+    data = {
+        "id": data_dict["res_id"], 
+        "format": "CUE",
+        'url': data_dict["dataset_name"]+"_Cue.csv", #'will-be-overwritten-automatically',
+        'upload': upload
+    }
+    toolkit.get_action('resource_patch')(context = {'ignore_auth': True}, data_dict=data)
 
     # Remove the temporary csv file from the server
     os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_Cue.csv")
@@ -155,4 +155,4 @@ def generateCue(data_dict):
     for resource in CKANpackage["resources"]:
         # Remove eventual temp resources left in case of error
         if resource["format"] == "temp" and (resource["resource_type"] == "Cue"):
-            toolkit.get_action("resource_delete")(data_dict={"id":resource["id"]})
+            toolkit.get_action("resource_delete")(context={"ignore_auth": True},data_dict={"id":resource["id"]})

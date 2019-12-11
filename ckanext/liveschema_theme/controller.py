@@ -39,7 +39,7 @@ class LiveSchemaController(BaseController):
                    'user': c.user or c.author}
         # Check if the user has the access to this page
         try:
-            check_access('ckanext_liveschema_theme_services', context, {})
+            check_access('ckanext_liveschema_theme_services', context=context, data_dict={})
         # Otherwise abort with NotAuthorized message
         except NotAuthorized:
             abort(401, _('User not authorized to view page'))
@@ -48,8 +48,19 @@ class LiveSchemaController(BaseController):
 
     # Define the behaviour of the fca generator
     def fca_generator(self, id = ""):
+
+        # Build the context using the information obtained by session and user
+        context = {'model': model, 'session': model.Session,
+                   'user': c.user or c.author}
+        # Check if the user has the access to this page
+        try:
+            check_access('ckanext_liveschema_theme_fca_generator', context, {})
+        # Otherwise abort with NotAuthorized message
+        except NotAuthorized:
+            abort(401, _('Anonymous users not authorized to access the FCA generator'))
+
         # If the page has to handle the form resulting from the service
-        if request.method == 'POST' and "dataset" in request.params.keys():
+        if request.method == 'POST' and "dataset" in request.params.keys() and request.params['dataset']:
             # Get the selected dataset
             dataset = request.params['dataset'].split(",")
             dataset_name = dataset[0]
@@ -66,18 +77,6 @@ class LiveSchemaController(BaseController):
 
             strPredicates = request.params.get('strPredicates', " ")
 
-            # Build the context using the information obtained by session and user
-            context = {'model': model, 'session': model.Session,
-                       'user': c.user or c.author}
-
-            # Check if the user has the access to this page
-            try:
-                check_access('ckanext_liveschema_theme_fca_generator', context, data_dict={})
-            # Otherwise abort with NotAuthorized message
-            except NotAuthorized:
-                abort(401, _('User not authorized to view page'))
-
-
             # Add the description of the FCA Matrix specifying the (eventual) set of predicates for the filtering process
             description = "FCA Matrix containing the information of"
             if(len(strPredicates.split()) == 0):
@@ -89,6 +88,8 @@ class LiveSchemaController(BaseController):
             dataset = toolkit.get_action('package_show')(
                 data_dict={"id": dataset_name})
 
+            #
+            context = {'ignore_auth':  True}
             # Set index to limit the resources up to 9
             i = dataset["num_resources"] - 9
             # Iterate over every resource of the dataset
@@ -98,14 +99,13 @@ class LiveSchemaController(BaseController):
                     # Update the index
                     i -= 1
                     # Delete the older FCA matrix
-                    dataset = toolkit.get_action('resource_delete')(data_dict={"id": res["id"]})
+                    dataset = toolkit.get_action('resource_delete')(context=context,data_dict={"id": res["id"]})
                 
             # Create temp FCA resource
-            FCAResource = toolkit.get_action("resource_create")(
+            FCAResource = toolkit.get_action("resource_create")(context=context,
                 data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_FCA.csv", "description": description, "resource_type": "FCA"})
-    
 
-            # Execute the update action
+            # Execute the fca_generator action
             get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, "strPredicates": strPredicates, 'apikey': c.userobj.apikey})
 
             # Go to the dataset page
@@ -124,8 +124,19 @@ class LiveSchemaController(BaseController):
 
     # Define the behaviour of the cue generator
     def cue_generator(self, id = ""):
+
+        # Build the context using the information obtained by session and user
+        context = {'model': model, 'session': model.Session,
+                   'user': c.user or c.author}
+        # Check if the user has the access to this page
+        try:
+            check_access('ckanext_liveschema_theme_cue_generator', context, {})
+        # Otherwise abort with NotAuthorized message
+        except NotAuthorized:
+            abort(401, _('Anonymous users not authorized to access the Cue generator'))
+
         # If the page has to handle the form resulting from the service
-        if request.method == 'POST' and "dataset" in request.params.keys():
+        if request.method == 'POST' and "dataset" in request.params.keys() and request.params['dataset']:
             # Get the selected dataset
             dataset = request.params['dataset'].split(",")
             dataset_name = dataset[0]
@@ -138,10 +149,6 @@ class LiveSchemaController(BaseController):
                 return redirect_to(controller=LiveSchemaController, action='fca_generator',
                     id=dataset_name+".Cue Metrics")
 
-            # Build the context using the information obtained by session and user
-            context = {'model': model, 'session': model.Session,
-                       'user': c.user or c.author}
-
             # Check if the user has the access to this page
             try:
                 check_access('ckanext_liveschema_theme_cue_generator', context, data_dict={})
@@ -153,17 +160,17 @@ class LiveSchemaController(BaseController):
             dataset = toolkit.get_action('package_show')(
                 data_dict={"id": dataset_name})
 
+            context['ignore_auth'] = True
             # Iterate over every resource of the dataset
             for res in dataset["resources"]:
                 # Check if they have the relative Cue matrix file
                 if("resource_type" in res.keys() and res["resource_type"] == "Cue"):
                     # Delete the current Cue matrix
-                    dataset = toolkit.get_action('resource_delete')(
-                        data_dict={"id": res["id"]})
+                    dataset = toolkit.get_action('resource_delete')(context=context, data_dict={"id": res["id"]})
                     break
 
             # Create temp CUE resource
-            CUEResource = toolkit.get_action("resource_create")(
+            CUEResource = toolkit.get_action("resource_create")(context=context, 
                 data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_Cue.csv", "description": "Cue metrics of the dataset", "resource_type": "Cue"})
 
             # Execute the Cue generator action
@@ -181,8 +188,19 @@ class LiveSchemaController(BaseController):
 
     # Define the behaviour of the visualization generator
     def visualization_generator(self, id = ""):
+
+        # Build the context using the information obtained by session and user
+        context = {'model': model, 'session': model.Session,
+                   'user': c.user or c.author}
+        # Check if the user has the access to this page
+        try:
+            check_access('ckanext_liveschema_theme_visualization_generator', context, {})
+        # Otherwise abort with NotAuthorized message
+        except NotAuthorized:
+            abort(401, _('Anonymous users not authorized to access the Visualization generator'))
+
         # If the page has to handle the form resulting from the service
-        if request.method == 'POST' and "dataset" in request.params.keys():
+        if request.method == 'POST' and "dataset" in request.params.keys() and request.params['dataset']:
             # Get the selected dataset
             dataset = request.params['dataset'].split(",")
             dataset_name = dataset[0]
@@ -210,17 +228,18 @@ class LiveSchemaController(BaseController):
             dataset = toolkit.get_action('package_show')(
                 data_dict={"id": dataset_name})
 
+            context['ignore_auth'] = True
             # Iterate over every resource of the dataset
             for res in dataset["resources"]:
                 # Check if they have the relative Cue matrix file
                 if("resource_type" in res.keys() and res["resource_type"] == "Visualization"):
                     # Delete the current Cue matrix
-                    dataset = toolkit.get_action('resource_delete')(
+                    dataset = toolkit.get_action('resource_delete')(context=context,
                         data_dict={"id": res["id"]})
                     break
 
-            # Create temp Visualizarion resource
-            VISResource = toolkit.get_action("resource_create")(
+            # Create temp Visualization resource
+            VISResource = toolkit.get_action("resource_create")(context=context, 
                 data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_Visualization.csv", "description": "Visualization input", "resource_type": "Visualization"})
 
             # Execute the Visualization generator action
@@ -240,6 +259,13 @@ class LiveSchemaController(BaseController):
         # Build the context using the information obtained by session and user
         context = {'model': model, 'session': model.Session,
                    'user': c.user or c.author}
+
+        # Check if the user has the access to this page
+        try:
+            check_access('ckanext_liveschema_theme_updater', context, {})
+        # Otherwise abort with NotAuthorized message
+        except NotAuthorized:
+            abort(401, _('Only admins can access the Updater service'))
 
         # If the page has to handle the form resulting from the service
         if request.method == 'POST':
@@ -262,13 +288,6 @@ class LiveSchemaController(BaseController):
 
             # Redirect to the index
             return redirect_to("../")
-
-        # Check if the user has the access to this page
-        try:
-            check_access('ckanext_liveschema_theme_updater', context, {})
-        # Otherwise abort with NotAuthorized message
-        except NotAuthorized:
-            abort(401, _('User not authorized to view page'))
 
         # Render the page of the service
         return render('service/updater.html')
@@ -397,8 +416,43 @@ class LiveSchemaController(BaseController):
                    'user': c.user, 'for_view': True,
                    'auth_user_obj': c.userobj}
 
+        # If the page has to handle the form resulting from the service to create the KLotus
+        if request.method == 'POST':
+            # Define the data_dict to pass to the package_show action
+            data_dict = {'id': id, 'include_tracking': True}
+            # get the information about the desired package
+            c.pkg_dict = get_action('package_show')(context, data_dict)
+
+            # Get the dataset type of the dataset
+            dataset_type = c.pkg_dict['type'] or 'dataset'
+
+            # Check if all the resources needed for the KLotus creation are present
+            FCAResource = ""
+            visualizationResource = ""
+            for res in c.pkg_dict['resources']:
+                if "resource_type" in res.keys() and res["resource_type"] == "FCA" and "format" in res.keys() and res["format"] != "temp":
+                    FCAResource = res["url"]
+                if "resource_type" in res.keys() and res["resource_type"] == "Visualization" and "format" in res.keys() and res["format"] != "temp":
+                    visualizationResource = res["url"]
+
+            # If the dataset does not have the required resource
+            if not FCAResource or not visualizationResource:
+                # Redirect to the page for the visulization of that resurce
+                LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
+                return redirect_to(controller=LiveSchemaController, action='visualization',
+                    id=id)
+
+            # Execute the Visualization generator action
+            get_action('ckanext_liveschema_theme_visualization_lotus')(context, data_dict={"dataset_name": id, "FCAResource": FCAResource, "visualizationResource": visualizationResource})
+
+            # Go to the KLotus page
+            return redirect_to('/KLotus/' + id + '_KLotus.png')
+            return
+
         # Resource to eventually show on the web page
         visualizationResource = ""
+        # 
+        FCAResource = False
         # Try to access the information
         try:
             # Define the data_dict to pass to the package_show action
@@ -409,9 +463,14 @@ class LiveSchemaController(BaseController):
             # Get the dataset type of the dataset
             dataset_type = c.pkg_dict['type'] or 'dataset'
 
+            # Iterate over all the resources of the dataset
             for res in c.pkg_dict['resources']:
+                # Get the eventual visualizationResource
                 if "resource_type" in res.keys() and res["resource_type"] == "Visualization":
                     visualizationResource = res
+                # Get the eventual FCAResource
+                if "resource_type" in res.keys() and res["resource_type"] == "FCA" and "format" in res.keys() and res["format"] != "temp":
+                    FCAResource = True
 
         # Otherwise return the relative error codes
         except NotFound:
@@ -422,12 +481,11 @@ class LiveSchemaController(BaseController):
         if visualizationResource and "format" in visualizationResource.keys() and visualizationResource["format"] == "VIS":
             # Render the page of the visualization page
             return render('package/visualization.html',
-                        {'dataset_type': dataset_type, 'visualizationResource': visualizationResource, 'pkg' : c.pkg_dict}) 
+                        {'dataset_type': dataset_type, 'visualizationResource': visualizationResource, 'pkg': c.pkg_dict, "FCAResource": FCAResource}) 
         else:
             # Render the page of the no_visualization page
             return render('package/no_visualization.html',
-                        {'dataset_type': dataset_type, 'visualizationResource': visualizationResource, 'pkg' : c.pkg_dict}) 
-
+                        {'dataset_type': dataset_type, 'visualizationResource': visualizationResource, 'pkg': c.pkg_dict}) 
 
     # Define the behaviour of the query catalog service
     def query_catalog(self):
@@ -444,7 +502,6 @@ class LiveSchemaController(BaseController):
             # Execute the query action
             result = list()
             if query:
-
                 CKAN = helpers.get_site_protocol_and_host()
                 CKAN_URL = CKAN[0]+"://" + CKAN[1]
                 result = get_action('ckanext_liveschema_theme_query')(context, data_dict={'N3Resource': {'name': "Catalog", 'url': CKAN_URL+"/catalog.n3"}, "query": query})
@@ -529,21 +586,21 @@ class LiveSchemaController(BaseController):
             # get the information about the desired package
             c.pkg_dict = get_action('package_show')(context, data_dict)
 
-
+            context['ignore_auth'] = True
             # Delete all the current resources of the dataset
             for resource in c.pkg_dict["resources"]:
-                get_action("resource_delete")(context, {"id": resource["id"]})
+                get_action("resource_delete")(context = context, data_dict={"id": resource["id"]})
 
             # Reset n3 resource
-            N3Resource = toolkit.get_action("resource_create")(
+            N3Resource = toolkit.get_action("resource_create")(context=context, 
                 data_dict={"package_id":id, "format": "temp", "name": id+".n3", "resource_type": "Serialized n3", "description": "Serialized n3 format of the dataset"})
                         
             # Reset rdf resource
-            RDFResource = toolkit.get_action("resource_create")(
+            RDFResource = toolkit.get_action("resource_create")(context=context, 
                 data_dict={"package_id":id, "format": "temp", "name": id+".rdf", "resource_type": "Serialized rdf", "description": "Serialized rdf format of the dataset"})
                         
             # Reset csv resource
-            CSVResource = toolkit.get_action("resource_create")(
+            CSVResource = toolkit.get_action("resource_create")(context=context, 
                 data_dict={"package_id":id, "format": "temp", "name": id+".csv", "resource_type": "Parsed csv", "description": "Parsed csv containing all the triples of the dataset"})
 
             # Execute the action of reset of all the resources
