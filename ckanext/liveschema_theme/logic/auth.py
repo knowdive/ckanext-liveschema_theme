@@ -24,3 +24,7 @@ def visualization_generator(context, data_dict):
 def updater(context, data_dict):
     # sysadmins only
     return {'success': False}
+
+def reset(context, data_dict):
+    # All registered users can access the Visualization generator page
+    return {'success': authz.auth_is_loggedin_user()}

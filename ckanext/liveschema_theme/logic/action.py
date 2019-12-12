@@ -92,157 +92,77 @@ def visualization_lotus(context, data_dict):
     # Create the dataframe from the FCA file
     data = pd.read_csv(data_dict["FCAResource"])
 
-    # Create the DataFrame used to save the occurrences of the Names present on the Element row
-    DF = pd.DataFrame(columns=["Element", "Names"])
-    # Iterate for every row present on data, for every Element
-    for index, row in data.iterrows():
-        # Create a list to save the Names present on that row
-        list_ = list()
-        # For evert column that indicates a Name
-        for column in data:
-            # Check if the Name is present on that Element/row
-            if(("TypeTerm" not in column ) and row[column]): 
-                # Save the Name on the list
-                list_.append(column)
-        # Save the correlation between Element and Names
-        DF = DF.append({"Element": row["TypeTerm"], "Names": list_}, ignore_index=True)
+    # Create the DataFrame used to save the occurrences of the Types present on the Token row
+    DF = pd.DataFrame(columns=["Token", "Types"])
 
-    DF.to_csv("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/KLotus/" + data_dict["dataset_name"]+"_FLotus2.csv")
-
-    # Create the DataFrame used to save the table used to identify common Elements between Names
-    DTF = pd.DataFrame(columns=["total", "Names", "number", "Elements"])
-    # Create the set used to check if new Names has to be added or if existing Names has to be updated
-    set_ = set()
-    # Iterate for every row present on DF, for every Element and the relative Names
-    for index_, row in DF.iterrows():
-        # Check if new Names has to be added or if existing Names has to be updated
-        a = len(set_)
-        set_.add(str(row["Names"]))
-        if(a < len(set_)):
-            # Create a new row on the DataFrame for that Names
-            DTF.at[str(row["Names"]), "total"] = len(row["Names"])
-            DTF.at[str(row["Names"]), "Names"] = row["Names"]
-            DTF.at[str(row["Names"]), "Elements"] = str(row["Element"])
-            DTF.at[str(row["Names"]), "number"] = 1
-        else:
-            # Update the row for that Names, adding the new Element
-            elements = str(DTF.at[str(row["Names"]), "Elements"])
-            number = DTF.at[str(row["Names"]), "number"]
-            DTF.at[str(row["Names"]), "Elements"] = elements + " , " + str(row["Element"])
-            DTF.at[str(row["Names"]), "number"] = number + 1
-
-    DTF = DTF.sort_values("number")
-
-    DTF.to_csv("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/KLotus/" + data_dict["dataset_name"]+"_KLotus2.csv")
-
-
-    # Create the dataframe from the FCA file
-    matrix = pd.read_csv(data_dict["FCAResource"])
-    
-    # Create the DataFrame used to save the occurrences of the Names present on the Element row
-    DF = pd.DataFrame(columns=["Element", "Names"])
-
-    # Use a list to create the visualization file
-    typeLists = list()
+    # Create the set used to check if new Types has to be added or if existing Types has to be updated
+    tokens = set()
     # Iterate over every row of the matrix
-    for index, row in matrix.iterrows():
-        # List of tokens of a TypeTerm
-        propertiesTokens = list()
+    for index, row in data.iterrows():
         # Iterate over overy tokenized column of the matrix
-        i = 0
-        for column in matrix.columns[2:]:
+        for column in data.columns[2:]:
             # If the row has a value, then add the token to the list of the TypeTerm
-            if(row[column] and not math.isnan(row[column])):
-                for j in range(int(row[column])):
-                    propertiesTokens.append(str(column))
-            i+=1
-        
-        # Save the correlation between Element and Names
-        SDF = DF.append({"Element": str(row["TypeTerm"]), "Names": propertiesTokens}, ignore_index=True)
+            if(row[column]):
+                # Check if new column has to be added or if existing column has to be updated
+                a = len(tokens)
+                tokens.add(str(column))
+                if(a < len(tokens)):
+                    DF.at[str(column), "Token"] = column
+                    DF.at[str(column), "Types"] = str(row["TypeTerm"])
+                else:
+                    types = str(DF.at[str(column), "Types"])
+                    DF.at[str(column), "Types"] = types + " , " + str(row["TypeTerm"])
 
-        #Add the term to the list with its tokens
-        typeLists.append((str(row["TypeTerm"]) + " " +  " ".join(propertiesTokens)).split())
-
-
-    DTF.to_csv("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/KLotus/" + data_dict["dataset_name"]+"_FLotus3.csv")
-
-
-    # Create the DataFrame used to save the table used to identify common Elements between Names
-    DTF = pd.DataFrame(columns=["total", "Names", "number", "Elements"])
-    # Create the set used to check if new Names has to be added or if existing Names has to be updated
+    # Create the DataFrame used to save the table used to identify common Tokens between Types
+    DTF = pd.DataFrame(columns=["total", "Types", "number", "Tokens"])
+    # Create the set used to check if new Types has to be added or if existing Types has to be updated
     set_ = set()
-    # Iterate for every row present on DF, for every Element and the relative Names
+    # Iterate for every row present on DF, for every Token and the relative Types
     for index_, row in DF.iterrows():
-        # Check if new Names has to be added or if existing Names has to be updated
+        # Check if new Types has to be added or if existing Types has to be updated
         a = len(set_)
-        set_.add(str(row["Names"]))
+        set_.add(str(row["Types"]))
         if(a < len(set_)):
-            # Create a new row on the DataFrame for that Names
-            DTF.at[str(row["Names"]), "total"] = len(row["Names"])
-            DTF.at[str(row["Names"]), "Names"] = row["Names"]
-            DTF.at[str(row["Names"]), "Elements"] = str(row["Element"])
-            DTF.at[str(row["Names"]), "number"] = 1
+            # Create a new row on the DataFrame for that Types
+            DTF.at[str(row["Types"]), "total"] = len(str(row["Types"]).split(","))
+            DTF.at[str(row["Types"]), "Types"] = row["Types"]
+            DTF.at[str(row["Types"]), "Tokens"] = str(row["Token"])
+            DTF.at[str(row["Types"]), "number"] = 1
         else:
-            # Update the row for that Names, adding the new Element
-            elements = str(DTF.at[str(row["Names"]), "Elements"])
-            number = DTF.at[str(row["Names"]), "number"]
-            DTF.at[str(row["Names"]), "Elements"] = elements + " , " + str(row["Element"])
-            DTF.at[str(row["Names"]), "number"] = number + 1
+            # Update the row for that Types, adding the new Token
+            elements = str(DTF.at[str(row["Types"]), "Tokens"])
+            number = DTF.at[str(row["Types"]), "number"]
+            DTF.at[str(row["Types"]), "Tokens"] = elements + " , " + str(row["Token"])
+            DTF.at[str(row["Types"]), "number"] = number + 1
 
-    DTF = DTF.sort_values("number")
+    DTF = DTF.sort_values(by='total', ascending=False)
 
-    DTF.to_csv("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/KLotus/" + data_dict["dataset_name"]+"_KLotus3.csv")
+    DTF = DTF.sort_values(by='number', ascending=False)
 
-    """
-    # [TODO] To think about a more complex selection
-    colSelection = list()
+    colSel = list()
+    thres = 0
     for index_, row in DTF.iterrows():
-        if(row["total"] <= 4 and 2<=row["number"]<=6):
-            colSelection = row["Names"]
-            print(colSelection)
-            ##loading data
-            data = pd.read_csv(data_dict["visualizationResource"], dtype='unicode')
-            #Make a direction to the temporary file(which is created for generating plots)
-            dir_ = "src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/resources/"
+        if(4 <= row["total"] <= 6 ):
+            if(row["total"]*row["number"] > thres): # [TODO] To think about a more complex selection
+                thres = row["total"]*row["number"]
+                colSel = list()
+                for a in  row["Types"].split(","):
+                    colSel.append(a.strip())
 
-            for column in data:
-                if( column not in colSelection):
-                    data.drop(column, axis=1, inplace=True)
+    ##loading data
+    data = pd.read_csv(data_dict["visualizationResource"], dtype='unicode')
 
-            file_name = sep_file(dir_,data)
-            plot_Venn(dir_, file_name)
+    #Make a direction to the temporary file(which is created for generating plots)
+    dir_ = "src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/"
+    
+    for column in data:
+        if( column.strip() not in colSel):
+            data.drop(column, axis=1, inplace=True)
 
-            #del_file(dir_,data)
+    file_name = sep_file(dir_ + "resources/",data)
+    plot_Venn(dir_, file_name)
 
-            break
-        
-
-    # [TODO] To think about a more complex selection
-    colSelection = list()
-    for index_, row in DTF.iterrows():
-        if(row["total"] == 4):
-            colSelection = row["Names"]
-
-            ##loading data
-            data = pd.read_csv("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_Visualization.csv", dtype='unicode')
-            #Make a direction to the temporary file(which is created for generating plots)
-            dir_ = "src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/resources/"
-
-
-            for column in data:
-                if( column not in colSelection):
-                    data.drop(column, axis=1, inplace=True)
-
-
-            file_name = sep_file(dir_,data)
-            plot_Venn(dir_,file_name)
-
-            #del_file(dir_,data)
-
-            break
-
-    """
-
+    del_file(dir_ + "resources/",data)
 
 #Separate a csv file into target input files
 def sep_file(dir_, data):
@@ -264,7 +184,7 @@ def del_file(dir_,data):
 #The Venn plot function
 def plot_Venn(dir_, file_name):
     if 2<=len(file_name)<=6:
-        a = os.system(r"intervene venn -i "+str(dir_)+"*.csv --output "+str(dir_)+" --type list --figtype png")
+        a = os.system(r"intervene venn -i "+str(dir_ + "resources/")+"*.csv --output "+str(dir_ + "KLotus/")+" --type list --figtype png")
 
 #The UpSet plot function
 def plot_UpSet(file_name):

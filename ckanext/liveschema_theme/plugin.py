@@ -174,7 +174,9 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
             'ckanext_liveschema_theme_fca_generator': ckanext.liveschema_theme.logic.auth.fca_generator,
             'ckanext_liveschema_theme_cue_generator': ckanext.liveschema_theme.logic.auth.cue_generator,
             'ckanext_liveschema_theme_visualization_generator': ckanext.liveschema_theme.logic.auth.visualization_generator,
-            'ckanext_liveschema_theme_updater': ckanext.liveschema_theme.logic.auth.updater
+            'ckanext_liveschema_theme_updater': ckanext.liveschema_theme.logic.auth.updater,
+            'ckanext_liveschema_theme_reset':
+                ckanext.liveschema_theme.logic.auth.reset
         }
 
     # Add functions for the services

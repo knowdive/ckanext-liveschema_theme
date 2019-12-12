@@ -446,7 +446,7 @@ class LiveSchemaController(BaseController):
             get_action('ckanext_liveschema_theme_visualization_lotus')(context, data_dict={"dataset_name": id, "FCAResource": FCAResource, "visualizationResource": visualizationResource})
 
             # Go to the KLotus page
-            return redirect_to('/KLotus/' + id + '_KLotus.png')
+            return redirect_to('/KLotus/Intervene_venn.png')
             return
 
         # Resource to eventually show on the web page
@@ -578,6 +578,14 @@ class LiveSchemaController(BaseController):
         context = {'model': model, 'session': model.Session,
                    'user': c.user, 'for_view': True,
                    'auth_user_obj': c.userobj}
+
+
+        # Check if the user has the access to this service
+        try:
+            check_access('ckanext_liveschema_theme_reset', context, {})
+        # Otherwise abort with NotAuthorized message
+        except NotAuthorized:
+            abort(401, _('Anonymous users not authorized to reset the resources'))
 
         # Try to access the dataset
         try:
