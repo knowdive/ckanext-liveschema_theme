@@ -63,12 +63,12 @@ def reset(context, data_dict):
 # Define the action of query of LiveSchema
 def query(context, data_dict):
     # Get the resource and query from the form
-    N3Resource = data_dict["N3Resource"]
+    TTL_Resource = data_dict["TTL_Resource"]
     query = data_dict["query"]
     try:
         # Try to create the graph to analyze the vocabulary
         g = Graph()
-        result = g.parse(N3Resource["url"], format=guess_format("n3"), publicID=N3Resource["name"])
+        result = g.parse(TTL_Resource["url"], format=guess_format("ttl"), publicID=TTL_Resource["name"])
         # Query the dataset
         qres = g.query(query)
 

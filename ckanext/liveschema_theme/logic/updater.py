@@ -9,7 +9,7 @@ import os
 import rdflib
 from rdflib import Graph, Namespace
 from rdflib.util import guess_format
-from rdflib.plugins.parsers.notation3 import N3Parser
+from rdflib.plugins.parsers.notation3 import TurtleParser
 
 import ckan.plugins.toolkit as toolkit
 
@@ -547,7 +547,7 @@ def checkPackage(datasets, package):
             data_dict={"id": package["name"]})
         # Check if all the resources are correctly available
         for resource in CKANpackage["resources"]:
-            if (resource["format"] == "N3" and resource["resource_type"] == "Serialized n3") or \
+            if (resource["format"] == "TTL" and resource["resource_type"] == "Serialized ttl") or \
                 (resource["format"] == "RDF" and resource["resource_type"] == "Serialized rdf") or \
                 (resource["format"] == "CSV" and resource["resource_type"] == "Parsed csv"):
                 # Update the index if a valid resource is available
@@ -562,9 +562,9 @@ def checkPackage(datasets, package):
         for resource in CKANpackage["resources"]:
             toolkit.get_action("resource_delete")(data_dict={"id": resource["id"]})
 
-        # Reset n3 resource
-        N3Resource = toolkit.get_action("resource_create")(
-            data_dict={"package_id":package["name"], "format": "temp", "name": package["name"]+".n3", "resource_type": "Serialized n3", "description": "Serialized n3 format of the dataset"})
+        # Reset ttl resource
+        TTL_Resource = toolkit.get_action("resource_create")(
+            data_dict={"package_id":package["name"], "format": "temp", "name": package["name"]+".ttl", "resource_type": "Serialized ttl", "description": "Serialized ttl format of the dataset"})
                     
         # Reset rdf resource
         RDFResource = toolkit.get_action("resource_create")(
@@ -575,7 +575,7 @@ def checkPackage(datasets, package):
             data_dict={"package_id":package["name"], "format": "temp", "name": package["name"]+".csv", "resource_type": "Parsed csv", "description": "Parsed csv containing all the triples of the dataset"})
 
         # Set the dictionary of IDs
-        id = {'n3_id': N3Resource['id'], 'rdf_id': RDFResource['id'], 'csv_id': CSVResource['id']}
+        id = {'ttl_id': TTL_Resource['id'], 'rdf_id': RDFResource['id'], 'csv_id': CSVResource['id']}
 
         # Update the resources of that package
         addResources(id, package)
@@ -601,21 +601,21 @@ def addResources(id, package):
         return 
 
     try:
-        # Serialize the vocabulary in n3
-        g.serialize(destination=str(os.path.join("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/", package["name"] + ".n3")), format="n3")
-        # Add the serialized n3 file to LiveSchema
+        # Serialize the vocabulary in ttl
+        g.serialize(destination=str(os.path.join("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/", package["name"] + ".ttl")), format=guess_format('ttl'))
+        # Add the serialized ttl file to LiveSchema
         upload = cgi.FieldStorage()
-        upload.filename = package["name"] + ".n3"
-        upload.file = file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".n3")
+        upload.filename = package["name"] + ".ttl"
+        upload.file = file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".ttl")
         data = {
-            "id": id["n3_id"], 
-            "format": "N3",
-            'url': package["name"] + ".n3", #'will-be-overwritten-automatically',
+            "id": id["ttl_id"], 
+            "format": "TTL",
+            'url': package["name"] + ".ttl", #'will-be-overwritten-automatically',
             'upload': upload
         }
         toolkit.get_action('resource_patch')(context = {'ignore_auth': True}, data_dict=data)
-        # Remove the temporary n3 file from the server
-        os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".n3")
+        # Remove the temporary ttl file from the server
+        os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".ttl")
     except Exception as e:
         # In case of an error during the graph's serialization, print the error
         print(str(e) + "\n")
@@ -701,5 +701,5 @@ def removeTemp(name):
     # Iterate over all the resources
     for resource in CKANpackage["resources"]:
         # Remove eventual temp resources left
-        if resource["format"] == "temp" and (resource["resource_type"] == "Serialized n3" or resource["resource_type"] == "Serialized rdf" or resource["resource_type"] == "Parsed csv"):
+        if resource["format"] == "temp" and (resource["resource_type"] == "Serialized ttl" or resource["resource_type"] == "Serialized rdf" or resource["resource_type"] == "Parsed csv"):
             toolkit.get_action("resource_delete")(context = {"ignore_auth": True}, data_dict={"id":resource["id"]})

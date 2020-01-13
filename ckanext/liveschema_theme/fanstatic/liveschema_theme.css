@@ -159,7 +159,7 @@ a {
 /* ====================================
    The format tags
    ==================================== */
-.label[data-format*=n3] {
+.label[data-format*=ttl] {
     background-color: rgba(2, 116, 190, 1);
 }
 

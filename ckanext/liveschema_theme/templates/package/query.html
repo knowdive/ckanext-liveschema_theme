@@ -7,7 +7,7 @@
   <header>
     <h1>Query</h1>
   </header>
-  {% if N3Resource %}
+  {% if TTL_Resource %}
     <form action="/dataset/query/{{ pkg.name }}" method="post">
         <label for="query">
         Write the SPARQL Query
@@ -37,7 +37,7 @@
     </form>
     <br />
   {% else %}
-      <h3>No N3 resources available </h3>
+      <h3>No TTL resources available </h3>
       <br />
   {% endif %}
 {% endblock %}

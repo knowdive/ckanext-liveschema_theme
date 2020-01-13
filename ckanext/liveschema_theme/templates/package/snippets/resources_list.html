@@ -13,7 +13,7 @@
         <ul class="{% block resource_list_class %}resource-list{% endblock %}">
             {% set can_edit = h.check_access('package_update', {'id':pkg.id }) %}
             {% for resource in resources %}
-                {% if "resource_type" in resource.keys() and (resource["resource_type"] == "Serialized n3" or resource["resource_type"] == "Serialized rdf" or resource["resource_type"] == "Parsed csv") %}
+                {% if "resource_type" in resource.keys() and (resource["resource_type"] == "Serialized ttl" or resource["resource_type"] == "Serialized rdf" or resource["resource_type"] == "Parsed csv") %}
                     {% snippet 'package/snippets/resource_item.html', res=resource, pkg=pkg, can_edit=can_edit %}
                 {% endif %}
             {% endfor %}

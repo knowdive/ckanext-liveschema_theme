@@ -503,7 +503,7 @@ class LiveSchemaController(BaseController):
             if query:
                 CKAN = helpers.get_site_protocol_and_host()
                 CKAN_URL = CKAN[0]+"://" + CKAN[1]
-                result = get_action('ckanext_liveschema_theme_query')(context, data_dict={'N3Resource': {'name': "Catalog", 'url': CKAN_URL+"/catalog.n3"}, "query": query})
+                result = get_action('ckanext_liveschema_theme_query')(context, data_dict={'TTL_Resource': {'name': "Catalog", 'url': CKAN_URL+"/catalog.ttl"}, "query": query})
 
             # Go to the dataset page
             return render('service/query_catalog.html',
@@ -528,7 +528,7 @@ class LiveSchemaController(BaseController):
                    'user': c.user, 'for_view': True,
                    'auth_user_obj': c.userobj}
 
-        N3Resource = ""
+        TTL_Resource = ""
         # Try to access the information
         try:
             # Define the data_dict to pass to the package_show action
@@ -540,8 +540,8 @@ class LiveSchemaController(BaseController):
             dataset_type = c.pkg_dict['type'] or 'dataset'
 
             for res in c.pkg_dict['resources']:
-                if "resource_type" in res.keys() and res["resource_type"] == "Serialized n3":
-                    N3Resource = res
+                if "resource_type" in res.keys() and res["resource_type"] == "Serialized ttl":
+                    TTL_Resource = res
         # Otherwise return the relative error codes
         except NotFound:
             abort(404, _('Dataset not found'))
@@ -556,20 +556,20 @@ class LiveSchemaController(BaseController):
             # Execute the query action
             result = list()
             if query:
-                result = get_action('ckanext_liveschema_theme_query')(context, data_dict={'N3Resource': N3Resource, "query": query})
+                result = get_action('ckanext_liveschema_theme_query')(context, data_dict={'TTL_Resource': TTL_Resource, "query": query})
 
             # Go to the dataset page
             return render('package/query.html',
-                        {'dataset_type': dataset_type, 'N3Resource': N3Resource, 'query': query, 'result': result, 'number': len(result), 'pkg' : c.pkg_dict}) 
+                        {'dataset_type': dataset_type, 'TTL_Resource': TTL_Resource, 'query': query, 'result': result, 'number': len(result), 'pkg' : c.pkg_dict}) 
         query = "# Get all the triples of the dataset\n" + \
                 "SELECT ?Subject ?Predicate ?Object\n" + \
                 "WHERE {\n" + \
                 "\t?Subject ?Predicate ?Object\n" + \
                 "}\n"
-                
+
         # Render the page of the query page
         return render('package/query.html',
-                    {'dataset_type': dataset_type, 'N3Resource': N3Resource, 'query': query, 'pkg': c.pkg_dict}) 
+                    {'dataset_type': dataset_type, 'TTL_Resource': TTL_Resource, 'query': query, 'pkg': c.pkg_dict}) 
 
 
     # Define the behaviour of the reset resources 
@@ -599,9 +599,9 @@ class LiveSchemaController(BaseController):
             for resource in c.pkg_dict["resources"]:
                 get_action("resource_delete")(context = context, data_dict={"id": resource["id"]})
 
-            # Reset n3 resource
-            N3Resource = toolkit.get_action("resource_create")(context=context, 
-                data_dict={"package_id":id, "format": "temp", "name": id+".n3", "resource_type": "Serialized n3", "description": "Serialized n3 format of the dataset"})
+            # Reset ttl resource
+            TTL_Resource = toolkit.get_action("resource_create")(context=context, 
+                data_dict={"package_id":id, "format": "temp", "name": id+".ttl", "resource_type": "Serialized ttl", "description": "Serialized ttl format of the dataset"})
                         
             # Reset rdf resource
             RDFResource = toolkit.get_action("resource_create")(context=context, 
@@ -612,7 +612,7 @@ class LiveSchemaController(BaseController):
                 data_dict={"package_id":id, "format": "temp", "name": id+".csv", "resource_type": "Parsed csv", "description": "Parsed csv containing all the triples of the dataset"})
 
             # Execute the action of reset of all the resources
-            result = get_action('ckanext_liveschema_theme_reset')(context, data_dict={'id': {'n3_id': N3Resource['id'], 'rdf_id': RDFResource['id'], 'csv_id': CSVResource['id']}, 'apikey': c.userobj.apikey, 'package': c.pkg_dict})
+            result = get_action('ckanext_liveschema_theme_reset')(context, data_dict={'id': {'ttl_id': TTL_Resource['id'], 'rdf_id': RDFResource['id'], 'csv_id': CSVResource['id']}, 'apikey': c.userobj.apikey, 'package': c.pkg_dict})
 
         # Otherwise return the relative error codes
         except NotFound:
