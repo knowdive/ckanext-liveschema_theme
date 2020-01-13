@@ -139,61 +139,72 @@ def visualization_lotus(context, data_dict):
 
     DTF = DTF.sort_values(by='number', ascending=False)
 
+    # Select the most intersecting columns
     colSel = list()
     thres = 0
+    maxx = 0 
+    maxxTypes = ""
     for index_, row in DTF.iterrows():
-        if(4 <= row["total"] <= 6 ):
+        if( maxx < row["total"] ):
+            maxx = row["total"] 
+            maxxTypes = row["Types"]
+        if(4 <= row["total"] <= 5 ):
             if(row["total"]*row["number"] > thres): # [TODO] To think about a more complex selection
                 thres = row["total"]*row["number"]
                 colSel = list()
                 for a in  row["Types"].split(","):
                     colSel.append(a.strip())
+    if(not len(colSel)):
+        colSel = list()
+        i = 0
+        for a in maxxTypes.split(","):
+            colSel.append(a.strip())
+            i += 1
+            if(i == 5):
+                break
 
-    ##loading data
+    # Load the Visualization data
     data = pd.read_csv(data_dict["visualizationResource"], dtype='unicode')
 
-    #Make a direction to the temporary file(which is created for generating plots)
+    # Make a direction to the temporary file (which is created for generating plots)
     dir_ = "src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/"
     
+    # Drop the columns not selected from the visualization file
     for column in data:
         if( column.strip() not in colSel):
             data.drop(column, axis=1, inplace=True)
 
-    file_name = sep_file(dir_ + "resources/",data)
-    plot_Venn(dir_, file_name)
+    # Separate the selected columns in multiple target input files
+    file_name = sep_file(dir_ + "resources/", data)
 
-    del_file(dir_ + "resources/",data)
+    # Generate the Venn Plot
+    plot_Venn(dir_, file_name, data_dict["dataset_name"])
+
+    # Delete the temporaty files
+    del_file(dir_ + "resources/", data)
+
 
 #Separate a csv file into target input files
 def sep_file(dir_, data):
     file_name =[]
-    for column in data:
-        file_content = data[column].dropna(axis=0,how='all')
-        file_n = dir_ + column+".csv"
-        file_content.to_csv(os.path.normpath(os.path.expanduser(file_n)))
+    headers = data.columns.values.tolist()
+    for i in range(len(headers)):
+        file_content = data[headers[i]].dropna(axis=0,how='all')
+        file_n = dir_ + headers[i]+".csv"
+        file_content.to_csv(file_n,index=False)
         file_name.append(file_n)
     return file_name
 
 #Delete the temporary inputs
-def del_file(dir_,data):
-    for column in data:
-        file_n = dir_ + column + ".csv"
+def del_file(dir_, data):
+    headers = data.columns.values.tolist()
+    for i in range(len(headers)):
+        file_n = dir_ + headers[i] + ".csv"
         if (os.path.exists(file_n)):
             os.remove(file_n)
 
 #The Venn plot function
-def plot_Venn(dir_, file_name):
-    if 2<=len(file_name)<=6:
+def plot_Venn(dir_, file_name, dataset_name):
+    if 2<=len(file_name)<=5:
         a = os.system(r"intervene venn -i "+str(dir_ + "resources/")+"*.csv --output "+str(dir_ + "KLotus/")+" --type list --figtype png")
-
-#The UpSet plot function
-def plot_UpSet(file_name):
-    if 2 <= len(file_name) <= 6:
-        a = os.system(r"intervene upset -i data1/*.csv --output Results --type list --figtype png")
-
-#The Pairwise plot function
-def plot_Pairwise(file_name):
-    if 2 <= len(file_name) <= 20:
-        os.system(r"intervene pairwise -i data1/*.csv --output Results --type list --figtype png")
-
-
+        os.rename(str(dir_ + "KLotus/Intervene_venn.png"), str(dir_ + "KLotus/" + dataset_name + "_KLotus.png"))

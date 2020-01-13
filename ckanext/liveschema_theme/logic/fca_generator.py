@@ -18,7 +18,7 @@ def generateFCA(data_dict):
     triples = pd.read_csv(data_dict["dataset_link"])
 
     # Sort the DataFrame
-    triples = triples.sort_values("Object")
+    triples = triples.sort_values("ObjectTerm")
 
     # Create the DataFrame used to create the FCA matrix
     matrix = pd.DataFrame(columns=["TypeTerm", "PropertiesTokens"])
@@ -46,7 +46,7 @@ def generateFCA(data_dict):
         # Check if the triple has to be saved
         if(bool_ and "http" == str(row["Subject"])[0:4] and "http" == str(row["Object"])[0:4]):
             # If the object value on the row has changed(first row or a new object)
-            if(row["Object"] != obj):
+            if(row["ObjectTerm"] != obj):
                 # If the name of the object is not null
                 if(len(obj)):
                     # Add to the dictionary the latest values of the row
@@ -54,7 +54,7 @@ def generateFCA(data_dict):
                     # Store the row in the matrix
                     matrix = matrix.append(dict_, ignore_index=True)
                 # Reset the name of the new object
-                obj = row["Object"]
+                obj = row["ObjectTerm"]
                 # Reset the other values of the row
                 propTokens = ""
                 # Store in the dictionary the fixed values of the row

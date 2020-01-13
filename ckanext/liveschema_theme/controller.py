@@ -446,8 +446,7 @@ class LiveSchemaController(BaseController):
             get_action('ckanext_liveschema_theme_visualization_lotus')(context, data_dict={"dataset_name": id, "FCAResource": FCAResource, "visualizationResource": visualizationResource})
 
             # Go to the KLotus page
-            return redirect_to('/KLotus/Intervene_venn.png')
-            return
+            return redirect_to('/KLotus/' + id + '_KLotus.png')
 
         # Resource to eventually show on the web page
         visualizationResource = ""
@@ -567,6 +566,7 @@ class LiveSchemaController(BaseController):
                 "WHERE {\n" + \
                 "\t?Subject ?Predicate ?Object\n" + \
                 "}\n"
+                
         # Render the page of the query page
         return render('package/query.html',
                     {'dataset_type': dataset_type, 'N3Resource': N3Resource, 'query': query, 'pkg': c.pkg_dict}) 
