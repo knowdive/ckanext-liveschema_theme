@@ -365,7 +365,7 @@ def scrapeLOV(catalogs, datasets):
         page += 1
 
 # Get all the vocabulary of that page
-def vocabList(context, cataLOV, datasets, link, url, end):
+def vocabList(cataLOV, datasets, link, url, end):
     # Connect to the URL
     response = requests.get(link)
     # Parse HTML and save to BeautifulSoup object
