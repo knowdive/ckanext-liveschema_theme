@@ -18,7 +18,7 @@
                           {{ h.markdown_extract(org.description, extract_length=140) }}
                         </p>
                       {% else %}
-                        <p>{{ _('This organization has no description') }}</p>
+                        <p>{{ _('This catalog has no description') }}</p>
                       {% endif %}
                         <strong><a href="/dataset?organization={{ org.name }}">{{ org.package_count}} {% if org.package_count==1 %}dataset{% else %}datasets{% endif %}</a></strong>
                     </li>

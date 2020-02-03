@@ -43,7 +43,7 @@ Example:
                     {% for extra in organization.extras %}
                         {% if extra.key == "URL" %}
                             <p>
-                                URL: <a href="{{ extra.value }}">{{ h.markdown_extract(extra.value, 30) }}</a>
+                                URL: <a target="blank" href="{{ extra.value }}">{{ h.markdown_extract(extra.value, 30) }}</a>
                             </p>
                         {% endif %}
                     {% endfor %}
