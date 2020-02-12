@@ -1,6 +1,8 @@
 # Import libraries
 from pylons import config
 
+from plugin import format_selection
+
 import ckan.lib.base as base
 from ckan.lib.base import BaseController
 
@@ -142,12 +144,22 @@ class LiveSchemaController(BaseController):
             dataset_name = dataset[0]
             dataset_link = dataset[1]
 
-            # If the dataset does not have the required resource
+            # If the dataset does not have the required FCA resource, we need to create it 
             if not dataset_link:
-                # Redirect to the page for the generation of that resurce
-                LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
-                return redirect_to(controller=LiveSchemaController, action='fca_generator',
-                    id=dataset_name+".Cue Metrics")
+                # Get CSV file to 
+                resCSV = format_selection(dataset_name, "CSV")
+                # If there is no CSV resource
+                if not resCSV: 
+                    # Reset that dataset
+                    LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
+                    return redirect_to(controller=LiveSchemaController, action='reset',
+                        id=dataset_name)
+                # Create temp FCA resource
+                FCAResource = toolkit.get_action("resource_create")(context=context,
+                    data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_FCA.csv", "description": "FCA Matrix containing the information of all the triples", "resource_type": "FCA"})
+
+                # Execute the fca_generator action
+                get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": resCSV, "strPredicates": "", 'apikey': c.userobj.apikey})
 
             # Check if the user has the access to this page
             try:
@@ -206,12 +218,23 @@ class LiveSchemaController(BaseController):
             dataset_name = dataset[0]
             dataset_link = dataset[1]
 
-            # If the dataset does not have the required resource
+            # If the dataset does not have the required FCA resource, we need to create it 
             if not dataset_link:
-                # Redirect to the page for the generation of that resurce
-                LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
-                return redirect_to(controller=LiveSchemaController, action='fca_generator',
-                    id=dataset_name+".Visualization")
+                # Get CSV file to 
+                resCSV = format_selection(dataset_name, "CSV")
+                # If there is no CSV resource
+                if not resCSV: 
+                    # Reset that dataset
+                    LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
+                    return redirect_to(controller=LiveSchemaController, action='reset',
+                        id=dataset_name)
+                # Create temp FCA resource
+                FCAResource = toolkit.get_action("resource_create")(context=context,
+                    data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_FCA.csv", "description": "FCA Matrix containing the information of all the triples", "resource_type": "FCA"})
+
+                # Execute the fca_generator action
+                get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": resCSV, "strPredicates": "", 'apikey': c.userobj.apikey})
+
 
             # Build the context using the information obtained by session and user
             context = {'model': model, 'session': model.Session,

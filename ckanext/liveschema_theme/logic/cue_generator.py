@@ -4,15 +4,28 @@ import os
 
 import ckan.plugins.toolkit as toolkit
 
-import ckan.lib.helpers as helpers
-
 import cgi
+
 
 
 # Function that generate the Cue file
 def generateCue(data_dict):
+    # Get the dataset link
+    dataset_link = data_dict["dataset_link"]
+    # If it is not valid: FCA yet to be created at the time
+    if not dataset_link:
+        # Get the new link of the FCA
+        datasetDict = toolkit.get_action('package_show')(
+            data_dict={"id": data_dict["dataset_name"]})
+        # Iterate over every resource of the dataset
+        for res in datasetDict["resources"]:
+            # Check if they have the given format
+            if(res["format"] == "FCA"):
+                # Delete the older FCA matrix
+                dataset_link = res["url"]
+
     # Create the dataframe from the FCA file
-    matrix = pd.read_csv(data_dict["dataset_link"])
+    matrix = pd.read_csv(dataset_link)
 
     # Generate the resulting DataFrame having as words the tokenized columns of the matrix, and a total of 0 for every row
     data = pd.DataFrame({"word": matrix.columns[6:], "total": 0})

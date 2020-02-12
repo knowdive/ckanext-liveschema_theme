@@ -14,8 +14,18 @@
         {% endfor %}
       </ul>
     {% else %}
-      <h3>No FCA resources available </h3>
-      <p>Please generate FCA using the <a href="/service/fca_generator/{{ pkg.name }}">FCA Generator service</a></p>
+      <h1>No FCA resources available </h1>
+      {% set resLink = h.liveschema_theme_format_selection(pkg.name, "CSV") %}
+      <form action="/service/fca_generator" method="post">
+        <input type="hidden" value="{{ pkg.name }},{{ resLink }}" name="dataset" />
+        <button class="btn btn-primary btn-lg"> 
+            Generate the FCA Matrix
+        </button>
+      </form>
+      <br />
+      <p>
+        Refer to the <a href="/service/fca_generator/{{ pkg.name }}">FCA Generator service</a> for advanced options.
+      </p>
       <br />
     {% endif %}
 {% endblock %}

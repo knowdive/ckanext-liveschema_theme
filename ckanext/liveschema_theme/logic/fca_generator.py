@@ -5,8 +5,6 @@ import requests
 
 import ckan.plugins.toolkit as toolkit
 
-import ckan.lib.helpers as helpers
-
 import cgi
 
 # List of stopWords

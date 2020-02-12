@@ -78,8 +78,15 @@
       </section>
     {% endif %}
   {% else %}
-    <h3>No Cue resource available </h3>
-    <p>Please generate one using the <a href="/service/cue_generator/{{ pkg.name }}">Cue Generator service</a></p>
+    <h1>No Cue resources available </h1>
+    {% set resLink = h.liveschema_theme_format_selection(pkg.name, "FCA") %}
+    <form action="/service/cue_generator" method="post">
+      <input type="hidden" value="{{ pkg.name }},{{ resLink }}" name="dataset" />
+      <button class="btn btn-primary btn-lg"> 
+          Generate the Cue Metrics
+      </button>
+    </form>
+    <br />
     <br />
   {% endif %}
 {% endblock %}

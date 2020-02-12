@@ -27,6 +27,24 @@ def most_popular_catalogs():
     # Return the list of catalogs
     return catalogs
 
+# For the given dataset, get the link of the resource of the given format 
+def format_selection(dataset, format):
+    '''Return the link of the resource of the given format for the given dataset '''
+    # Create the dummy variable that will eventually contain the link 
+    resLink = ""
+
+    datasetDict = toolkit.get_action('package_show')(
+        data_dict={"id": dataset})
+    # Iterate over every resource of the dataset
+    for res in datasetDict["resources"]:
+        # Check if they have the given format
+        if(res["format"] == format):
+            # Delete the older FCA matrix
+            resLink = res["url"]
+
+    # Return the list of datasets that have the relative csv file to return
+    return resLink
+
 # Get the list of datasets that have the requested resource_type file
 def dataset_selection(ok, no, resource_type):
     '''Return a list of the datasets with their requested resource_type.'''
@@ -130,6 +148,7 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         # extension they belong to, to avoid clashing with functions from
         # other extensions.
         return {'liveschema_theme_most_popular_catalogs': most_popular_catalogs, 
+            'liveschema_theme_format_selection': format_selection, 
             'liveschema_theme_dataset_selection': dataset_selection, 
             'liveschema_theme_catalog_selection': catalog_selection }   
 

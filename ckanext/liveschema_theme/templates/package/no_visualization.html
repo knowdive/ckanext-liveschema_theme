@@ -12,8 +12,17 @@
       {% snippet 'package/snippets/resource_item.html', res=visualizationResource, pkg=pkg, can_edit=can_edit %}
     </ul>
   {% else %}
-    <h3>No Visualization resource available</h3>
-    <p>Please generate one using the <a href="/service/visualization_generator/{{ pkg.name }}">Visualization Generator service</a></p>
+
+    <h1>No Visualization resources available </h1>
+    {% set resLink = h.liveschema_theme_format_selection(pkg.name, "FCA") %}
+    <form action="/service/visualization_generator" method="post">
+      <input type="hidden" value="{{ pkg.name }},{{ resLink }}" name="dataset" />
+      <button class="btn btn-primary btn-lg"> 
+          Generate the Visualization resource
+      </button>
+    </form>
+    <br />
+    <br />
   {% endif %}
   <br />
 {% endblock %}

@@ -12,16 +12,8 @@
     <header>
       <h1>FCA Generator</h1>
     </header>
-    <h3>Select a DataSet: </h3>
     <div class="col-sm-7">
       <form action="/service/fca_generator" method="post">
-        <label for="predicates">
-          Select the predicates to consider for the FCA Matrix (optional)
-        </label>
-        <br />
-        <input type="text" name="strPredicates" placeholder="Both URI or last term accepted, case sensitive" id="predicates" style="width: 100%">
-        <br />
-        <br />
         <label for="select2">
           Select the dataset for the FCA Matrix generation
         </label>
@@ -37,6 +29,15 @@
         <button class="btn btn-primary btn-lg"> 
             Generate the FCA Matrix
         </button>
+        <br />
+        <h3 onclick="document.getElementById('advanced').classList.toggle('hide-heading');"><a>Advanced option</a></h3>
+        <div id="advanced" class="hide-heading">
+          <label for="predicates">
+            Select the predicates to consider for the FCA Matrix (optional)
+          </label>
+          <br />
+          <input type="text" name="strPredicates" placeholder="Both URI or last term accepted, case sensitive" id="predicates" style="width: 100%">
+        </div>
         <br />
         <br />
       </form>
