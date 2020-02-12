@@ -1,0 +1,23 @@
+
+{% block info %}
+    <div class="module module-narrow module-shallow context-info">
+        <h2 class="module-heading"><i class="fa fa-users"></i> {{ _('Groups') }}</h2>
+        {% if c.pkg_dict.groups %}
+            <ul class="list-unstyled nav nav-simple nav-facet">
+                {% for group in c.pkg_dict.groups %}
+                <li class="nav-item">
+                    {% set url = h.url_for(controller='group', action='read', id=group.name) %}
+                    <a href="{{ url }}" title="{{ _('View {name}').format(name=group.display_name) }}">
+                        <span>{{ _('{name}').format(name=group.display_name) }}</span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+        <section class="module-content">
+                <p class="empty">{{ _('There are no groups associated with this dataset') }}</p>
+
+        </section>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -30,7 +30,65 @@
         </div>
     </div>
     <div class="col2 col-md-6">
-      {% snippet 'home/snippets/promoted.html' %}
+      <div class="module-content box">
+        <header>
+          <h1 class="page-heading">Services</h1>
+        </header>
+          <ul class="media-grid" data-module="media-grid">
+            {% if h.check_access('ckanext_liveschema_theme_updater') %}
+              {# Uploader #}
+              <li class="media-item" style="width:45%">
+                <img src="https://cdn.pixabay.com/photo/2016/01/03/00/43/upload-1118929_960_720.png" alt="Uploader" class="img-responsive media-image">
+                <h3 class="media-heading">LiveSchema Updater</h3>
+                  Scrape the Catalogs searching for new information in order to have an always updated system
+                <a href="/service/updater" title="Go to LiveSchema Updater" class="media-view">
+                  <span>Go to the LiveSchema Updater</span>
+                </a>
+              </li>
+            {% endif %}
+          
+              {# FCA_Generator #}
+              <li class="media-item" style="width:45%">
+                <img src="http://www.cs.ubbcluj.ro/icfca14/wp-content/uploads/Screen-Shot-2013-06-27-at-1.17.18-PM.png" alt="FCA_Generator" class="img-responsive media-image">
+                <h3 class="media-heading">FCA Generator</h3>
+                  Generate the FCA matrix from a given Dataset 
+                <a href="/service/fca_generator" title="Go to the FCA Generator" class="media-view">
+                  <span>Go to the FCA Generator</span>
+                </a>
+              </li>
+          
+              {# Cue_Generator #}
+              <li class="media-item" style="width:45%">
+                <img src="https://cdn4.iconfinder.com/data/icons/conscious-living-and-personality-traits-4/512/447_Curious_exclamation_eye_knowledge_mark-512.png" alt="Cue_Generator" class="img-responsive media-image">
+                <h3 class="media-heading">Cue Generator</h3>
+                  Extract the Cue Metrics from a given Dataset in order to have more insightful information about it
+                <a href="/service/cue_generator" title="Go to the Cue Generator" class="media-view">
+                  <span>Go to the Cue Generator</span>
+                </a>
+              </li>
+    
+              {# Visualization_Generator #}
+              <li class="media-item" style="width:45%">
+                <img src="https://intervene.readthedocs.io/en/latest/_images/venn4way.png" alt="Cue_Generator" class="img-responsive media-image">
+                <h3 class="media-heading">Visualization Generator</h3>
+                  Generate the input file for the Visualization tool from a given Dataset
+                <a href="/service/visualization_generator" title="Go to the Visualization Generator" class="media-view">
+                  <span>Go to the Visualization Generator</span>
+                </a>
+              </li>
+    
+              {# Query Catalog #}
+              <li class="media-item" style="width:45%">
+                <img src="https://labs.mondeca.com/sparqlEndpointsStatus/images/SES.png" alt="Query_Catalog" class="img-responsive media-image">
+                <h3 class="media-heading">Query Catalog</h3>
+                  SPARQL Query to analyse the whole Catalog of Datasets
+                <a href="/service/query_catalog" title="Go to the Query Catalog" class="media-view">
+                  <span>Go to the Query Catalog</span>
+                </a>
+              </li>
+          
+            </ul>
+          </div>
       <br />
       <div class="module-content box">
         <header>

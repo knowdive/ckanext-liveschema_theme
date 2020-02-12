@@ -9,15 +9,23 @@
 {% block primary %}
   <article class="module">
     <header class="module-content page-header">
+      {# As copied from package/read_base.html  #}
+      <div class="content_action">
+        {% block content_action %}
+          {% if not is_activity_archive %}
+            {% if h.check_access('package_update', {'id':pkg.id }) %}
+              {% link_for _('Manage'), named_route='dataset.edit', id=pkg.name, class_='btn btn-default', icon='wrench' %}
+            {% endif %}
+          {% endif %}
+        {% endblock %}
+      </div>
       <ul class="nav nav-tabs">
-        {# As copied from package/read_base.html  #}
         {{ h.build_nav_icon('dataset_read', _('Dataset'), id=pkg.name) }}
         {{ h.build_nav_icon('ckanext_liveschema_theme_fca', _('FCA'), id=pkg.name) }}
         {{ h.build_nav_icon('ckanext_liveschema_theme_cue', _('Cue'), id=pkg.name) }}
         {{ h.build_nav_icon('ckanext_liveschema_theme_visualization', _('Visualization'), id=pkg.name) }}
         {{ h.build_nav_icon('ckanext_liveschema_theme_graph', _('Graph'), id=pkg.name) }}
         {{ h.build_nav_icon('ckanext_liveschema_theme_query', _('Query'), id=pkg.name) }}
-        {{ h.build_nav_icon('dataset_groups', _('Groups'), id=pkg.name) }}
         {{ h.build_nav_icon('dataset_activity', _('Activities'), id=pkg.name) }}
       </ul>
     </header>

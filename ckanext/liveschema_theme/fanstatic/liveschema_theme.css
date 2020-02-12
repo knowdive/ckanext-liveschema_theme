@@ -161,16 +161,37 @@ a {
    ==================================== */
 .label[data-format*=ttl] {
     background-color: rgba(2, 116, 190, 1);
+    pointer-events: none;
+}
+
+.label[data-format*=rdf] {
+    pointer-events: none;
+}
+
+.label[data-format*=csv] {
+    pointer-events: none;
 }
 
 .label[data-format*=fca] {
     background-color: green;
+    pointer-events: none;
 }
 
 .label[data-format*=cue] {
     background-color: red;
+    pointer-events: none;
 }
 
 .label[data-format*=vis] {
     background-color: #af0089;
+    pointer-events: none;
+}
+
+/* ====================================
+   The resources buttons
+   ==================================== */
+.resource-item .res-btns {
+    position: absolute;
+    top: 9px;
+    right: 10px;
 }

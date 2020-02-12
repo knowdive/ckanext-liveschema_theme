@@ -12,7 +12,7 @@
       <h1>Services</h1>
     </header>
       <ul class="media-grid" data-module="media-grid">
-
+        {% if h.check_access('ckanext_liveschema_theme_updater') %}
           {# Uploader #}
           <li class="media-item">
             <img src="https://cdn.pixabay.com/photo/2016/01/03/00/43/upload-1118929_960_720.png" alt="Uploader" class="img-responsive media-image">
@@ -22,6 +22,7 @@
               <span>Go to the LiveSchema Updater</span>
             </a>
           </li>
+        {% endif %}
       
           {# FCA_Generator #}
           <li class="media-item">

@@ -13,28 +13,64 @@
     </ul>
     {% if cueResource.format == "CUE" %}
       <section class="additional-info">
-        <table class="table table-striped table-bordered table-condensed">
+        <table class="table table-striped table-bordered table-condensed" style="text-align: center;">
           <thead>
             <tr>
-              <th scope="col">Type</th>
-              <th scope="col">Cue1</th>
-              <th scope="col">Cue2</th>
-              <th scope="col">Cue3</th>
-              <th scope="col">Cue4</th>
-              <th scope="col">Cue5</th>
-              <th scope="col">Cue6</th>
+              <td scope="col" style="width: 100%;"><strong>Type</strong></th>
+              <td scope="col" style="width: 25%;"><strong>Cue1</strong></th>
+              <td scope="col" style="width: 25%;"><strong>Cue2</strong></th>
+              <td scope="col" style="width: 25%;"><strong>Cue3</strong></th>
+              <td scope="col" style="width: 25%;"><strong>Cue4</strong></th>
+              <td scope="col" style="width: 25%;"><strong>Cue5</strong></th>
+              <td scope="col" style="width: 25%;"><strong>Cue6</strong></th>
             </tr>
           </thead>
           <tbody>
             {% for i in range(lenList) %}
             <tr>
-              <th scope="row" class="dataset-label">{{ termList[i] }}</th>
-              <td class="dataset-details">{{ Cue1List[i] }}</td>
-              <td class="dataset-details">{{ Cue2List[i] }}</td>
-              <td class="dataset-details">{{ Cue3List[i] }}</td>
-              <td class="dataset-details">{{ Cue4List[i] }}</td>
-              <td class="dataset-details">{{ Cue5List[i] }}</td>
-              <td class="dataset-details">{{ Cue6List[i] }}</td>
+              <td scope="row" class="dataset-label"><strong>{{ termList[i] }}</strong></th>
+              <td class="dataset-details">
+                {% if Cue1List[i] != Cue1List[i] %} 
+                  0.0
+                {% else %} 
+                  {{ h.markdown_extract( Cue1List[i]|string() , 9) }}
+                {% endif %} 
+              </td>
+              <td class="dataset-details">
+                {% if Cue2List[i] != Cue2List[i] %} 
+                  0.0
+                {% else %} 
+                  {{ h.markdown_extract( Cue2List[i]|string() , 9) }}
+                {% endif %} 
+              </td>
+              <td class="dataset-details">
+                {% if Cue3List[i] != Cue3List[i] %} 
+                  0.0
+                {% else %} 
+                  {{ h.markdown_extract( Cue3List[i]|string() , 9) }}
+                {% endif %} 
+              </td>
+              <td class="dataset-details">
+                {% if Cue4List[i] != Cue4List[i] %} 
+                  0.0
+                {% else %} 
+                  {{ h.markdown_extract( Cue4List[i]|string() , 9) }}
+                {% endif %} 
+              </td>
+              <td class="dataset-details">
+                {% if Cue5List[i] != Cue5List[i] %} 
+                  0.0
+                {% else %} 
+                  {{ h.markdown_extract( Cue5List[i]|string() , 9) }}
+                {% endif %} 
+              </td>
+              <td class="dataset-details">
+                {% if Cue6List[i] != Cue6List[i] %} 
+                  0.0
+                {% else %} 
+                  {{ h.markdown_extract( Cue6List[i]|string() , 9) }}
+                {% endif %} 
+              </td>
             </tr>
             {% endfor %}
           </tbody>
@@ -46,4 +82,10 @@
     <p>Please generate one using the <a href="/service/cue_generator/{{ pkg.name }}">Cue Generator service</a></p>
     <br />
   {% endif %}
+{% endblock %}
+
+
+
+{% block secondary_content %}
+  {% snippet "package/snippets/helper_cue.html" %}
 {% endblock %}

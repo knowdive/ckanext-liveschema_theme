@@ -1,3 +1,4 @@
+{% set ForRes = res.resource_type[-3:] %}
 {% if res.format != 'temp' %}
   <li class="resource-item" data-id="{{ res.id }}">
     {% set url_action = 'resource_edit' if url_is_edit and can_edit else 'resource_read' %}
@@ -19,62 +20,114 @@
         {% endif %}
       </p>
     {% if not url_is_edit %}
-    <div class="dropdown btn-group">
-      <a href="#" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-        <i class="fa fa-share"></i>
-        {{ _('Explore') }}
-        <span class="caret"></span>
-      </a>
-      <ul class="dropdown-menu">
-        <li>
-          <a href="{{ url }}">
-            {% if res.has_views %}
+      <div class="res-btns">
+        <a href="{{ url }}">
+          {% if res.has_views %}
+            <button type="button" class="btn btn-info" title="Preview">
               <i class="fa fa-bar-chart-o"></i>
-              {{ _('Preview') }}
-            {% else %}
+            </button>
+          {% else %}
+            <button type="button" class="btn btn-info" title="More information">
               <i class="fa fa-info-circle"></i>
-              {{ _('More information') }}
-            {% endif %}
-          </a>
-        </li>
+            </button>
+          {% endif %}
+        </a>
         {% if res.url and h.is_url(res.url) %}
-        <li>
           <a href="{{ res.url }}" class="resource-url-analytics" target="_blank">
             {% if res.has_views or res.url_type == 'upload' %}
-              <i class="fa fa-arrow-circle-o-down"></i>
-              {{ _('Download') }}
+              <button type="button" class="btn btn-info" title="Download">
+                <i class="fa fa-arrow-circle-o-down"></i>
+              </button>
             {% else %}
-              <i class="fa fa-external-link"></i>
-              {{ _('Go to resource') }}
+              <button type="button" class="btn btn-info" title="Go to resource">
+                <i class="fa fa-external-link"></i>
+              </button>
             {% endif %}
           </a>
-        </li>
         {% endif %}
         {% if can_edit %}
-        <li>
           <a href="{{ h.url_for(controller='package', action='resource_edit', id=pkg.name, resource_id=res.id) }}">
-            <i class="fa fa-pencil-square-o"></i>
-            {{ _('Edit') }}
+            <button type="button" class="btn btn-info" title="Edit">
+              <i class="fa fa-pencil-square-o"></i>
+            </button>
           </a>
-        </li>
         {% endif %}
-      </ul>
-    </div>
+      </div>
     {% endif %}
   </li>
 {% else %}
-<li class="resource-item" onClick="window.location.reload();" data-id="{{ res.id }}">
-    <a class="heading" href>
+  <li class="resource-item" onClick="window.location.reload();" data-id="{{ res.id }}">
+    <span class="heading">
+      <strong style="color: green;">
+        Please wait for the generation of the resource, the page will refresh as soon as it is ready.
+      </strong>
+    </span>
+    <br />
+    <span class="heading" >
       {{ h.resource_display_name(res) | truncate(50) }}
-    </a>
-    <img src="https://videowiki.wmflabs.org/img/view-loader.gif" class="format-label"></img>
+    </span>
+    <img src="https://videowiki.wmflabs.org/img/view-loader.gif" class="format-label" id="tempImage"></img>
     <p class="description">
       {% if res.description %}
         {{ h.markdown_extract(h.get_translated(res, 'description'), extract_length=80) }}
       {% endif %}
     </p>
-    <p class="description">
-      <strong style="color: green;">Please wait for the generation of the resource, refresh the page or click here to check for updates</strong>
-    </p>
   </li>
+  <script>
+    // Get the last n elements of an array(string)
+    last =  function(array, n) {
+      if (array == null) 
+        return void 0;
+      if (n == null) 
+        return array[array.length - 1];
+      return array.slice(Math.max(array.length - n, 0));  
+    };
+    // Check the availability of a temp resource using ajax
+    function checkTemp(time) {
+      // Create an ajax request
+      let xhttp_{{ ForRes }} = new XMLHttpRequest();
+      // Check if the ajax request has been satisfied
+      xhttp_{{ForRes}}.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          // Get the response of the api request
+          let J_{{ForRes}} = JSON.parse(xhttp_{{ForRes}}.responseText);
+          // Check if the resource has not been deleted
+          let count = 0;
+          // Check for every resource of the result
+          J_{{ForRes}}.result.resources.forEach(myFunction);
+          // Check for every resource
+          function myFunction(item) {
+            // Check only the resouce of this item
+            if(last(item.resource_type,3) == "{{ForRes}}"){
+              count ++;
+              // If the temp resource is no more a temp one
+              if(item.format != "temp"){
+                // Reload the page, since there has been an update
+                location.reload();
+              }
+              // Set an incremental timeout and run the check again
+              setTimeout(function() {
+                checkTemp(time+Math.sqrt(2*time)/time);
+              }, time*1000);
+            }
+          }
+          // If the resouce has been deleted in case of error, then reload the page
+          if(count == 0){
+            location.reload();
+          }
+        }
+      }
+      // Open and send the right API Request
+      let link = "{{ url }}".split('/')[0]
+      xhttp_{{ForRes}}.open("GET", link+"/api/3/action/package_show?id={{ pkg.name }}", true);
+      xhttp_{{ForRes}}.send();
+    }
+    // Check the availability of the resource as soon as the page has been loaded
+    document.addEventListener('readystatechange', (event) => {
+      if (document.readyState == "complete") {
+        // Call the function to check the update suddently(using a 0s timeout)
+        checkTemp(0.5)   
+      }
+    });
+  </script>
 {% endif %}
