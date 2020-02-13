@@ -20,7 +20,7 @@
     {% block URI %}
         {% if group.extras %}
             {% for extra in group.extras %}
-                {% if extra.key == "URI" %}
+                {% if extra.key == "URI" and extra.value %}
                     <p>
                         URI: <a target="blank" href="{{ extra.value }}">{{ h.markdown_extract(extra.value, 30) }}</a>
                     </p>

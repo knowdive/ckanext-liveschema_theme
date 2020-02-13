@@ -1,9 +1,10 @@
 # Import libraries
 from bs4 import BeautifulSoup
 import requests
-#import time
+import time
 import pandas as pd
 import re
+import string 
 import json
 import os
 import rdflib
@@ -68,6 +69,8 @@ def updateLiveSchema(data_dict):
 
 # Script to scrape the Finto repository
 def scrapeFinto(catalogs, datasets):
+    # Get the list of available licenses from CKAN
+    licenses = toolkit.get_action('license_list')(data_dict={})
     # Check if FINTO is present on LiveSchema
     cataFinto = ""
     if "finto" in catalogs:
@@ -84,7 +87,6 @@ def scrapeFinto(catalogs, datasets):
                 "image_url": "https://eepos.finna.fi/themes/custom/images/Finto-logo_eng.png?_=1511945761",
                 "extras": [{"key": "URL", "value": "http://finto.fi/en/"}],
                 "description": "Finto is a Finnish thesaurus and ontology service, which enables both the publication and browsing of vocabularies. The service also offers interfaces for integrating the thesauri and ontologies into other applications and systems."})
-
     # Set the URL you want to webscrape from
     url = "http://finto.fi/"
     # Connect to the URL
@@ -101,8 +103,12 @@ def scrapeFinto(catalogs, datasets):
         for vocab in category("a"):
             # Get the page of the vocabulary
             responseVoc = requests.get(url+vocab["href"])
+            print(url+vocab["href"])
             # Parse the page of the vocabulary
             soupVoc = BeautifulSoup(responseVoc.text, "html.parser")
+
+            # Create the package as a dict
+            package = dict(extras=list())
 
             # Iterate over each link of the vocabulary and save the link (TURTLE format preferred)
             for a in soupVoc("div", {"class":"download-links"})[0]("a"):
@@ -110,36 +116,58 @@ def scrapeFinto(catalogs, datasets):
                     link = a["href"]
                 if(a and a.text == "TURTLE"):
                     link = a["href"]
-            # Iterate over each row of the metadata table to obtain title, description, last modified, language, homepage, uri if available
+            package["url"] = url + link
+
+            # Iterate over each row of the metadata table to obtain title, description, last modified, language, homepage, uri, publisher, creator, license if available
+            agents = list()
             for tr in soupVoc("table", {"class":"table"})[0].find_all("tr"):
                 th = tr.find_all("th")  
                 if th and th[0].text == "TITLE":
                     title = tr.find_all("td")[0].text
+                    package["title"] = title
                 if th and th[0].text == "DESCRIPTION":
                     description = tr.find_all("td")[0].text
+                    package["notes"] = description
                 if th and th[0].text == "LAST MODIFIED":
                     lastModified = tr.find_all("td")[0].text
+                    package["extras"].append({"key": "issued", "value": lastModified})
                 if th and th[0].text == "LANGUAGE":
                     language = tr.find_all("td")[0].text
+                    language = ", ".join(language[1:-1].split("\n"))
+                    package["extras"].append({"key": "language", "value": language})
                 if th and th[0].text == "HOMEPAGE":
                     homepage = tr.find_all("td")[0].text
+                    package["extras"].append({"key": "contact_uri", "value": homepage})
                 if th and th[0].text == "URI":
                     uri = tr.find_all("td")[0].text
+                    package["extras"].append({"key": "uri", "value": uri})
+                if th and th[0].text == "PUBLISHER":
+                    publisher = tr.find_all("td")[0].text
+                    publisher = ", ".join(publisher.split("\n"))
+                    package["maintainer"] = publisher
+                    for publi in publisher.split(", "):
+                        if(publi):
+                            agents.append(addAgent(publi, ""))
+                if th and th[0].text == "CREATOR":
+                    creator = tr.find_all("td")[0].text
+                    creator = ", ".join(creator.split("\n"))
+                    package["author"] = creator
+                    for crea in creator.split(", "):
+                        if(crea):
+                            agents.append(addAgent(crea, ""))
+                if th and th[0].text == "LICENSE":
+                    lic = tr.find_all("td")[0].text
+                    package["license_id"] = lic
+                    for license_ in licenses:
+                        if(len(license_["url"])>7 and len(lic)>7 and (lic[6:-5] in license_["url"][6:-5] or license_["url"][6:-5] in lic[6:-5])):
+                            package["license_id"] = license_["id"]
 
-            # Create the package as a dict
-            package = dict(extras=list())
             # Fill the package information
-            package["url"] = url + link
             package["name"] = "finto_" + vocab["href"].split("/")[0].lower().replace(" ","-").replace(".","-").replace(";","-").replace("\\","").replace("/","").replace(":","").replace("*","").replace("?","").replace("\"","").replace("<","").replace(">","").replace("|","")
-            package["title"] = title
-            package["notes"] = description
             package["owner_org"] = cataFinto["id"]
             package["version"] = "1"
             package["tags"] = [{"name": tagName}]
-            package["extras"].append({"key": "issued", "value": lastModified})
-            package["extras"].append({"key": "language", "value": language})
-            package["extras"].append({"key": "contact_uri", "value": homepage})
-            package["extras"].append({"key": "uri", "value": uri})
+            package["groups"] = agents
             package["extras"].append({"key": "Reference Catalog URL", "value": url+vocab["href"]})
 
             # Check if the dataset has to be updated
@@ -165,6 +193,7 @@ def scrapeRVS(catalogs, datasets):
                 "extras": [{"key": "URL", "value": "https://vocabs.ands.org.au/"}],
                 "description": "Research Vocabularies Australia is the controlled vocabulary discovery service of the Australian Research Data Commons (ARDC). ARDC is supported by the Australian Government through the National Collaborative Research Infrastructure Strategy Program."})
     #[TODO]
+
 
 # Script to scrape the DERI repository
 def scrapeDERI(catalogs, datasets):
@@ -240,6 +269,16 @@ def scrapeDERI(catalogs, datasets):
             if lastModified:
                 lastModified = lastModified[0].text
                 package["extras"].append({"key": "issued", "value": lastModified})
+            
+            # Add the Agents to LiveSchema
+            agents = list()
+            authorList = list()
+            for author in soup("div", {"id":"author-value"}):
+                if(author.a.text):
+                    agents.append(addAgent(author.a.text, author.a["href"]))
+                    authorList.append(author.a.text)
+            package["author"] = ", ".join(authorList)
+            package["groups"] = agents
 
             # Fill the package with the remaining information needed
             package["url"] = url + vocab("a")[0]["href"][1:] + ".ttl"
@@ -247,6 +286,7 @@ def scrapeDERI(catalogs, datasets):
             package["owner_org"] = cataDERI["id"]
             package["version"] = "1"
             package["extras"].append({"key": "Reference Catalog URL", "value": url + vocab("a")[0]["href"][1:]})
+            package["license_id"] = "CC-BY-4.0"
 
             # Check if the dataset has to be updated
             checkPackage(datasets, package)
@@ -271,27 +311,7 @@ def scrapeKnowDive(catalogs, datasets):
                 "image_url": "http://knowdive.disi.unitn.it/wp-content/uploads/cropped-logo_small.png",
                 "description": "Vocabularies developed by the Knowdive Research group", 
                 "extras": [{"key": "URL", "value": "http://knowdive.disi.unitn.it/"}]})
-                    
-    # Get the KnowDive vocabularies from the Excel file from github
-    vocabs = pd.read_excel("https://raw.githubusercontent.com/knowdive/resources/master/otherVocabs.xlsx")
-    # Iterate for every vocabulary read from the Excel file
-    for index, row in vocabs.iterrows():
-
-        # Create the package as a dict
-        package = dict(extras=list())
-        # Add the metadata of the dataset
-        package["url"] = row["Link"]+"#"    # They are just example datasets 
-        package["private"] = True
-        package["name"] = "knowdive_" + row["prefix"].lower().replace(" ","-").replace(".","-").replace(";","-").replace("\\","").replace("/","").replace(":","").replace("*","").replace("?","").replace("\"","").replace("<","").replace(">","").replace("|","")
-        package["title"] = row["prefix"]
-        package["notes"] = row["Title"]
-        package["owner_org"] = cataKnowDive["id"]
-        package["version"] = row["VersionName"]
-        package["extras"].append({"key": "issued", "value": row["VersionDate"]})
-        package["extras"].append({"key": "language", "value": row["Languages"]})
-        package["extras"].append({"key": "contact_uri", "value": row["URI"]})
-        # Check if the dataset has to be updated
-        checkPackage(datasets, package)
+                
 
 
 # Script to scrape the Others excel file from GitHub Repository
@@ -327,6 +347,7 @@ def scrapeGitHub(catalogs, datasets):
         package["extras"].append({"key": "issued", "value": row["VersionDate"]})
         package["extras"].append({"key": "language", "value": row["Languages"]})
         package["extras"].append({"key": "contact_uri", "value": row["URI"]})
+        package["license_id"] = "CC-BY-4.0"
         # Check if the dataset has to be updated
         checkPackage(datasets, package)
 
@@ -387,8 +408,8 @@ def vocabList(cataLOV, datasets, link, url, end):
 
 # Get all the info from the vocabulary page
 def vocabMeta(cataLOV, datasets, link):
-    # Pause the code for a sec
-    #time.sleep(.500)
+    # Pause the code for half a sec
+    time.sleep(.5)
     # Connect to the URL
     response = requests.get(link)
     # Parse HTML and save to BeautifulSoup object
@@ -406,6 +427,7 @@ def vocabMeta(cataLOV, datasets, link):
     package["name"] = "lov_" + prefix
     package["title"] = title
     package["owner_org"] = cataLOV["id"]
+    package["license_id"] = "CC-BY-4.0"
     package["extras"].append({"key": "Reference Catalog URL", "value": link})
 
     #Get the Metadata and Languages of the vocabulary page
@@ -414,6 +436,7 @@ def vocabMeta(cataLOV, datasets, link):
     homepage = "homepage"
     description = "Description"
     languages = list()
+    agents = list()
     pub = 1
     for child in soup("tbody")[0].find_all("tr"):
         if child.td.text.strip() == "URI":
@@ -436,6 +459,43 @@ def vocabMeta(cataLOV, datasets, link):
                 uriL = childL.find("div", {"class": "agentThumbPrefUri"}).text.strip()
                 languages.append(uriL)
             package["extras"].append({"key": "language", "value": ', '.join(languages)})
+        # Get the Creators
+        if child.td.text.strip() == "Creator":
+            creator = child.find_all("td")[1]
+            # Add the Creators to the dataset
+            creatorList = list()
+            for childCr in creator.find_all("a"):
+                nameCr = childCr.find("div", {"class": "agentThumbName"}).text.strip()
+                creatorList.append(nameCr)
+                uriCr = childCr.find("div", {"class": "agentThumbPrefUri"}).text.strip()
+                # Create Agent, get dict, add to list
+                agents.append(addAgent(nameCr, uriCr))
+            package["author"] = ", ".join(creatorList)
+
+        # Get the Contributors
+        if child.td.text.strip() == "Contributor":
+            contributor = child.find_all("td")[1]
+            # Add the Contributors to the dataset
+            contributorList = list()
+            for childCo in contributor.find_all("a"):
+                nameCo = childCo.find("div", {"class": "agentThumbName"}).text.strip()
+                contributorList.append(nameCo)
+                uriCo = childCo.find("div", {"class": "agentThumbPrefUri"}).text.strip()
+                # Create Agent, get dict, add to list
+                agents.append(addAgent(nameCo, uriCo))
+            package["maintainer"] = ", ".join(contributorList)
+
+        # Get the Publishers
+        if child.td.text.strip() == "Publisher":
+            publisher = child.find_all("td")[1]
+            # Add the Publishers  to the dataset
+            for childP in publisher.find_all("a"):
+                nameP = childP.find("div", {"class": "agentThumbName"}).text.strip()
+                uriP = childP.find("div", {"class": "agentThumbPrefUri"}).text.strip()
+                # Create Agent, get dict, add to list
+                agents.append(addAgent(nameP, uriP))
+
+    package["groups"] = agents
 
     # Add the Tags of the vocabulary page to the excel file
     tag = soup("ul", {"class": "tagsVocab"})
@@ -580,6 +640,16 @@ def checkPackage(datasets, package):
         # Update the resources of that package
         addResources(id, package)
 
+    # After all get the new online version
+    CKANpackage = toolkit.get_action('package_show')(
+        data_dict={"id": package["name"]})
+    # Check if there are resources available in that dataset
+    if (CKANpackage["num_resources"] == 0):
+        # If there are none, then delete the dataset
+        CKANpackage = toolkit.get_action('dataset_purge')(
+            data_dict={"id": package["name"], "force":"True"})
+        
+
 # Procedure to add the resources of the given package
 def addResources(id, package):
     # Try to create the graph to analyze the vocabulary
@@ -703,3 +773,25 @@ def removeTemp(name):
         # Remove eventual temp resources left
         if resource["format"] == "temp" and (resource["resource_type"] == "Serialized ttl" or resource["resource_type"] == "Serialized rdf" or resource["resource_type"] == "Parsed csv"):
             toolkit.get_action("resource_delete")(context = {"ignore_auth": True}, data_dict={"id":resource["id"]})
+
+# Add an Agent to LiveSchema
+def addAgent(agentTitle, agentLink):
+    agentName = agentTitle.lower().replace(" ","-").replace(".","-").replace(";","-")
+    agentName = "".join([i for i in agentName if (i in string.ascii_lowercase or i.isdigit() or i == "-")])
+    agents = toolkit.get_action('group_list')(data_dict={})
+    print(agentName)
+    # Check if the Agent has already been created
+    if agentName in agents:
+        # If it is then get its relative information and datasets
+        agent = toolkit.get_action('group_show')(
+            data_dict={"id": agentName, "include_datasets": False, "include_dataset_count": False, "include_extras": False, "include_users": False, "include_groups": False, "include_tags": False, "include_followers": False})
+    else:
+        # Otherwise create the agent
+        agent = toolkit.get_action('group_create')(
+            data_dict={"name": agentName,
+                "id": agentName,
+                "state": "active",
+                "title": agentTitle,
+                "extras": [{"key": "URI", "value": agentLink}]})
+
+    return {"id": agentName}
