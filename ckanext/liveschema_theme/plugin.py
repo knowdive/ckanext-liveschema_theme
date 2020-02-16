@@ -45,13 +45,12 @@ def format_selection(dataset, format):
     # Return the list of datasets that have the relative csv file to return
     return resLink
 
-# Get the list of datasets that have the requested resource_type file
-def dataset_selection(ok, no, resource_type):
+# Get the list of datasets
+def dataset_selection(resource_type):
     '''Return a list of the datasets with their requested resource_type.'''
     
-    # Create the list of datasets that have the requested resource_type file
-    dataSetSelectionOK = list()
-    dataSetSelectionNO = list()
+    # Create the list of datasets
+    dataSetSelection = list()
     # Use searchLimit and index in order to get all the datasets, overcoming the limit of 1000 rows
     searchLimit = True
     index = 0
@@ -66,29 +65,20 @@ def dataset_selection(ok, no, resource_type):
             index = index + 1
         # Iterate over every datasets
         for dataset in datasets["results"]:
-            datasetSelected = ""
+            linkResource = ""
             # Iterate over every resource of the dataset
             for res in dataset["resources"]:
-                # Check if they have the relative parsed csv file
+                # Check if they have the relative resource type
                 if("resource_type" in res.keys() and res["resource_type"] == resource_type and "format" in res.keys() and res["format"] != "temp"):
-                    # Create the dictionary with the resource information
-                    datasetSelected = {"name": dataset["name"], "link": res["url"], "btn": ok, "title": dataset["title"] + " [" + dataset["organization"]["title"] + "]"}
-            # If the dataset does not have the required resource_type
-            if(datasetSelected):
-                # Append the dataset to the selection
-                dataSetSelectionOK.append(datasetSelected)
-            # If the dataset does not have the required resource_type
-            else:
-                # Create the dictionary without link, specifying the need of the resource_type in the title
-                datasetSelected = {"name": dataset["name"], "link": "", "btn": no, "title": dataset["title"] + " [" + dataset["organization"]["title"] + "], " + resource_type + " needed"}
-                # Append the dataset to the selection
-                dataSetSelectionNO.append(datasetSelected)
+                    # Get the link of the desired resouce type
+                    linkResource = res["url"]
+            # Append the dataset to the selection
+            dataSetSelection.append({"name": dataset["name"], "link": linkResource, "title": dataset["title"] + " [" + dataset["organization"]["title"] + "]"})
 
     # Order the datasets
-    dataSetSelectionOK.sort(key = lambda i: (i['title']))
-    dataSetSelectionNO.sort(key = lambda i: (i['title']))
+    dataSetSelection.sort(key = lambda i: (i['title']))
     # Return the list of datasets that have the relative csv file to return
-    return dataSetSelectionOK + dataSetSelectionNO
+    return dataSetSelection
 
 
 # Get the list of catalogs with their relative title

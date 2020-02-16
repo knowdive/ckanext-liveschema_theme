@@ -46,13 +46,13 @@
         <ul class="{% block resource_list_class %}resource-list{% endblock %}">
           {% snippet 'package/snippets/resource_item.html', res=visualizationResource, pkg=pkg, can_edit=can_edit %}
         </ul>
-        Make sure you download the resource
-        <br />
-        Then upload it to the frame below
-        <br />
-        Move to the related Settings tab
-        <br />
-        Have fun playing with the visualization
+        <h3 onclick="document.getElementById('visList').classList.toggle('hide-heading');"><a>How to use Intervene:</a></h3>
+        <ol id="visList" class="hide-heading">
+          <li>Download the resource above</li>
+          <li>Upload it to the frame below as it is (either on Venn or UpSet)</li>
+          <li>Move to the related Settings tab</li>
+          <li>Customize the visualization image accordingly to your needs</li>
+        </ol>
         <iframe src="https://asntech.shinyapps.io/intervene" style="width: 100%;height: 1000px;"></iframe>
     </div>
   </article>

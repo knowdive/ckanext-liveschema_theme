@@ -20,8 +20,8 @@
       <br />
       <select class="js-example-basic-single js-states js-example-responsive" style="width: 50%" id="select2" name="dataset">
           <option></option>
-          {% for dataset in h.liveschema_theme_dataset_selection("Generate the Cue Metrics", "First generate the FCA Matrix", "FCA") %}
-            <option value="{{ dataset.name }},{{ dataset.link }},{{ dataset.btn }}" class="{% if dataset.link == "" %}no{% else %}ok{% endif %}"{% if id and id == dataset.name %}selected="selected"{% endif %}>{{ dataset.title }}</option>
+          {% for dataset in h.liveschema_theme_dataset_selection("FCA") %}
+            <option value="{{ dataset.name }},{{ dataset.link }}" class="{% if dataset.link == "" %}no{% else %}ok{% endif %}"{% if id and id == dataset.name %}selected="selected"{% endif %}>{{ dataset.title }}</option>
           {% endfor %}
       </select>
       <br />

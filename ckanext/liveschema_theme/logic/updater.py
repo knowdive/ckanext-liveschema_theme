@@ -103,7 +103,6 @@ def scrapeFinto(catalogs, datasets):
         for vocab in category("a"):
             # Get the page of the vocabulary
             responseVoc = requests.get(url+vocab["href"])
-            print(url+vocab["href"])
             # Parse the page of the vocabulary
             soupVoc = BeautifulSoup(responseVoc.text, "html.parser")
 
@@ -143,18 +142,18 @@ def scrapeFinto(catalogs, datasets):
                     package["extras"].append({"key": "uri", "value": uri})
                 if th and th[0].text == "PUBLISHER":
                     publisher = tr.find_all("td")[0].text
-                    publisher = ", ".join(publisher.split("\n"))
-                    package["maintainer"] = publisher
-                    for publi in publisher.split(", "):
-                        if(publi):
-                            agents.append(addAgent(publi, ""))
+                    publisher = publisher.split("\n")
+                    publisher = [publi for publi in publisher if publi] 
+                    package["maintainer"] = ", ".join(publisher)
+                    for publi in publisher:
+                        agents.append(addAgent(publi, ""))
                 if th and th[0].text == "CREATOR":
                     creator = tr.find_all("td")[0].text
-                    creator = ", ".join(creator.split("\n"))
-                    package["author"] = creator
-                    for crea in creator.split(", "):
-                        if(crea):
-                            agents.append(addAgent(crea, ""))
+                    creator = creator.split("\n")
+                    creator = [crea for crea in creator if crea] 
+                    package["author"] = ", ".join(creator)
+                    for crea in creator:
+                        agents.append(addAgent(crea, ""))
                 if th and th[0].text == "LICENSE":
                     lic = tr.find_all("td")[0].text
                     package["license_id"] = lic
@@ -776,10 +775,11 @@ def removeTemp(name):
 
 # Add an Agent to LiveSchema
 def addAgent(agentTitle, agentLink):
+    # Format the agentName to CKAN specifics
     agentName = agentTitle.lower().replace(" ","-").replace(".","-").replace(";","-")
     agentName = "".join([i for i in agentName if (i in string.ascii_lowercase or i.isdigit() or i == "-")])
+    # Get the list of the Agents alredy on LiveSchema 
     agents = toolkit.get_action('group_list')(data_dict={})
-    print(agentName)
     # Check if the Agent has already been created
     if agentName in agents:
         # If it is then get its relative information and datasets
@@ -793,5 +793,5 @@ def addAgent(agentTitle, agentLink):
                 "state": "active",
                 "title": agentTitle,
                 "extras": [{"key": "URI", "value": agentLink}]})
-
+    # Return the id of the created agent
     return {"id": agentName}
