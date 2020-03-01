@@ -38,25 +38,33 @@ def updater(context, data_dict):
     # Enqueue the script to be executed by the background worker
     enqueue_job(ckanext.liveschema_theme.logic.updater.updateLiveSchema, args=[data_dict], title="updateLiveSchema", queue=u'default', timeout=-1)
 
+# Define the action of Upload Dataset of LiveSchema
+def uploader(context, data_dict):
+    # Enqueue the script to be executed by the background worker
+    enqueue_job(ckanext.liveschema_theme.logic.updater.uploadDataset, args=[data_dict['id'], data_dict['package'], data_dict['filePath'], data_dict['data']], title="uploadPackage", queue=u'default', timeout=-1)
+
 # Define the action of fca_generator of LiveSchema
 def fca_generator(context, data_dict):
     # Enqueue the script to be executed by the background worker
-    #resource_patch
+    # [TODO] Pass filePath of resource to avoid 404 with private datasets
     enqueue_job(ckanext.liveschema_theme.logic.fca_generator.generateFCA, args=[data_dict], title="generateFCA", queue=u'default', timeout=-1)
 
 # Define the action of cue_generator of LiveSchema
 def cue_generator(context, data_dict):
     # Enqueue the script to be executed by the background worker
+    # [TODO] Pass filePath of resource to avoid 404 with private datasets
     enqueue_job(ckanext.liveschema_theme.logic.cue_generator.generateCue, args=[data_dict], title="generateCue", queue=u'default', timeout=-1)
 
 # Define the action of visualization_generator of LiveSchema
 def visualization_generator(context, data_dict):
     # Enqueue the script to be executed by the background worker
+    # [TODO] Pass filePath of resource to avoid 404 with private datasets
     enqueue_job(ckanext.liveschema_theme.logic.visualization_generator.generateVisualization, args=[data_dict], title="generateVisualization", queue=u'default', timeout=-1)
 
 # Define the action of reset resources of LiveSchema
 def reset(context, data_dict):
     # Enqueue the script to be executed by the background worker
+    # [TODO] Pass filePath of resource to avoid 404 with private datasets
     enqueue_job(ckanext.liveschema_theme.logic.updater.addResources, args=[data_dict['id'], data_dict['package']], title="resetResources", queue=u'default', timeout=-1)
 
 
@@ -89,6 +97,8 @@ def query(context, data_dict):
 
 # Define the action of KLotus of LiveSchema
 def visualization_lotus(context, data_dict):
+    # [TODO] To become a job and add it as a image view resource to LiveSchema
+    
     # Create the dataframe from the FCA file
     data = pd.read_csv(data_dict["FCAResource"])
 
@@ -183,6 +193,16 @@ def visualization_lotus(context, data_dict):
     # Delete the temporaty files
     del_file(dir_ + "resources/", data)
 
+    # Boolean used to check if a new view has to be created
+    KLotusView = True
+    # Get the views related to the visualization resource, and check if the Knowledge Lotus is already present
+    views = toolkit.get_action('resource_view_list')(context = {'ignore_auth': True}, data_dict={'id': str(data_dict["visId"])})
+    for view in views:
+        if(view["title"] == "Knowledge Lotus"):
+            KLotusView = False
+    # Create a KLotus view of the resource if there were none
+    if(KLotusView):
+        toolkit.get_action('resource_view_create')(context = {'ignore_auth': True}, data_dict={'resource_id': str(data_dict["visId"]), 'title': "Knowledge Lotus", 'view_type': "image_view", 'image_url': "/KLotus/" + data_dict["dataset_name"] + "_KLotus.png"})
 
 #Separate a csv file into target input files
 def sep_file(dir_, data):

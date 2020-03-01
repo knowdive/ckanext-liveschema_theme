@@ -23,32 +23,42 @@
       <div class="res-btns">
         <a href="{{ url }}">
           {% if res.has_views %}
-            <button type="button" class="btn btn-info" title="Preview">
-              <i class="fa fa-bar-chart-o"></i>
+            <button type="button" class="btn btn-info btn-sm" title="Preview">
+              <i class="fa fa-bar-chart-o fa-2x"></i>
+              <br />
+              Preview
             </button>
           {% else %}
-            <button type="button" class="btn btn-info" title="More information">
-              <i class="fa fa-info-circle"></i>
+            <button type="button" class="btn btn-info btn-sm" title="More information">
+              <i class="fa fa-info-circle fa-2x"></i>
+              <br />
+              More
             </button>
           {% endif %}
         </a>
         {% if res.url and h.is_url(res.url) %}
           <a href="{{ res.url }}" class="resource-url-analytics" target="_blank">
             {% if res.has_views or res.url_type == 'upload' %}
-              <button type="button" class="btn btn-info" title="Download">
-                <i class="fa fa-arrow-circle-o-down"></i>
+              <button type="button" class="btn btn-info btn-sm" title="Download">
+                <i class="fa fa-arrow-circle-o-down fa-2x"></i>
+                <br />
+                Download
               </button>
             {% else %}
-              <button type="button" class="btn btn-info" title="Go to resource">
-                <i class="fa fa-external-link"></i>
+              <button type="button" class="btn btn-info btn-sm" title="Go to resource">
+                <i class="fa fa-external-link fa-2x"></i>
+                <br />
+                Go to resource
               </button>
             {% endif %}
           </a>
         {% endif %}
         {% if can_edit %}
           <a href="{{ h.url_for(controller='package', action='resource_edit', id=pkg.name, resource_id=res.id) }}">
-            <button type="button" class="btn btn-info" title="Edit">
-              <i class="fa fa-pencil-square-o"></i>
+            <button type="button" class="btn btn-info btn-sm align-center" title="Edit">
+              <i class="fa fa-pencil-square-o fa-2x"></i>
+              <br />
+              Edit
             </button>
           </a>
         {% endif %}
@@ -114,6 +124,11 @@
           // If the resouce has been deleted in case of error, then reload the page
           if(count == 0){
             location.reload();
+          }
+        }else{
+          if (this.readyState == 4 && this.status == 404) { // If dataset has been deleted because it was not valid
+            // Return to dataset search page
+            location.replace('/dataset');
           }
         }
       }

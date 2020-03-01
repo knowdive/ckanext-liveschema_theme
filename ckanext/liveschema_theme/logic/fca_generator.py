@@ -12,6 +12,8 @@ stopWords = ['able', 'about', 'above', 'according', 'accordingly', 'across', 'ac
 
 # Function that generate the FCA Matrix
 def generateFCA(data_dict):
+    # [TODO] Get Dataset CSV Resource url from id of resource
+
     # Create the dataframe from the CSV file
     triples = pd.read_csv(data_dict["dataset_link"])
 
@@ -104,6 +106,13 @@ def generateFCA(data_dict):
         "format": "FCA"
     }
     toolkit.get_action('resource_patch')(context = {'ignore_auth': True}, data_dict=data)
+
+    # Add file to DataStore using DataPusher
+    import ckanext.datapusher.logic.action as dpaction
+    dpaction.datapusher_submit(context = {'ignore_auth': True}, data_dict={'resource_id': str(data_dict["res_id"])})
+
+    # Create a Data Explorer view of the resource
+    toolkit.get_action('resource_view_create')(context = {'ignore_auth': True}, data_dict={'resource_id': str(data_dict["res_id"]), 'title': "Data Explorer", 'view_type': "recline_view"})
 
     # Remove the temporary csv file from the server
     os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_FCA.csv")

@@ -1,0 +1,176 @@
+{% extends "page.html" %}
+ 
+{% import 'macros/form.html' as form %}
+
+{% block subtitle %}{{ _("Upload Dataset") }}{% endblock %}
+
+{% block breadcrumb_content %}
+  <li>{{ h.nav_link(_('Services'), controller='ckanext.liveschema_theme.controller:LiveSchemaController', action='services') }}</li>
+  <li class="active"><a href="{{ h.url_for_static('/service/uploader') }}">Upload Dataset</a></li>
+{% endblock %}
+
+{% block primary_content %}
+  <article class="module module-content">
+    <header>
+      <h1>Upload Dataset</h1>
+    </header>
+    <form action="/service/uploader" method="post" enctype="multipart/form-data">
+
+      {% block package_basic_fields_title %}
+        {{ form.input('title', id='field-title', label=_('Title'), placeholder=_('eg. A descriptive title'), classes=['control-full', 'control-large'], attrs={'data-module': 'slug-preview-target', 'class': 'form-control'}, is_required=true) }}
+      {% endblock %}
+
+      {% block package_basic_fields_url %}
+        {% set prefix = h.url_for(controller='package', action='read', id='') %}
+        {% set domain = h.url_for(controller='package', action='read', id='', qualified=true) %}
+        {% set domain = domain|replace("http://", "")|replace("https://", "") %}
+        {% set attrs = {'data-module': 'slug-preview-slug', 'data-module-prefix': domain+"users_", 'data-module-placeholder': '<dataset>', 'class': 'form-control input-sm'} %}
+
+        {{ form.prepend('name', id='field-name', label=_('URL'), prepend=prefix+"users_", placeholder=_('eg. my-dataset'), attrs=attrs, is_required=true) }}
+      {% endblock %}
+
+      {% block basic_fields_url %}
+        {{ form.image_upload({"field_url":""}, {"field_url":""}, field_url='url', field_upload='upload', field_clear='clear_upload',
+          is_upload_enabled = h.uploads_enabled(), upload_label=_('File'), url_label=_('Url'), placeholder=_('http://example.com/external-data.rdf'), field_name='name', accept=".ttl, .nt, .n3, .rdf, .owl, .xml, .xhtml, .svg, .rdfs, .trix, .html, .nq, .trig", is_required=true) }}
+      {% endblock %}
+      <hr />
+      {% block package_basic_fields_custom %}{% endblock %}
+
+      {% block package_basic_fields_description %}
+        {{ form.markdown('notes', id='field-notes', label=_('Description'), placeholder=_('eg. Some useful notes about the data')) }}
+      {% endblock %}
+
+      {% block package_basic_fields_tags %}
+        {% set tag_attrs = {'data-module': 'autocomplete', 'data-module-tags': '', 'data-module-source': '/api/2/util/tag/autocomplete?incomplete=?'} %}
+        {{ form.input('tag_string', id='field-tags', label=_('Tags'), placeholder=_('eg. economy, mental health, government'), classes=['control-full'], attrs=tag_attrs) }}
+      {% endblock %}
+
+      {% block package_basic_fields_license %}
+        <div class="form-group">
+          <label class="control-label" for="field-license">{{ _("License") }}</label>
+          <div class="controls">
+            <div class="row">
+              <div class="col-md-6">
+                <select id="field-license" name="license_id" data-module="autocomplete">
+                  {% for license_id, license_desc in h.license_options() %}
+                    <option value="{{ license_id }}" >{{ license_desc }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-6">
+                <span class="info-block info-inline">
+                  <i class="fa fa-info-circle"></i>
+                  {% trans %}
+                    License definitions and additional information can be found
+                    at <a href="http://opendefinition.org/licenses/">opendefinition.org</a>
+                  {% endtrans %}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endblock %}
+
+      {% block package_basic_fields_org %}
+
+        {% set organizations_available = h.organizations_available('create_dataset') %}
+        {% set user_is_sysadmin = h.check_access('sysadmin') %}
+        {% set show_organizations_selector = organizations_available %}
+        {% set show_visibility_selector = dataset_has_organization or (organizations_available and (user_is_sysadmin or dataset_is_draft)) %}
+
+        {% if show_organizations_selector and show_visibility_selector %}
+          <div data-module="dataset-visibility">
+        {% endif %}
+
+        {% if show_organizations_selector %}
+        <div class="form-group control-medium">
+          <label for="field-organizations" class="control-label">{{ _('Organization') }}</label>
+          <div class="controls">
+            <select id="field-organizations" name="owner_org" data-module="autocomplete">
+              {% if h.check_config_permission('create_unowned_dataset') %}
+                <option value="" {% if not selected_org %} selected="selected" {% endif %}>{{ _('No organization') }}</option>
+              {% endif %}
+              {% for organization in organizations_available %}
+                {# get out first org from users list only if there is not an existing org #}
+                <option value="{{ organization.id }}" {% if organization.id == "users" %} selected {% endif %} >{{ organization.display_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if show_visibility_selector %}
+          {% block package_metadata_fields_visibility %}
+          <div class="form-group control-medium">
+            <label for="field-private" class="control-label">{{ _('Visibility') }}</label>
+            <div class="controls">
+              <select id="field-private" name="private" class="form-control">
+                {% for option in [ ('False', _('Public')) , ('True', _('Private')) ] %}
+                  <option value="{{ option[0] }}">{{ option[1] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          {% endblock %}
+        {% endif %}
+
+        {% if show_organizations_selector and show_visibility_selector %}
+          </div>
+        {% endif %}
+
+      {% endblock %}
+      <hr />
+      {% block package_metadata_fields_contact_uri %}
+        {{ form.input('contact_uri', label=_('Contact URI'), id='field-contact_uri', placeholder=_('http://example.com/docs/about.html'), classes=['control-medium']) }}
+      {% endblock %}
+
+      {% block package_metadata_fields_uri %}
+        {{ form.input('uri', label=_('URI'), id='field-uri', placeholder=_('http://example.com/'), classes=['control-medium']) }}
+      {% endblock %}
+
+      {% block package_metadata_fields_version %}
+        {{ form.input('version', label=_('Version'), id='field-version', placeholder=_('1.0'), classes=['control-medium']) }}
+      {% endblock %}
+
+      {% block package_metadata_fields_issued %}
+        {{ form.input('issued', label=_('Issued Date'), id='field-issued', placeholder=_('1997-07-14'), classes=['control-medium']) }}
+      {% endblock %}
+
+      {% block package_metadata_fields_language %}
+        {{ form.input('language', label=_('Language'), id='field-language', placeholder=_('English, Italian'), classes=['control-medium']) }}
+      {% endblock %}
+      <hr />
+      {% block package_metadata_author %}
+        {{ form.input('author', label=_('Author'), id='field-author', placeholder=_('Joe Bloggs'),  classes=['control-medium']) }}
+        {{ form.input('author_uri', label=_('Author URI'), id='field-author-uri', placeholder=_('https://www.example.net/profile/joe'), classes=['control-medium']) }}
+        {{ form.input('author_email', label=_('Author e-mail'), id='field-author-email', placeholder=_('joe@example.com'), classes=['control-medium']) }}
+      {% endblock %}
+      <hr />
+      {% block package_metadata_fields_maintainer %}
+        {{ form.input('maintainer', label=_('Maintainer'), id='field-maintainer', placeholder=_('Joe Bloggs'), classes=['control-medium']) }}
+        {{ form.input('maintainer_uri', label=_('Maintainer URI'), id='field-maintainer-uri', placeholder=_('https://www.example.net/profile/joe'), classes=['control-medium']) }}
+        {{ form.input('maintainer_email', label=_('Maintainer e-mail'), id='field-maintainer-email', placeholder=_('joe@example.com'), classes=['control-medium']) }}
+      {% endblock %}
+      <hr />
+      {% block package_metadata_fields_custom %}
+        {% block custom_fields %}
+          {% snippet 'snippets/custom_form_fields.html', errors="", limit=1 %}
+        {% endblock %}
+      {% endblock %}
+
+      {% block dataset_fields %}
+      {% endblock %}
+
+      <button class="btn btn-primary btn-lg"> 
+          Upload Datasets
+      </button>
+      <br />
+      <br />
+    </form>
+  </article>
+
+{% endblock %}
+
+{% block secondary_content %}
+  {% snippet "service/snippets/helper_upload.html" %}
+{% endblock %}

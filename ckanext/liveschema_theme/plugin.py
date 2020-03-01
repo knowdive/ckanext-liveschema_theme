@@ -69,9 +69,10 @@ def dataset_selection(resource_type):
             # Iterate over every resource of the dataset
             for res in dataset["resources"]:
                 # Check if they have the relative resource type
-                if("resource_type" in res.keys() and res["resource_type"] == resource_type and "format" in res.keys() and res["format"] != "temp"):
+                if("resource_type" in res.keys() and res["resource_type"] == resource_type and "format" in res.keys() and res["format"] != "temp"): # [TODO] To be commented the temp part, after the switch to id 
                     # Get the link of the desired resouce type
                     linkResource = res["url"]
+            # [TODO] Use id of resource to get also the temp that are going to get generated 
             # Append the dataset to the selection
             dataSetSelection.append({"name": dataset["name"], "link": linkResource, "title": dataset["title"] + " [" + dataset["organization"]["title"] + "]"})
 
@@ -163,6 +164,7 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         map.connect('ckanext_liveschema_theme_cue_generator_id', '/service/cue_generator/{id}', controller=LiveSchemaController, action='cue_generator')
         map.connect('ckanext_liveschema_theme_visualization_generator_id', '/service/visualization_generator/{id}', controller=LiveSchemaController, action='visualization_generator')
         map.connect('ckanext_liveschema_theme_updater', '/service/updater', controller=LiveSchemaController, action='updater')
+        map.connect('ckanext_liveschema_theme_uploader', '/service/uploader', controller=LiveSchemaController, action='uploader')
         map.connect('ckanext_liveschema_theme_fca', '/dataset/fca/{id}', controller=LiveSchemaController, action='fca', ckan_icon='table')
         map.connect('ckanext_liveschema_theme_cue', '/dataset/cue/{id}', controller=LiveSchemaController, action='cue', ckan_icon='info')
         map.connect('ckanext_liveschema_theme_visualization', '/dataset/visualization/{id}', controller=LiveSchemaController, action='visualization', ckan_icon='image')
@@ -184,6 +186,7 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
             'ckanext_liveschema_theme_cue_generator': ckanext.liveschema_theme.logic.auth.cue_generator,
             'ckanext_liveschema_theme_visualization_generator': ckanext.liveschema_theme.logic.auth.visualization_generator,
             'ckanext_liveschema_theme_updater': ckanext.liveschema_theme.logic.auth.updater,
+            'ckanext_liveschema_theme_uploader': ckanext.liveschema_theme.logic.auth.uploader,
             'ckanext_liveschema_theme_reset': ckanext.liveschema_theme.logic.auth.reset
         }
 
@@ -200,6 +203,8 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
                 ckanext.liveschema_theme.logic.action.visualization_generator,
             'ckanext_liveschema_theme_updater':
                 ckanext.liveschema_theme.logic.action.updater,
+            'ckanext_liveschema_theme_uploader':
+                ckanext.liveschema_theme.logic.action.uploader,
             'ckanext_liveschema_theme_query':
                 ckanext.liveschema_theme.logic.action.query,
             'ckanext_liveschema_theme_visualization_lotus':

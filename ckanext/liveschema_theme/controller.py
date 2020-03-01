@@ -63,6 +63,8 @@ class LiveSchemaController(BaseController):
 
         # If the page has to handle the form resulting from the service
         if request.method == 'POST' and "dataset" in request.params.keys() and request.params['dataset']:
+
+            context['ignore_auth'] = True
             # Get the selected dataset
             dataset = request.params['dataset'].split(",")
             dataset_name = dataset[0]
@@ -90,8 +92,6 @@ class LiveSchemaController(BaseController):
             dataset = toolkit.get_action('package_show')(
                 data_dict={"id": dataset_name})
 
-            #
-            context = {'ignore_auth':  True}
             # Set index to limit the resources up to 9
             i = dataset["num_resources"] - 9
             # Iterate over every resource of the dataset
@@ -139,6 +139,9 @@ class LiveSchemaController(BaseController):
 
         # If the page has to handle the form resulting from the service
         if request.method == 'POST' and "dataset" in request.params.keys() and request.params['dataset']:
+
+            context['ignore_auth'] = True
+
             # Get the selected dataset
             dataset = request.params['dataset'].split(",")
             dataset_name = dataset[0]
@@ -152,12 +155,14 @@ class LiveSchemaController(BaseController):
                 if not resCSV: 
                     # Reset that dataset
                     LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
-                    return redirect_to(controller=LiveSchemaController, action='reset',
+                    redirect_to(controller=LiveSchemaController, action='reset',
                         id=dataset_name)
                 # Create temp FCA resource
                 FCAResource = toolkit.get_action("resource_create")(context=context,
                     data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_FCA.csv", "description": "FCA Matrix containing the information of all the triples", "resource_type": "FCA"})
 
+                # [TODO] Remove dataset_link from the inputs
+                # [TODO] Change also visualization and maybe also FCA
                 # Execute the fca_generator action
                 get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": resCSV, "strPredicates": "", 'apikey': c.userobj.apikey})
 
@@ -172,7 +177,6 @@ class LiveSchemaController(BaseController):
             dataset = toolkit.get_action('package_show')(
                 data_dict={"id": dataset_name})
 
-            context['ignore_auth'] = True
             # Iterate over every resource of the dataset
             for res in dataset["resources"]:
                 # Check if they have the relative Cue matrix file
@@ -213,6 +217,12 @@ class LiveSchemaController(BaseController):
 
         # If the page has to handle the form resulting from the service
         if request.method == 'POST' and "dataset" in request.params.keys() and request.params['dataset']:
+
+            # Build the context using the information obtained by session and user
+            context = {'model': model, 'session': model.Session,
+                       'user': c.user or c.author}
+            context['ignore_auth'] = True
+
             # Get the selected dataset
             dataset = request.params['dataset'].split(",")
             dataset_name = dataset[0]
@@ -235,11 +245,6 @@ class LiveSchemaController(BaseController):
                 # Execute the fca_generator action
                 get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": resCSV, "strPredicates": "", 'apikey': c.userobj.apikey})
 
-
-            # Build the context using the information obtained by session and user
-            context = {'model': model, 'session': model.Session,
-                       'user': c.user or c.author}
-
             # Check if the user has the access to this page
             try:
                 check_access('ckanext_liveschema_theme_visualization_generator', context, data_dict={})
@@ -251,12 +256,11 @@ class LiveSchemaController(BaseController):
             dataset = toolkit.get_action('package_show')(
                 data_dict={"id": dataset_name})
 
-            context['ignore_auth'] = True
             # Iterate over every resource of the dataset
             for res in dataset["resources"]:
-                # Check if they have the relative Cue matrix file
+                # Check if they have the relative visualization resource
                 if("resource_type" in res.keys() and res["resource_type"] == "Visualization"):
-                    # Delete the current Cue matrix
+                    # Delete the current visualization resource
                     dataset = toolkit.get_action('resource_delete')(context=context,
                         data_dict={"id": res["id"]})
                     break
@@ -314,6 +318,130 @@ class LiveSchemaController(BaseController):
 
         # Render the page of the service
         return render('service/updater.html')
+
+    # Define the behaviour of the updater service
+    def uploader(self):
+        # Build the context using the information obtained by session and user
+        context = {'model': model, 'session': model.Session,
+                   'user': c.user or c.author}
+
+        # Check if the user has the access to this page
+        try:
+            check_access('ckanext_liveschema_theme_uploader', context, {})
+        # Otherwise abort with NotAuthorized message
+        except NotAuthorized:
+            abort(401, _('Anonymous users not authorized to access the Upload Dataset service'))
+
+        # If the page has to handle the form resulting from the service
+        if request.method == 'POST' and ( (request.params.get("url") != "") or (request.params.get("upload") != "")):
+
+            context['ignore_auth'] = True
+
+            # Use the given name from the form
+            datasetName = "users_" + request.params.get("name")
+
+            # Get the information about the desired package
+            datasetList = get_action('package_list')(context, {})
+
+            # Add the Dataset if there are no Datasets with the same name
+            if(datasetName not in datasetList):
+                # Try to remove an eventual deleted resource that might generate errors
+                try:
+                    get_action('dataset_purge')(context, {'id': datasetName, 'force': True})
+                except NotFound:
+                    print("No dataset named" + datasetName)
+
+                # Add the url used to generate the resources, either file upload or url link
+                url = ""
+                filePath = ""
+                if(request.params.get("upload") != ""): 
+                    # Save the position where the file will be
+                    filePath = "src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/resources/" + request.params.get("upload").filename
+                    # Use the file to generate the resources
+                    url = filePath
+                    # Store the uploaded file
+                    open(filePath, 'wb').write(request.params.get("upload").file.read())
+                else:
+                    # Use the link as url to generate the resources
+                    url = request.params.get("url")
+
+                # Define the data to pass to the package_show action
+                title = request.params.get("title")
+                owner_org = request.params.get("owner_org") or 'users'
+                version = request.params.get("version") or '1.0'
+                private = request.params.get("private")
+                data = {'id': datasetName, 'name': datasetName, 'title': title, 'owner_org': owner_org, 'version': version, 'url': url, 'private': private, 'state': 'active', 'include_tracking': True, 'extras': list()}
+                
+                if(request.params.get("notes") != ""):
+                    data["notes"] = request.params.get("notes")
+
+                if(request.params.get("license_id") != "notspecified"):
+                    data["license_id"] = request.params.get("license_id")
+
+                if(request.params.get("contact_uri") != ""):
+                    data["extras"].append({"key": "contact_uri", "value": request.params.get("contact_uri")})
+
+                if(request.params.get("uri") != ""):
+                    data["extras"].append({"key": "uri", "value": request.params.get("uri")})
+
+                if(request.params.get("issued") != ""):
+                    data["extras"].append({"key": "issued", "value": request.params.get("issued")})
+
+                if(request.params.get("tags") != None):
+                    tags = list()
+                    for tag in str(request.params.get("tags")).split(","):
+                        tags.append({"name": tag})
+                    data["tags"] = tags
+
+                if(request.params.get("author") != ""):
+                    data["author"] = request.params.get("author")
+                if(request.params.get("author_uri") != ""):
+                    data["author_uri"] = request.params.get("author_uri")
+                if(request.params.get("author_email") != ""):
+                    data["author_email"] = request.params.get("author_email")
+
+                if(request.params.get("maintainer") != ""):
+                    data["maintainer"] = request.params.get("maintainer")
+                if(request.params.get("maintainer_uri") != ""):
+                    data["maintainer_uri"] = request.params.get("maintainer_uri")
+                if(request.params.get("maintainer_email") != ""):
+                    data["maintainer_email"] = request.params.get("maintainer_email")
+
+                if(request.params.get("extras__0__key") != ""):
+                    data["extras"].append({"key": request.params.get("extras__0__key"), "value": request.params.get("extras__0__value") or ""})
+
+                extraIndex = 1
+                while((request.params.get("extras__"+str(extraIndex)+"__key") or "") != ""):
+                    data["extras"].append({"key": request.params.get("extras__"+str(extraIndex)+"__key"), "value": request.params.get("extras__"+str(extraIndex)+"__value") or ""})
+                    extraIndex = extraIndex + 1
+
+                # Create the package on LiveSchema
+                CKANpackage = get_action('package_create')(context, data_dict=data)
+
+                # Reset ttl resource
+                TTL_Resource = get_action("resource_create")(
+                    context, data_dict={"package_id": CKANpackage["name"], "url": "", 'upload': "", "format": "temp", "name": CKANpackage["name"]+".ttl", "resource_type": "Serialized ttl", "description": "Serialized ttl format of the dataset"})
+                            
+                # Reset rdf resource
+                RDFResource = get_action("resource_create")(
+                    context, data_dict={"package_id": CKANpackage["name"], "url": "", 'upload': "", "format": "temp", "name": CKANpackage["name"]+".rdf", "resource_type": "Serialized rdf", "description": "Serialized rdf format of the dataset"})
+                            
+                # Reset csv resource
+                CSVResource = get_action("resource_create")(
+                    context, data_dict={"package_id": CKANpackage["name"], "url": "", 'upload': "", "format": "temp", "name": CKANpackage["name"]+".csv", "resource_type": "Parsed csv", "description": "Parsed csv containing all the triples of the dataset"})
+
+                # Set the dictionary of IDs
+                id = {'ttl_id': TTL_Resource['id'], 'rdf_id': RDFResource['id'], 'csv_id': CSVResource['id']}
+                
+                # Execute the action of upload the Dataset
+                result = get_action('ckanext_liveschema_theme_uploader')(context, data_dict={'id': id, 'package': CKANpackage, 'filePath': filePath, 'data': data})
+
+            # Redirect to the last package read page
+            return redirect_to(controller='package', action='read',
+                id=datasetName)
+
+        # Render the page of the service
+        return render('service/uploader.html')
     
     # Define the behaviour of the graph visualization tool
     def graph(self, id):
@@ -336,7 +464,7 @@ class LiveSchemaController(BaseController):
             dataset_type = c.pkg_dict['type'] or 'dataset'
 
             # Set the link for the information
-            #[TODO] Once deployed, link should have the url of the LiveSchema's relative resource instead of the url
+            #[TODO] Once deployed, link should have the url of the LiveSchema's relative resource instead of the internal url
             link = c.pkg_dict['url']
         # Otherwise return the relative error codes
         except NotFound:
@@ -452,11 +580,13 @@ class LiveSchemaController(BaseController):
             # Check if all the resources needed for the KLotus creation are present
             FCAResource = ""
             visualizationResource = ""
+            visId = ""
             for res in c.pkg_dict['resources']:
                 if "resource_type" in res.keys() and res["resource_type"] == "FCA" and "format" in res.keys() and res["format"] != "temp":
                     FCAResource = res["url"]
                 if "resource_type" in res.keys() and res["resource_type"] == "Visualization" and "format" in res.keys() and res["format"] != "temp":
                     visualizationResource = res["url"]
+                    visId = res["id"]
 
             # If the dataset does not have the required resource
             if not FCAResource or not visualizationResource:
@@ -466,7 +596,7 @@ class LiveSchemaController(BaseController):
                     id=id)
 
             # Execute the Visualization generator action
-            get_action('ckanext_liveschema_theme_visualization_lotus')(context, data_dict={"dataset_name": id, "FCAResource": FCAResource, "visualizationResource": visualizationResource})
+            get_action('ckanext_liveschema_theme_visualization_lotus')(context, data_dict={"dataset_name": id, "FCAResource": FCAResource, "visualizationResource": visualizationResource, "visId": visId})
 
             # Go to the KLotus page
             return redirect_to('/KLotus/' + id + '_KLotus.png')
@@ -602,13 +732,12 @@ class LiveSchemaController(BaseController):
                    'user': c.user, 'for_view': True,
                    'auth_user_obj': c.userobj}
 
-
         # Check if the user has the access to this service
         try:
             check_access('ckanext_liveschema_theme_reset', context, {})
         # Otherwise abort with NotAuthorized message
         except NotAuthorized:
-            abort(401, _('Anonymous users not authorized to reset the resources'))
+            abort(401, _('Only admins can reset the resources'))
 
         # Try to access the dataset
         try:
@@ -618,24 +747,47 @@ class LiveSchemaController(BaseController):
             c.pkg_dict = get_action('package_show')(context, data_dict)
 
             context['ignore_auth'] = True
-            # Delete all the current resources of the dataset
+            # Update or Delete all the current resources of the dataset
+            ttl = ""
+            rdf = ""
+            csv = ""
             for resource in c.pkg_dict["resources"]:
+                formatTemp = resource["format"]
+                # Reset resource
+                resource["format"] = "temp"
+                resource = toolkit.get_action("resource_update")(context=context, 
+                    data_dict=resource)
+                # Store id resources
+                if(formatTemp == "TTL" and resource["resource_type"] == "Serialized ttl"):
+                    ttl = resource["id"]
+                    continue
+                if(formatTemp == "RDF" and resource["resource_type"] == "Serialized rdf"):
+                    rdf = resource["id"]
+                    continue
+                if(formatTemp == "CSV" and resource["resource_type"] == "Parsed csv"):
+                    csv = resource["id"]
+                    continue
+                # Delete different formats
                 get_action("resource_delete")(context = context, data_dict={"id": resource["id"]})
-
-            # Reset ttl resource
-            TTL_Resource = toolkit.get_action("resource_create")(context=context, 
-                data_dict={"package_id":id, "format": "temp", "name": id+".ttl", "resource_type": "Serialized ttl", "description": "Serialized ttl format of the dataset"})
-                        
-            # Reset rdf resource
-            RDFResource = toolkit.get_action("resource_create")(context=context, 
-                data_dict={"package_id":id, "format": "temp", "name": id+".rdf", "resource_type": "Serialized rdf", "description": "Serialized rdf format of the dataset"})
-                        
-            # Reset csv resource
-            CSVResource = toolkit.get_action("resource_create")(context=context, 
-                data_dict={"package_id":id, "format": "temp", "name": id+".csv", "resource_type": "Parsed csv", "description": "Parsed csv containing all the triples of the dataset"})
+            
+            if(not ttl):
+                # Create new ttl resource
+                TTL_Resource = toolkit.get_action("resource_create")(
+                    data_dict={"package_id":c.pkg_dict["name"], "format": "temp", "name": c.pkg_dict["name"]+".ttl", "resource_type": "Serialized ttl", "description": "Serialized ttl format of the dataset"})
+                ttl = TTL_Resource["id"]
+            if(not rdf):
+                # Create new rdf resource
+                RDFResource = toolkit.get_action("resource_create")(
+                    data_dict={"package_id":c.pkg_dict["name"], "format": "temp", "name": c.pkg_dict["name"]+".rdf", "resource_type": "Serialized rdf", "description": "Serialized rdf format of the dataset"})
+                rdf = RDFResource["id"]
+            if(not csv):
+                # Create new csv resource
+                CSVResource = toolkit.get_action("resource_create")(
+                    data_dict={"package_id":c.pkg_dict["name"], "format": "temp", "name": c.pkg_dict["name"]+".csv", "resource_type": "Parsed csv", "description": "Parsed csv containing all the triples of the dataset"})
+                csv = CSVResource["id"]
 
             # Execute the action of reset of all the resources
-            result = get_action('ckanext_liveschema_theme_reset')(context, data_dict={'id': {'ttl_id': TTL_Resource['id'], 'rdf_id': RDFResource['id'], 'csv_id': CSVResource['id']}, 'apikey': c.userobj.apikey, 'package': c.pkg_dict})
+            result = get_action('ckanext_liveschema_theme_reset')(context, data_dict={'id': {'ttl_id': ttl, 'rdf_id': rdf, 'csv_id': csv}, 'apikey': c.userobj.apikey, 'package': c.pkg_dict})
 
         # Otherwise return the relative error codes
         except NotFound:

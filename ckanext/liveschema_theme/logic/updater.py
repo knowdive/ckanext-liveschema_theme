@@ -7,12 +7,13 @@ import re
 import string 
 import json
 import os
+import shutil
 import rdflib
 from rdflib import Graph, Namespace
 from rdflib.util import guess_format
 from rdflib.plugins.parsers.notation3 import TurtleParser
 
-import ckan.plugins.toolkit as toolkit
+from ckan.plugins import toolkit
 
 import ckan.lib.helpers as helpers
 
@@ -42,20 +43,22 @@ def updateLiveSchema(data_dict):
         scrapeFinto(catalogs, datasets)
 
     # Scrape the RVS Repository
+    """
     if not catalogsSelection or "rvs" in catalogsSelection:
         print("rvs")
         scrapeRVS(catalogs, datasets)
+    """
 
     # Scrape the DERI Repository
     if not catalogsSelection or "deri" in catalogsSelection:
         print("deri")
         scrapeDERI(catalogs, datasets)
-
+    
     # Scrape Knowdive
     if not catalogsSelection or "knowdive" in catalogsSelection:
         print("knowdive")
         scrapeKnowDive(catalogs, datasets)
-
+        
     # Scrape the the Others excel file from the GitHub Repository
     if not catalogsSelection or "github" in catalogsSelection:
         print("github")
@@ -65,6 +68,11 @@ def updateLiveSchema(data_dict):
     if not catalogsSelection or "lov" in catalogsSelection:
         print("lov")
         scrapeLOV(catalogs, datasets)
+
+    # Scrape the Users Repository
+    if not catalogsSelection or "users" in catalogsSelection:
+        print("users")
+        scrapeUsers(catalogs)
 
 
 # Script to scrape the Finto repository
@@ -291,7 +299,6 @@ def scrapeDERI(catalogs, datasets):
             checkPackage(datasets, package)
             
 
-
 # Script to scrape KnowDive
 def scrapeKnowDive(catalogs, datasets):
     # Check if the KnowDive is present on LiveSchema
@@ -311,7 +318,6 @@ def scrapeKnowDive(catalogs, datasets):
                 "description": "Vocabularies developed by the Knowdive Research group", 
                 "extras": [{"key": "URL", "value": "http://knowdive.disi.unitn.it/"}]})
                 
-
 
 # Script to scrape the Others excel file from GitHub Repository
 def scrapeGitHub(catalogs, datasets):
@@ -440,6 +446,9 @@ def vocabMeta(cataLOV, datasets, link):
     for child in soup("tbody")[0].find_all("tr"):
         if child.td.text.strip() == "URI":
             uri = child.find_all("td")[1].text.strip() 
+            # Check for Duplicates between Deri & LOV
+            if "vocab.deri.ie" in uri:
+                return
             package["extras"].append({"key": "uri", "value": uri})
         if child.td.text.strip() == "Namespace":
             namespace = child.find_all("td")[1].text.strip() 
@@ -447,6 +456,9 @@ def vocabMeta(cataLOV, datasets, link):
         if child.td.text.strip() == "homepage":
             homepage = child.find_all("td")[1].text.strip() 
             package["extras"].append({"key": "contact_uri", "value": homepage})
+            # Check for Duplicates between Deri & LOV
+            if "vocab.deri.ie" in uri:
+                return
         if child.td.text.strip() == "Description":
             description = child.find_all("td")[1].text.strip() 
             package["notes"] = description
@@ -535,6 +547,25 @@ def vocabMeta(cataLOV, datasets, link):
 
     # Delete the package at every iteration 
     del package
+
+
+# Script to update the Users
+def scrapeUsers(catalogs):
+    # Check if RVS is present on LiveSchema
+    cataUsers = ""
+    if "users" in catalogs:
+        # If it is then get its relative information and datasets
+        cataUsers = toolkit.get_action('organization_show')(
+            data_dict={"id": "users", "include_datasets": False, "include_dataset_count": False, "include_extras": False, "include_users": False, "include_groups": False, "include_tags": False, "include_followers": False})
+    else:
+        # Otherwise create the catalog for RVS
+        cataUsers = toolkit.get_action('organization_create')(
+            data_dict={"name": "users",
+                "id": "users",
+                "state": "active",
+                "title": "User defined Datasets",
+                "description": "Datasets which have been uploaded to LiveSchema using the proper Service"})
+
 
 # Procedure to check the package to update for LiveSchema
 def checkPackage(datasets, package):
@@ -647,7 +678,7 @@ def checkPackage(datasets, package):
         # If there are none, then delete the dataset
         CKANpackage = toolkit.get_action('dataset_purge')(
             data_dict={"id": package["name"], "force":"True"})
-        
+
 
 # Procedure to add the resources of the given package
 def addResources(id, package):
@@ -669,13 +700,15 @@ def addResources(id, package):
         removeTemp(package["name"])
         return 
 
+    path = "src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/resources/"
+
     try:
         # Serialize the vocabulary in ttl
-        g.serialize(destination=str(os.path.join("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/", package["name"] + ".ttl")), format=guess_format('ttl'))
+        g.serialize(destination=str(os.path.join(path, package["name"] + ".ttl")), format=guess_format('ttl'))
         # Add the serialized ttl file to LiveSchema
         upload = cgi.FieldStorage()
         upload.filename = package["name"] + ".ttl"
-        upload.file = file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".ttl")
+        upload.file = file(path + package["name"] + ".ttl")
         data = {
             "id": id["ttl_id"], 
             "format": "TTL",
@@ -684,18 +717,18 @@ def addResources(id, package):
         }
         toolkit.get_action('resource_patch')(context = {'ignore_auth': True}, data_dict=data)
         # Remove the temporary ttl file from the server
-        os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".ttl")
+        os.remove(path + package["name"] + ".ttl")
     except Exception as e:
         # In case of an error during the graph's serialization, print the error
         print(str(e) + "\n")
 
     try:
         # Serialize the vocabulary in rdf
-        g.serialize(destination=str(os.path.join("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/", package["name"] + ".rdf")), format="pretty-xml")
+        g.serialize(destination=str(os.path.join(path, package["name"] + ".rdf")), format="pretty-xml")
         # Add the serialized rdf file to LiveSchema     
         upload = cgi.FieldStorage()
         upload.filename = package["name"] + ".rdf"
-        upload.file = file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".rdf")
+        upload.file = file(path + package["name"] + ".rdf")
         data = {
             "id": id["rdf_id"], 
             "format": "RDF",
@@ -704,7 +737,7 @@ def addResources(id, package):
         }
         toolkit.get_action('resource_patch')(context = {'ignore_auth': True}, data_dict=data)
         # Remove the temporary rdf file from the server
-        os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".rdf")
+        os.remove(path + package["name"] + ".rdf")
     except Exception as e:
         # In case of an error during the graph's serialization, print the error
         print(str(e) + "\n")
@@ -742,12 +775,12 @@ def addResources(id, package):
     # Create the DataFrame to save the vocabs' information
     DTF = pd.DataFrame(list_, columns=["Subject", "Predicate", "Object", "SubjectTerm", "PredicateTerm", "ObjectTerm", "Domain", "Domain Version"])
     # Parse the DataFrame into the csv file
-    DTF.to_csv(os.path.normpath(os.path.expanduser("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".csv")))
+    DTF.to_csv(os.path.normpath(os.path.expanduser(path + package["name"] + ".csv")))
 
     # Upload the csv file to LiveSchema
     upload = cgi.FieldStorage()
     upload.filename = package["name"] + ".csv"
-    upload.file = file("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".csv")
+    upload.file = file(path + package["name"] + ".csv")
     data = {
         "id": id["csv_id"],
         "format": "CSV",
@@ -755,9 +788,13 @@ def addResources(id, package):
         'upload': upload
     }
     toolkit.get_action('resource_patch')(context = {'ignore_auth': True}, data_dict=data)
+    
+    # Add file to DataStore using DataPusher
+    import ckanext.datapusher.logic.action as dpaction
+    dpaction.datapusher_submit(context = {'ignore_auth': True}, data_dict={'resource_id': str(id["csv_id"])})
 
     # Remove the temporary csv file from the server
-    os.remove("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + package["name"] + ".csv")
+    os.remove(path + package["name"] + ".csv")
 
     # Remove the eventual temp resources left
     removeTemp(package["name"])
@@ -795,3 +832,51 @@ def addAgent(agentTitle, agentLink):
                 "extras": [{"key": "URI", "value": agentLink}]})
     # Return the id of the created agent
     return {"id": agentName}
+
+
+# Add the dataset obtained by the Service
+def uploadDataset(id, package, filePath, data):
+    
+    # Add the resources of the package
+    addResources(id, package)
+
+    # After all get the new online version
+    CKANpackage = toolkit.get_action('package_show')(
+        data_dict={"id": package["name"]})
+
+    # Check if there are resources available in that dataset
+    if (CKANpackage["num_resources"] == 0):
+        # If there are none, then delete the dataset and return
+        CKANpackage = toolkit.get_action('dataset_purge')(
+            data_dict={"id": package["name"], "force":"True"})
+        return
+
+    # Remove the temporary file from the server and update the url in case of uploaded file
+    if(filePath):
+        os.remove(filePath)
+        # Check if the TTL resource is correctly available 
+        for resource in CKANpackage["resources"]:
+            if (resource["format"] == "TTL" and resource["resource_type"] == "Serialized ttl"):
+                # Update the url of the package with the one of the TTL resource
+                CKANpackage["url"] = resource["url"]
+                break
+        # Update the online version of the package with the new url
+        CKANpackage = toolkit.get_action('package_update')(
+            data_dict=CKANpackage)
+
+    # Add Agents
+    agents = list()
+    if("author" in data.keys()): 
+        agents.append(addAgent(data["author"], data["author_uri"]))
+        CKANpackage["maintainer"] = data["author"]
+    if("maintainer" in data.keys()): 
+        agents.append(addAgent(data["maintainer"], data["maintainer_uri"]))
+        CKANpackage["maintainer"] = data["maintainer"]
+    CKANpackage["groups"] = agents
+
+    # Update the online version of the package with the new agents
+    if(agents):
+        CKANpackage = toolkit.get_action('package_update')(
+            data_dict=CKANpackage)
+    
+

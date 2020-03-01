@@ -482,9 +482,9 @@
 
 
   .select2-result-selectable.ok{
-    background-color: green;
+    background-color: darkgreen;
   }
 
   .select2-result-selectable.no{
-    background-color: lightgreen;
+    background-color: green;
   }

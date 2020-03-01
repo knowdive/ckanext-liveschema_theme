@@ -13,9 +13,9 @@
     </header>
       <ul class="media-grid" data-module="media-grid">
         {% if h.check_access('ckanext_liveschema_theme_updater') %}
-          {# Uploader #}
+          {# Updater #}
           <li class="media-item">
-            <img src="https://cdn.pixabay.com/photo/2016/01/03/00/43/upload-1118929_960_720.png" alt="Uploader" class="img-responsive media-image">
+            <img src="https://cdn.pixabay.com/photo/2017/02/07/02/16/cloud-2044820_960_720.png" alt="Updater" class="img-responsive media-image">
             <h3 class="media-heading">LiveSchema Updater</h3>
               Scrape the Catalogs searching for new information in order to have an always updated system
             <a href="/service/updater" title="Go to LiveSchema Updater" class="media-view">
@@ -23,6 +23,16 @@
             </a>
           </li>
         {% endif %}
+
+          {# Uploader#}
+          <li class="media-item">
+            <img src="https://cdn.pixabay.com/photo/2017/02/07/02/16/cloud-2044823_960_720.png" alt="Uploader" class="img-responsive media-image">
+            <h3 class="media-heading">Upload Dataset</h3>
+              Add your Dataset to LiveSchema
+            <a href="/service/uploader" title="Go to Upload Dataset" class="media-view">
+              <span>Go to Upload Dataset</span>
+            </a>
+          </li>
       
           {# FCA_Generator #}
           <li class="media-item">
@@ -38,7 +48,7 @@
           <li class="media-item">
             <img src="https://cdn4.iconfinder.com/data/icons/conscious-living-and-personality-traits-4/512/447_Curious_exclamation_eye_knowledge_mark-512.png" alt="Cue_Generator" class="img-responsive media-image">
             <h3 class="media-heading">Cue Generator</h3>
-              Extract the Cue Metrics from a given Dataset in order to have more insightful information about it
+              Extract the Cue Metrics from a given Dataset in order to gain more insightful information
             <a href="/service/cue_generator" title="Go to the Cue Generator" class="media-view">
               <span>Go to the Cue Generator</span>
             </a>
@@ -56,7 +66,7 @@
 
           {# Query Catalog #}
           <li class="media-item">
-            <img src="https://labs.mondeca.com/sparqlEndpointsStatus/images/SES.png" alt="Query_Catalog" class="img-responsive media-image">
+            <img src="https://s3.amazonaws.com/tinycards/image/14bd759437aa6b44e3e224cfe624a2e5" alt="Query_Catalog" class="img-responsive media-image">
             <h3 class="media-heading">Query Catalog</h3>
               SPARQL Query to analyse the whole Catalog of Datasets
             <a href="/service/query_catalog" title="Go to the Query Catalog" class="media-view">
