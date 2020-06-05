@@ -6,8 +6,6 @@ import ckan.plugins.toolkit as toolkit
 
 import cgi
 
-
-
 # Function that generate the Cue file
 def generateCue(data_dict):
     # Get the dataset link

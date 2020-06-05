@@ -1,0 +1,60 @@
+{% extends "page.html" %}
+
+{% block subtitle %}{{ _("Knowledge Embedder") }}{% endblock %}
+
+{% block breadcrumb_content %}
+  <li>{{ h.nav_link(_('Services'), controller='ckanext.liveschema_theme.controller:LiveSchemaController', action='services') }}</li>
+  <li class="active"><a href="{{ h.url_for_static('/service/embedder') }}">Knowledge Embedder</a></li>
+{% endblock %}
+
+{% block primary_content %}
+  <article class="module module-content">
+    <header>
+      <h1>Knowledge Embedder</h1>
+    </header>
+    <div class="col-sm-7">
+      <form action="/service/embedder" method="post">
+        <label for="select2">
+          Select the dataset for Knowledge Embedding generation
+        </label>
+        <br />
+        <select class="js-example-basic-single js-states js-example-responsive" style="width: 100%" id="select2" name="dataset">
+            <option></option>
+            {% for dataset in h.liveschema_theme_dataset_selection("Parsed csv") %}
+              <option value="{{ dataset.name }},{{ dataset.link }}" class="{% if dataset.link == "" %}no{% else %}ok{% endif %}"{% if id and id == dataset.name %}selected="selected"{% endif %}>{{ dataset.title }}</option>
+            {% endfor %}
+        </select>
+        <br />
+        <br />
+        <button class="btn btn-primary btn-lg"> 
+            Generate the Knowledge Embedding 
+        </button>
+        <br />
+        <h3 onclick="document.getElementById('advanced').classList.toggle('hide-heading');"><a>Advanced option</a></h3>
+        <div id="advanced" class="hide-heading">
+          <label for="predicates">
+            Select the model (default: TransE)
+          </label>
+          <br />
+          <input type="text" name="strModel" placeholder="TransE" id="strModel" style="width: 100%">
+        </div>
+        <br />
+        <br />
+      </form>
+    </div>
+    {{ args }}
+  </article>
+
+  {% resource 'liveschema_theme/select2_singleDataset.js' %}
+
+  {% resource 'liveschema_theme/select2/select2.js' %}
+{% endblock %}
+
+{% block secondary_content %}
+  {% snippet "service/snippets/helper_embedder.html" %}
+{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    {% resource 'liveschema_theme/select2/select2.css' %}
+{% endblock %}

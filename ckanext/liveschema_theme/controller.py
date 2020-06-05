@@ -48,9 +48,78 @@ class LiveSchemaController(BaseController):
         # Render the page desired
         return render('service/services.html')
 
+    # Define the behaviour of the embedder service
+    def embedder(self, id=""):
+        # Build the context using the information obtained by session and user
+        context = {'model': model, 'session': model.Session,
+                   'user': c.user or c.author}
+
+        # Check if the user has the access to this page
+        try:
+            check_access('ckanext_liveschema_theme_embedder', context, {})
+        # Otherwise abort with NotAuthorized message
+        except NotAuthorized:
+            abort(401, _('Anonymous users not authorized to access the Knowledge Embedder'))
+
+        # If the page has to handle the form resulting from the service
+        if request.method == 'POST' and "dataset" in request.params.keys() and request.params['dataset']:
+
+            context['ignore_auth'] = True
+            # Get the selected dataset
+            dataset = request.params['dataset'].split(",")
+            dataset_name = dataset[0]
+            dataset_link = dataset[1]
+            
+            # If the dataset does not have the required resource
+            if not dataset_link:
+                # Redirect to the dataset main page
+                #return redirect_to(controller='package', action='read', id=dataset_name)
+                # Reset resources and go to the dataset page
+                LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
+                return redirect_to(controller=LiveSchemaController, action='reset',
+                    id=dataset_name)
+
+            strModel = request.params.get('strModel', " ")
+
+            # Add the description of the Embedding specifying the Model
+            description = "Knowledge Embedding obtained with Model: "
+            if(len(strModel) == 0):
+                description = description + "TransE"
+            else:
+                description = description + strModel
+
+            dataset = toolkit.get_action('package_show')(
+                data_dict={"id": dataset_name})
+
+            # Set index to limit the resources up to 9
+            i = dataset["num_resources"] - 9
+            # Iterate over every resource of the dataset
+            for res in dataset["resources"]:
+                # Check if they have the relative Embedding file
+                if(res["description"] == description or (i > 0 and "resource_type" in res.keys() and res["resource_type"] == "Emb")):
+                    # Update the index
+                    i -= 1
+                    # Delete the older Embedding
+                    dataset = toolkit.get_action('resource_delete')(context=context,data_dict={"id": res["id"]})
+                
+            # Create temp Emb resource
+            EmbResource = toolkit.get_action("resource_create")(context=context,
+                data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_Emb.csv", "description": description, "resource_type": "Emb"})
+
+            # Execute the embedder action
+            get_action('ckanext_liveschema_theme_embedder')(context, data_dict={"res_id": EmbResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, "strModel": strModel, 'apikey': c.userobj.apikey})
+
+            # Go to the dataset page
+            LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
+            return redirect_to(controller=LiveSchemaController, action='embedding',
+                    id=dataset_name)
+
+        # Render the page of the service
+        return render('service/embedder.html',
+                      {'id': id})
+
     # Define the behaviour of the fca generator
     def fca_generator(self, id = ""):
-
         # Build the context using the information obtained by session and user
         context = {'model': model, 'session': model.Session,
                    'user': c.user or c.author}
@@ -476,6 +545,38 @@ class LiveSchemaController(BaseController):
         return render('package/graph.html',
                       {'dataset_type': dataset_type, 'link': link})
    
+    # Define the behaviour of the package Embedding tool
+    def embedding(self, id):
+        # Build the context using the information obtained by session and user
+        context = {'model': model, 'session': model.Session,
+                   'user': c.user, 'for_view': True,
+                   'auth_user_obj': c.userobj}
+
+        EmbList = list()
+        # Try to access the information
+        try:
+            # Define the data_dict to pass to the package_show action
+            data_dict = {'id': id, 'include_tracking': True}
+            # get the information about the desired package
+            c.pkg_dict = get_action('package_show')(context, data_dict)
+
+            # Get the dataset type of the dataset
+            dataset_type = c.pkg_dict['type'] or 'dataset'
+
+            for res in c.pkg_dict['resources']:
+                if "resource_type" in res.keys() and res["resource_type"] == "Emb":
+                    EmbList.append(res)
+
+        # Otherwise return the relative error codes
+        except NotFound:
+            abort(404, _('Dataset not found'))
+        except NotAuthorized:
+            abort(403, _('Unauthorized to read dataset %s') % id)
+
+        # Render the page of the service
+        return render('package/embedding.html',
+                      {'dataset_type': dataset_type, 'EmbList': EmbList, 'pkg' : c.pkg_dict}) 
+
     # Define the behaviour of the package FCA tool
     def fca(self, id):
         # Build the context using the information obtained by session and user

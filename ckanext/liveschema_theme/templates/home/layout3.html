@@ -5,7 +5,7 @@
       <br />
       <div class="module-content box">
           <header>
-            <h1 class="page-heading">5 Biggest Catalogs</h1>
+            <h1 class="page-heading">Biggest Catalogs</h1>
               <ul>
                 {% for org in h.liveschema_theme_most_popular_catalogs() %}
                   {% if org.package_count != 0 %}
@@ -54,6 +54,16 @@
                   Add your Dataset to LiveSchema
                 <a href="/service/uploader" title="Go to Upload Dataset" class="media-view">
                   <span>Go to Upload Dataset</span>
+                </a>
+              </li>
+
+              {# Embedder #}
+              <li class="media-item" style="width:90%">
+                <img src="https://www.schemaapp.com/wp-content/uploads/2020/02/Dots-Graphic.png" alt="Embedder" class="img-responsive media-image" style="width:15%; height:15%; margin-right:20px" ALIGN=left>
+                <h3 class="media-heading">Knowledge Embedder</h3>
+                  Generate the Knowledge Embedding from a given Dataset 
+                <a href="/service/embedder" title="Go to the Knowledge Embedder" class="media-view">
+                  <span>Go to the Knowledge Embedder</span>
                 </a>
               </li>
           

@@ -9,6 +9,10 @@ def services(context, data_dict):
     # All users can access the services page
     return {'success': True}
 
+def embedder(context, data_dict):
+    # All registered users can access the Knowledge Embedder page
+    return {'success': authz.auth_is_loggedin_user()}
+
 def fca_generator(context, data_dict):
     # All registered users can access the FCA generator page
     return {'success': authz.auth_is_loggedin_user()}

@@ -6,8 +6,6 @@ import rdflib
 from rdflib import Graph
 from rdflib.util import guess_format
 
-
-
 import pandas as pd
 import os
 import math
@@ -20,10 +18,9 @@ import ckan.lib.helpers as helpers
 import csv
 from itertools import izip_longest
 
-
-
 # Import the package for the update function from the logic folder
 import ckanext.liveschema_theme.logic.updater
+import ckanext.liveschema_theme.logic.embedder
 import ckanext.liveschema_theme.logic.fca_generator
 import ckanext.liveschema_theme.logic.cue_generator
 import ckanext.liveschema_theme.logic.visualization_generator
@@ -42,6 +39,12 @@ def updater(context, data_dict):
 def uploader(context, data_dict):
     # Enqueue the script to be executed by the background worker
     enqueue_job(ckanext.liveschema_theme.logic.updater.uploadDataset, args=[data_dict['id'], data_dict['package'], data_dict['filePath'], data_dict['data']], title="uploadPackage", queue=u'default', timeout=-1)
+
+# Define the action of embedder of LiveSchema
+def embedder(context, data_dict):
+    # Enqueue the script to be executed by the background worker
+    # [TODO] Pass filePath of resource to avoid 404 with private datasets
+    enqueue_job(ckanext.liveschema_theme.logic.embedder.embedKnowledge, args=[data_dict], title="embedKnowledge", queue=u'default', timeout=-1)
 
 # Define the action of fca_generator of LiveSchema
 def fca_generator(context, data_dict):

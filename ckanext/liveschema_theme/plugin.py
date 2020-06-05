@@ -156,15 +156,18 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
 
         # Define the list of new routes to be added
         map.connect('ckanext_liveschema_theme_services', '/service', controller=LiveSchemaController, action='services')
+        map.connect('ckanext_liveschema_theme_embedder', '/service/embedder', controller=LiveSchemaController, action='embedder')
         map.connect('ckanext_liveschema_theme_fca_generator', '/service/fca_generator', controller=LiveSchemaController, action='fca_generator')
         map.connect('ckanext_liveschema_theme_cue_generator', '/service/cue_generator', controller=LiveSchemaController, action='cue_generator')
         map.connect('ckanext_liveschema_theme_visualization_generator', '/service/visualization_generator', controller=LiveSchemaController, action='visualization_generator')
         map.connect('ckanext_liveschema_theme_query_catalog', '/service/query_catalog', controller=LiveSchemaController, action='query_catalog')
+        map.connect('ckanext_liveschema_theme_fca_generator_id', '/service/embedder/{id}', controller=LiveSchemaController, action='embedder')
         map.connect('ckanext_liveschema_theme_fca_generator_id', '/service/fca_generator/{id}', controller=LiveSchemaController, action='fca_generator')
         map.connect('ckanext_liveschema_theme_cue_generator_id', '/service/cue_generator/{id}', controller=LiveSchemaController, action='cue_generator')
         map.connect('ckanext_liveschema_theme_visualization_generator_id', '/service/visualization_generator/{id}', controller=LiveSchemaController, action='visualization_generator')
         map.connect('ckanext_liveschema_theme_updater', '/service/updater', controller=LiveSchemaController, action='updater')
         map.connect('ckanext_liveschema_theme_uploader', '/service/uploader', controller=LiveSchemaController, action='uploader')
+        map.connect('ckanext_liveschema_theme_embedding', '/dataset/embedding/{id}', controller=LiveSchemaController, action='embedding', ckan_icon='line-chart')
         map.connect('ckanext_liveschema_theme_fca', '/dataset/fca/{id}', controller=LiveSchemaController, action='fca', ckan_icon='table')
         map.connect('ckanext_liveschema_theme_cue', '/dataset/cue/{id}', controller=LiveSchemaController, action='cue', ckan_icon='info')
         map.connect('ckanext_liveschema_theme_visualization', '/dataset/visualization/{id}', controller=LiveSchemaController, action='visualization', ckan_icon='image')
@@ -182,6 +185,7 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
     def get_auth_functions(self):
         return {
             'ckanext_liveschema_theme_services': ckanext.liveschema_theme.logic.auth.services,
+            'ckanext_liveschema_theme_embedder': ckanext.liveschema_theme.logic.auth.embedder,
             'ckanext_liveschema_theme_fca_generator': ckanext.liveschema_theme.logic.auth.fca_generator,
             'ckanext_liveschema_theme_cue_generator': ckanext.liveschema_theme.logic.auth.cue_generator,
             'ckanext_liveschema_theme_visualization_generator': ckanext.liveschema_theme.logic.auth.visualization_generator,
@@ -195,6 +199,8 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
 
     def get_actions(self):
         action_functions = {
+            'ckanext_liveschema_theme_embedder':
+                ckanext.liveschema_theme.logic.action.embedder,
             'ckanext_liveschema_theme_fca_generator':
                 ckanext.liveschema_theme.logic.action.fca_generator,
             'ckanext_liveschema_theme_cue_generator':

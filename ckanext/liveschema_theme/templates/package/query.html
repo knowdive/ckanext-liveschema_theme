@@ -25,9 +25,11 @@
           <p>
             <table style="width:100%">
             {% for row in result %}
-              <tr>
+              <tr style="border: 1px solid #dddddd;">
               {% for element in row %}
-                <td>{{ element }}</td>
+                <td>
+                  {{ element }}
+                </td>
               {% endfor %}
               </tr>
             {% endfor %}

@@ -69,6 +69,17 @@
 
 
 /* ===========================================
+   Container size
+   =========================================== */
+
+/* Enlarge the maximum width of the container for bigger screens. */
+@media (min-width: 1280px){
+.container {
+    width: 1254px;
+}
+
+
+/* ===========================================
    The content in the middle of the front page
    =========================================== */
 
@@ -160,30 +171,37 @@ a {
    The format tags
    ==================================== */
 .label[data-format*=ttl] {
-    background-color: rgba(2, 116, 190, 1);
+    background-color: dodgerblue;
     pointer-events: none;
 }
 
 .label[data-format*=rdf] {
+    background-color: navy;
     pointer-events: none;
 }
 
 .label[data-format*=csv] {
+    background-color: goldenrod;
+    pointer-events: none;
+}
+
+.label[data-format*=emb] {
+    background-color: firebrick;
     pointer-events: none;
 }
 
 .label[data-format*=fca] {
-    background-color: green;
+    background-color: orangered;
     pointer-events: none;
 }
 
 .label[data-format*=cue] {
-    background-color: red;
+    background-color: green;
     pointer-events: none;
 }
 
 .label[data-format*=vis] {
-    background-color: #af0089;
+    background-color: purple;
     pointer-events: none;
 }
 
