@@ -11,9 +11,9 @@
   <article class="module module-content">
     <header>
       <h1>Knowledge Embedder</h1>
-    </header>
-    <div class="col-sm-7">
-      <form action="/service/embedder" method="post">
+    </header> 
+    <form action="/service/embedder" method="post">
+      <div class="col-sm-7">
         <label for="select2">
           Select the dataset for Knowledge Embedding generation
         </label>
@@ -30,18 +30,89 @@
             Generate the Knowledge Embedding 
         </button>
         <br />
-        <h3 onclick="document.getElementById('advanced').classList.toggle('hide-heading');"><a>Advanced option</a></h3>
-        <div id="advanced" class="hide-heading">
-          <label for="predicates">
+        <h3 onclick="document.getElementById('advanced').classList.toggle('hide-heading');"><a>Advanced option</a></h3>  
+      </div>
+      <div id="advanced" class="hide-heading">
+        <div class="col-sm-6">
+          <label for="strModel">
             Select the model (default: TransE)
           </label>
           <br />
           <input type="text" name="strModel" placeholder="TransE" id="strModel" style="width: 100%">
+          <br />
+          <label for="embedding_dim">
+            Select the embedding dimension (default: 64)
+          </label>
+          <br />
+          <input type="text" name="embedding_dim" placeholder="64" id="embedding_dim" style="width: 100%">
+          <br />
+          <label for="normalization_of_entities">
+            Select the normalization of entities (default: 2)
+          </label>
+          <br />
+          <input type="text" name="normalization_of_entities" placeholder="2" id="normalization_of_entities" style="width: 100%">
+          <br />
+          <label for="scoring_function">
+            Select the scoring function (default: 1)
+          </label>
+          <br />
+          <input type="text" name="scoring_function" placeholder="1" id="scoring_function" style="width: 100%">
+          <br />
+          <label for="margin_loss">
+            Select the margin loss (default: 1)
+          </label>
+          <br />
+          <input type="text" name="margin_loss" placeholder="1" id="margin_loss" style="width: 100%">
+          <br />
+          <label for="random_seed">
+            Select the random seed (default: 2)
+          </label>
+          <br />
+          <input type="text" name="random_seed" placeholder="2" id="random_seed" style="width: 100%">
+          <br />
+          <br />
         </div>
-        <br />
-        <br />
-      </form>
-    </div>
+        <div class="col-sm-6">
+          <label for="num_epochs">
+            Select the number of epochs (default: 500)
+          </label>
+          <br />
+          <input type="text" name="num_epochs" placeholder="500" id="num_epochs" style="width: 100%">
+          <br />
+          <label for="learning_rate">
+            Select the learning rate (default: 0.001)
+          </label>
+          <br />
+          <input type="text" name="learning_rate" placeholder="0.001" id="learning_rate" style="width: 100%">
+          <br />
+          <label for="batch_size">
+            Select the batch size (default: 32)
+          </label>
+          <br />
+          <input type="text" name="batch_size" placeholder="32" id="batch_size" style="width: 100%">
+          <br />
+          <label for="test_set_ratio">
+            Select the test set ratio (default: 0.1)
+          </label>
+          <br />
+          <input type="text" name="filter_negative_triples" placeholder="0.1" id="test_set_ratio" style="width: 100%">
+          <br />
+          <label for="filter_negative_triples">
+            Select the filter negative triples (default: True)
+          </label>
+          <br />
+          <input type="text" name="filter_negative_triples" placeholder="True" id="filter_negative_triples" style="width: 100%">
+          <br />
+          <label for="maximum_number_of_hpo_iters">
+            Select the maximum number of hpo iters (default: 3)
+          </label>
+          <br />
+          <input type="text" name="maximum_number_of_hpo_iters" placeholder="3" id="maximum_number_of_hpo_iters" style="width: 100%">
+          <br />
+          <br />
+        </div>
+      </div>
+    </form>
     {{ args }}
   </article>
 

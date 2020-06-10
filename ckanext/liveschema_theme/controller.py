@@ -78,15 +78,84 @@ class LiveSchemaController(BaseController):
                 LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
                 return redirect_to(controller=LiveSchemaController, action='reset',
                     id=dataset_name)
+            
+            # Get the strModel desired, TransE as standard
+            strModel = request.params.get('strModel', "TransE")
+            if(not strModel):
+                strModel = "TransE"
 
-            strModel = request.params.get('strModel', " ")
+            # Get the embedding_dim desired
+            embedding_dim = request.params.get('embedding_dim', 64)
+            if(not embedding_dim):
+                embedding_dim = 64
+
+            # Get the normalization_of_entities desired
+            normalization_of_entities = request.params.get('normalization_of_entities', 2)
+            if(not normalization_of_entities):
+                normalization_of_entities = 2
+
+            # Get the scoring_function desired
+            scoring_function = request.params.get('scoring_function', 1)
+            if(not scoring_function):
+                scoring_function = 1
+
+            # Get the margin_loss desired
+            margin_loss = request.params.get('margin_loss', 1)
+            if(not margin_loss):
+                margin_loss = 1
+
+            # Get the random_seed desired
+            random_seed = request.params.get('random_seed', 2)
+            if(not random_seed):
+                random_seed = 1
+
+            # Get the num_epochs desired
+            num_epochs = request.params.get('num_epochs', 500)
+            if(not num_epochs):
+                num_epochs = 500
+
+            # Get the learning_rate desired
+            learning_rate = request.params.get('learning_rate', 0.001)
+            if(not learning_rate):
+                learning_rate = 0.001
+
+            # Get the batch_size desired
+            batch_size = request.params.get('batch_size', 32)
+            if(not batch_size):
+                batch_size = 32
+
+            # Get the test_set_ratio desired
+            test_set_ratio = request.params.get('test_set_ratio', 0.1)
+            if(not test_set_ratio):
+                test_set_ratio = 0.1
+
+            # Get the filter_negative_triples desired
+            filter_negative_triples = request.params.get('filter_negative_triples', True)
+            if(not filter_negative_triples):
+                filter_negative_triples = True
+
+            # Get the maximum_number_of_hpo_iters desired
+            maximum_number_of_hpo_iters = request.params.get('maximum_number_of_hpo_iters', 3)
+            if(not maximum_number_of_hpo_iters):
+                maximum_number_of_hpo_iters = 3
+
+            options = {
+                "strModel" : str(strModel),
+                "embedding_dim" : str(embedding_dim),
+                "normalization_of_entities" : str(normalization_of_entities),
+                "scoring_function" : str(scoring_function),
+                "margin_loss" : str(margin_loss),
+                "random_seed" : str(random_seed),
+                "num_epochs" : str(num_epochs),
+                "learning_rate" : str(learning_rate),
+                "batch_size" : str(batch_size),
+                "test_set_ratio" : str(test_set_ratio),
+                "filter_negative_triples" : str(filter_negative_triples),
+                "maximum_number_of_hpo_iters" : str(maximum_number_of_hpo_iters)
+            }
 
             # Add the description of the Embedding specifying the Model
-            description = "Knowledge Embedding obtained with Model: "
-            if(len(strModel) == 0):
-                description = description + "TransE"
-            else:
-                description = description + strModel
+            description = "Knowledge Embedding obtained with Model: " + strModel
 
             dataset = toolkit.get_action('package_show')(
                 data_dict={"id": dataset_name})
@@ -101,13 +170,17 @@ class LiveSchemaController(BaseController):
                     i -= 1
                     # Delete the older Embedding
                     dataset = toolkit.get_action('resource_delete')(context=context,data_dict={"id": res["id"]})
-                
+            
+            # Create temp Model resource
+            ModelResource = toolkit.get_action("resource_create")(context=context,
+                data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_Model_"+strModel+".pkl", "description": description, "resource_type": "Emb"})
+    
             # Create temp Emb resource
             EmbResource = toolkit.get_action("resource_create")(context=context,
-                data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_Emb.csv", "description": description, "resource_type": "Emb"})
+                data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_Emb_"+strModel+".xlsx", "description": description, "resource_type": "Emb"})
 
             # Execute the embedder action
-            get_action('ckanext_liveschema_theme_embedder')(context, data_dict={"res_id": EmbResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, "strModel": strModel, 'apikey': c.userobj.apikey})
+            get_action('ckanext_liveschema_theme_embedder')(context, data_dict={"res_id": EmbResource["id"], "res_id_model": ModelResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, "options": options, 'apikey': c.userobj.apikey})
 
             # Go to the dataset page
             LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'

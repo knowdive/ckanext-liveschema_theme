@@ -76,7 +76,7 @@
     <span class="heading" >
       {{ h.resource_display_name(res) | truncate(50) }}
     </span>
-    <img src="https://videowiki.wmflabs.org/img/view-loader.gif" class="format-label" id="tempImage"></img>
+    <img src="https://www.taskbox.io/assets/img/animated/gears.gif" class="format-label" id="tempImage"></img>
     <p class="description">
       {% if res.description %}
         {{ h.markdown_extract(h.get_translated(res, 'description'), extract_length=80) }}
@@ -84,18 +84,14 @@
     </p>
   </li>
   <script>
-    // Get the last n elements of an array(string)
-    last =  function(array, n) {
-      if (array == null) 
-        return void 0;
-      if (n == null) 
-        return array[array.length - 1];
-      return array.slice(Math.max(array.length - n, 0));  
-    };
-    // Check the availability of a temp resource using ajax
-    function checkTemp(time) {
+    // Check the availability of that temp resource using ajax
+    function checkTemp{{ res.id[0:7] }}(time) {
       // Create an ajax request
       let xhttp_{{ ForRes }} = new XMLHttpRequest();
+      // Open and send the right API Request
+      let link = "{{ url }}".split('/')[0]
+      xhttp_{{ForRes}}.open("GET", link+"/api/3/action/package_show?id={{ pkg.name }}", true);
+      xhttp_{{ForRes}}.send();
       // Check if the ajax request has been satisfied
       xhttp_{{ForRes}}.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
@@ -108,22 +104,24 @@
           // Check for every resource
           function myFunction(item) {
             // Check only the resouce of this item
-            if(last(item.resource_type,3) == "{{ForRes}}"){
+            if( item.id == "{{ res.id }}"){
               count ++;
               // If the temp resource is no more a temp one
               if(item.format != "temp"){
                 // Reload the page, since there has been an update
-                location.reload();
+                location.reload(true);
               }
-              // Set an incremental timeout and run the check again
-              setTimeout(function() {
-                checkTemp(time+Math.sqrt(2*time)/time);
-              }, time*1000);
             }
           }
           // If the resouce has been deleted in case of error, then reload the page
           if(count == 0){
-            location.reload();
+            location.reload(true);
+          }
+          else{ // If the resouce has not been deleted but the page has not refreshed, then check again
+            // Set an incremental timeout and run the check again
+            setTimeout(function() {
+                  checkTemp{{ res.id[0:7] }}(time+Math.sqrt(4*time)/time);
+                }, time*1000);
           }
         }else{
           if (this.readyState == 4 && this.status == 404) { // If dataset has been deleted because it was not valid
@@ -132,16 +130,12 @@
           }
         }
       }
-      // Open and send the right API Request
-      let link = "{{ url }}".split('/')[0]
-      xhttp_{{ForRes}}.open("GET", link+"/api/3/action/package_show?id={{ pkg.name }}", true);
-      xhttp_{{ForRes}}.send();
     }
     // Check the availability of the resource as soon as the page has been loaded
     document.addEventListener('readystatechange', (event) => {
       if (document.readyState == "complete") {
         // Call the function to check the update suddently(using a 0s timeout)
-        checkTemp(0.5)   
+        checkTemp{{ res.id[0:7] }}(0.5)   
       }
     });
   </script>

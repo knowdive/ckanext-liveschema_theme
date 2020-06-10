@@ -571,6 +571,11 @@ def scrapeUsers(catalogs):
 def checkPackage(datasets, package):
     print(package["name"])
 
+    # Check License, if it's non usable then return without creating the package
+    nonUsableLicenses = ["http://unitsofmeasure.org/trac/wiki/TermsOfUse"]
+    if(package["license_id"] in nonUsableLicenses):
+        return
+
     # Boolean used to verify if the online resources need to be updated
     outResources = True
     # Index to check also if all the resources are correctly available

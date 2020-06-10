@@ -69,14 +69,20 @@
 
 
 /* ===========================================
-   Container size
+   Container
    =========================================== */
 
 /* Enlarge the maximum width of the container for bigger screens. */
 @media (min-width: 1280px){
-.container {
-    width: 1254px;
+    .container {
+        width: 1254px;
+    }
 }
+/* Remove 3px from fa to fit all the tabs on dataset page. */
+.nav-tabs .fa:last-child, .module-heading .fa:last-child, .btn .fa:last-child {
+    margin-right: 0px;
+}
+
 
 
 /* ===========================================
@@ -213,3 +219,8 @@ a {
     top: 9px;
     right: 10px;
 }
+
+/* Change Background */
+/*.hero {
+    background: url(https://i.pinimg.com/originals/74/43/a3/7443a31b6a19e5630b94a6538ff9bdd1.gif);
+}*/

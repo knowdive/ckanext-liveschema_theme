@@ -6,7 +6,7 @@
       <div class="module-content box">
           <header>
             <h1 class="page-heading">Biggest Catalogs</h1>
-              <ul>
+              <ul style="overflow-y: auto;height: 350px;">
                 {% for org in h.liveschema_theme_most_popular_catalogs() %}
                   {% if org.package_count != 0 %}
                     <li>
@@ -28,94 +28,89 @@
               </ul>
           </header>
         </div>
+        <br />
+        <div class="module-content box">
+          <header>
+            <h1 class="page-heading">Recent activities</h1>
+            {{ _(h.recently_changed_packages_activity_stream(limit=5)) }}
+          </header>
+        </div>
+        <br />
     </div>
     <div class="col2 col-md-6">
       <div class="module-content box">
         <header>
           <h1 class="page-heading">Services</h1>
         </header>
-          <ul class="media-grid" data-module="media-grid">
-            {% if h.check_access('ckanext_liveschema_theme_updater') %}
-              {# Updater #}
-              <li class="media-item" style="width:90%">
-                <img src="https://cdn.pixabay.com/photo/2017/02/07/02/16/cloud-2044820_960_720.png" alt="Updater" class="img-responsive media-image" style="width:15%; height:15%; margin-right:20px" ALIGN=left>
-                <h3 class="media-heading">LiveSchema Updater</h3>
-                  Scrape the Catalogs searching for new information in order to have an always updated system
-                <a href="/service/updater" title="Go to LiveSchema Updater" class="media-view">
-                  <span>Go to the LiveSchema Updater</span>
-                </a>
-              </li>
-            {% endif %}
-    
-              {# Uploader#}
-              <li class="media-item" style="width:90%">
-                <img src="https://cdn.pixabay.com/photo/2017/02/07/02/16/cloud-2044823_960_720.png" alt="Uploader" class="img-responsive media-image" style="width:15%; height:15%; margin-right:20px" ALIGN=left>
-                <h3 class="media-heading">Upload Dataset</h3>
-                  Add your Dataset to LiveSchema
-                <a href="/service/uploader" title="Go to Upload Dataset" class="media-view">
-                  <span>Go to Upload Dataset</span>
-                </a>
-              </li>
+        <ul class="media-grid" data-module="media-grid" style="overflow-y: auto;height: 475px;text-align: center;">
+        {% if h.check_access('ckanext_liveschema_theme_updater') %}
+          {# Updater #}
+          <li class="media-item" style="width:45%">
+            <img src="https://cdn.pixabay.com/photo/2017/02/07/02/16/cloud-2044820_960_720.png" alt="Updater" class="img-responsive media-image" style="width:34%; height:34%; display: block; margin-left: auto; margin-right: auto;" ALIGN=center>
+            <h3 class="">LiveSchema Updater</h3>
+            <a href="/service/updater" title="Go to LiveSchema Updater" class="media-view">
+              <span>Go to the LiveSchema Updater</span>
+            </a>
+          </li>
+        {% endif %}
 
-              {# Embedder #}
-              <li class="media-item" style="width:90%">
-                <img src="https://www.schemaapp.com/wp-content/uploads/2020/02/Dots-Graphic.png" alt="Embedder" class="img-responsive media-image" style="width:15%; height:15%; margin-right:20px" ALIGN=left>
-                <h3 class="media-heading">Knowledge Embedder</h3>
-                  Generate the Knowledge Embedding from a given Dataset 
-                <a href="/service/embedder" title="Go to the Knowledge Embedder" class="media-view">
-                  <span>Go to the Knowledge Embedder</span>
-                </a>
-              </li>
-          
-              {# FCA_Generator #}
-              <li class="media-item" style="width:90%">
-                <img src="http://www.cs.ubbcluj.ro/icfca14/wp-content/uploads/Screen-Shot-2013-06-27-at-1.17.18-PM.png" alt="FCA_Generator" class="img-responsive media-image" style="width:15%; height:15%; margin-right:20px" ALIGN=left>
-                <h3 class="media-heading">FCA Generator</h3>
-                  Generate the FCA matrix from a given Dataset 
-                <a href="/service/fca_generator" title="Go to the FCA Generator" class="media-view">
-                  <span>Go to the FCA Generator</span>
-                </a>
-              </li>
-          
-              {# Cue_Generator #}
-              <li class="media-item" style="width:90%">
-                <img src="https://cdn4.iconfinder.com/data/icons/conscious-living-and-personality-traits-4/512/447_Curious_exclamation_eye_knowledge_mark-512.png" alt="Cue_Generator" class="img-responsive media-image" style="width:15%; height:15%; margin-right:20px" ALIGN=left>
-                <h3 class="media-heading">Cue Generator</h3>
-                  Extract the Cue Metrics from a given Dataset in order to gain more insightful information
-                <a href="/service/cue_generator" title="Go to the Cue Generator" class="media-view">
-                  <span>Go to the Cue Generator</span>
-                </a>
-              </li>
-    
-              {# Visualization_Generator #}
-              <li class="media-item" style="width:90%">
-                <img src="https://intervene.readthedocs.io/en/latest/_images/venn4way.png" alt="Cue_Generator" class="img-responsive media-image" style="width:15%; height:15%; margin-right:20px" ALIGN=left>
-                <h3 class="media-heading">Visualization Generator</h3>
-                  Generate the input file for the Visualization tool from a given Dataset
-                <a href="/service/visualization_generator" title="Go to the Visualization Generator" class="media-view">
-                  <span>Go to the Visualization Generator</span>
-                </a>
-              </li>
-    
-              {# Query Catalog #}
-              <li class="media-item" style="width:90%">
-                <img src="https://s3.amazonaws.com/tinycards/image/14bd759437aa6b44e3e224cfe624a2e5" alt="Query_Catalog" class="img-responsive media-image" style="width:15%; height:15%; margin-right:20px" ALIGN=left>
-                <h3 class="media-heading">Query Catalog</h3>
-                  SPARQL Query to analyse the whole Catalog of Datasets
-                <a href="/service/query_catalog" title="Go to the Query Catalog" class="media-view">
-                  <span>Go to the Query Catalog</span>
-                </a>
-              </li>
-          
-            </ul>
-          </div>
-      <br />
-      <div class="module-content box">
-        <header>
-          <h1 class="page-heading">Recent activities</h1>
-          {{ _(h.recently_changed_packages_activity_stream(limit=5)) }}
-        </header>
+          {# Uploader #}
+          <li class="media-item" style="width:45%">
+            <img src="https://cdn.pixabay.com/photo/2017/02/07/02/16/cloud-2044823_960_720.png" alt="Uploader" class="img-responsive media-image" style="width:34%; height:34%; display: block; margin-left: auto; margin-right: auto;" ALIGN=center>
+            <h3 class="">Dataset Uploader</h3>
+            <a href="/service/uploader" title="Go to Upload Dataset" class="media-view">
+              <span>Go to Upload Dataset</span>
+            </a>
+          </li>
+
+          {# Embedder #}
+          <li class="media-item" style="width:45%">
+            <img src="https://www.schemaapp.com/wp-content/uploads/2020/02/Dots-Graphic.png" alt="Embedder" class="img-responsive media-image" style="width:42%; height:42%; display: block; margin-left: auto; margin-right: auto;" ALIGN=center>
+            <h3 class="media-heading">Knowledge Embedder</h3>
+            <a href="/service/embedder" title="Go to the Knowledge Embedder" class="media-view">
+              <span>Go to the Knowledge Embedder</span>
+            </a>
+          </li>
+      
+          {# FCA_Generator #}
+          <li class="media-item" style="width:45%">
+            <img src="http://www.cs.ubbcluj.ro/icfca14/wp-content/uploads/Screen-Shot-2013-06-27-at-1.17.18-PM.png" alt="FCA_Generator" class="img-responsive media-image" style="width:50%; height:50%; display: block; margin-left: auto; margin-right: auto;" ALIGN=center>
+            <h3 class="media-heading">FCA Generator</h3>
+            <a href="/service/fca_generator" title="Go to the FCA Generator" class="media-view">
+              <span>Go to the FCA Generator</span>
+            </a>
+          </li>
+      
+          {# Cue_Generator #}
+          <li class="media-item" style="width:45%">
+            <img src="https://cdn4.iconfinder.com/data/icons/conscious-living-and-personality-traits-4/512/447_Curious_exclamation_eye_knowledge_mark-512.png" alt="Cue_Generator" class="img-responsive media-image" style="width:46%; height:46%; display: block; margin-left: auto; margin-right: auto;" ALIGN=center>
+            <h3 class="media-heading">Cue Generator</h3>
+            <a href="/service/cue_generator" title="Go to the Cue Generator" class="media-view">
+              <span>Go to the Cue Generator</span>
+            </a>
+          </li>
+
+          {# Visualization_Generator #}
+          <li class="media-item" style="width:45%">
+            <img src="https://intervene.readthedocs.io/en/latest/_images/venn4way.png" alt="Cue_Generator" class="img-responsive media-image"  style="width:52%; height:52%; display: block; margin-left: auto; margin-right: auto;" ALIGN=center>
+            <h3 class="media-heading">Visualization Generator</h3>
+            <a href="/service/visualization_generator" title="Go to the Visualization Generator" class="media-view">
+              <span>Go to the Visualization Generator</span>
+            </a>
+          </li>
+
+          {# Query Catalog #}
+          <li class="media-item" style="width:45%">
+            <img src="https://s3.amazonaws.com/tinycards/image/14bd759437aa6b44e3e224cfe624a2e5" alt="Query_Catalog" class="img-responsive media-image" style="width:46%; height:46%; display: block; margin-left: auto; margin-right: auto;" ALIGN=center>
+            <h3 class="media-heading">Query Catalog</h3>
+            <a href="/service/query_catalog" title="Go to the Query Catalog" class="media-view">
+              <span>Go to the Query Catalog</span>
+            </a>
+          </li>
+        </ul>
+        <br />
       </div>
+      <br />
     </div>
   </div>
 </div>
