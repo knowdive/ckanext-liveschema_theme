@@ -19,7 +19,7 @@ filter_negative_triples = sys.argv[12].replace("!", "")
 maximum_number_of_hpo_iters = sys.argv[13].replace("!", "")
 
 # Set path
-path = "/usr/lib/ckan/default/src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/resources/" + str(sys.argv[1]) + "/"
+path = "src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/resources/" + str(sys.argv[1]) + "/"
 
 # Create configuration
 config = dict(

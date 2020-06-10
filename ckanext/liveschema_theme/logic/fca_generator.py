@@ -14,6 +14,10 @@ stopWords = ['able', 'about', 'above', 'according', 'accordingly', 'across', 'ac
 def generateFCA(data_dict):
     # [TODO] Get Dataset CSV Resource url from id of resource
 
+    # Set visibility of loading gear
+    loading='src/ckanext-liveschema_theme/ckanext/liveschema_theme/fanstatic/loading.css' 
+    loadingFile = open(loading, 'w+')
+
     # Create the dataframe from the CSV file
     triples = pd.read_csv(data_dict["dataset_link"])
 
@@ -125,6 +129,10 @@ def generateFCA(data_dict):
         # Remove eventual temp resources left in case of error
         if resource["format"] == "temp" and (resource["resource_type"] == "FCA"):
             toolkit.get_action("resource_delete")(context={"ignore_auth": True}, data_dict={"id":resource["id"]})
+
+    # Remove visibility of loading gear
+    if(os.path.isfile(loading)):
+        os.remove(loading)
 
 # Function that tokenize on capitalLetters the SubjectTerm, obtaining the simple words of its composition as strings separated by " "
 def tokenTerm(term):

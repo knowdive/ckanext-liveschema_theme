@@ -81,7 +81,6 @@ def dataset_selection(resource_type):
     # Return the list of datasets that have the relative csv file to return
     return dataSetSelection
 
-
 # Get the list of catalogs with their relative title
 def catalog_selection():
     '''Return a list of the catalogs with their relative title.'''
@@ -103,6 +102,16 @@ def catalog_selection():
 
     # Return the list of catalogs with their relative title
     return catalogsSelection
+
+# Return true if loading gif must be displayed
+def check_loading():
+    '''Return true if loading gif must be displayed'''
+    # Import library
+    import os.path
+    # Set path to check
+    loading = 'src/ckanext-liveschema_theme/ckanext/liveschema_theme/fanstatic/loading.css' 
+    # Return result if exists
+    return os.path.exists(loading)
 
 
 class LiveSchemaThemePlugin(plugins.SingletonPlugin):
@@ -141,7 +150,8 @@ class LiveSchemaThemePlugin(plugins.SingletonPlugin):
         return {'liveschema_theme_most_popular_catalogs': most_popular_catalogs, 
             'liveschema_theme_format_selection': format_selection, 
             'liveschema_theme_dataset_selection': dataset_selection, 
-            'liveschema_theme_catalog_selection': catalog_selection }   
+            'liveschema_theme_catalog_selection': catalog_selection , 
+            'check_loading': check_loading }   
 
     # Edit the Routes of CKAN to add custom ones for the services
     implements(IRoutes, inherit=True)

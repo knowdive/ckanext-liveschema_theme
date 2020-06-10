@@ -4,5 +4,5 @@ pandas
 rdflib
 intervene
 xlsxwriter
-subprocess
+subprocess32
 pykeen

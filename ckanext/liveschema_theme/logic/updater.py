@@ -30,6 +30,11 @@ sys.setdefaultencoding('utf8')
 
 # Main function used to update LiveSchema
 def updateLiveSchema(data_dict):    
+
+    # Set visibility of loading gear
+    loading='src/ckanext-liveschema_theme/ckanext/liveschema_theme/fanstatic/loading.css' 
+    loadingFile = open(loading, 'w+')
+
     # Get the list of catalogs and datasets to use to check the current state of LiveSchema
     catalogs = toolkit.get_action('organization_list')(data_dict={})
     datasets = toolkit.get_action('package_list')(data_dict={})
@@ -74,6 +79,10 @@ def updateLiveSchema(data_dict):
         print("users")
         scrapeUsers(catalogs)
 
+    # Remove visibility of loading gear
+    if(os.path.isfile(loading)):
+        os.remove(loading)
+        
 
 # Script to scrape the Finto repository
 def scrapeFinto(catalogs, datasets):

@@ -13,6 +13,11 @@ import cgi
 
 # Function that generate the Visualization file
 def generateVisualization(data_dict):
+
+    # Set visibility of loading gear
+    loading='src/ckanext-liveschema_theme/ckanext/liveschema_theme/fanstatic/loading.css' 
+    loadingFile = open(loading, 'w+')
+
     # Get the dataset link
     dataset_link = data_dict["dataset_link"]
     # If it is not valid: FCA yet to be created at the time
@@ -84,3 +89,7 @@ def generateVisualization(data_dict):
         # Remove eventual temp resources left in case of error
         if resource["format"] == "temp" and (resource["resource_type"] == "Visualization"):
             toolkit.get_action("resource_delete")(context={"ignore_auth": True}, data_dict={"id":resource["id"]})
+
+    # Remove visibility of loading gear
+    if(os.path.isfile(loading)):
+        os.remove(loading)

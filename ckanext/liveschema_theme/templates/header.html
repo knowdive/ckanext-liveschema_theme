@@ -15,12 +15,25 @@
     {% endif %} 
 {% endblock %}
 
-{% block header_site_navigation_tabs %}
-    {{ h.build_nav_main( ('search', _('Datasets')),
-     ('organizations_index', _('Organizations')), 
-     ('group_index', _('Groups')), 
-     ('ckanext_liveschema_theme_services', _('Services')), 
-     ('home.about', _('About')) ) }} 
+{% block header_debug %} 
+  <div class="debug">Controller : {{ c.controller }}<br/>Action : {{ c.action }}</div>
+{% endblock %}
+
+{% block header_site_navigation %}
+    {% if h.check_loading() %}
+        <img id="LoadingGif" src="https://www.taskbox.io/assets/img/animated/gears.gif" alt="Ongoing Operation" title="Ongoing Operation" style="max-height:40px; float: left;"/>
+    {% endif %}
+    <nav class="section navigation">
+        <ul class="nav nav-pills">
+            {% block header_site_navigation_tabs %}
+                {{ h.build_nav_main( ('search', _('Datasets')),
+                ('organizations_index', _('Organizations')), 
+                ('group_index', _('Groups')), 
+                ('ckanext_liveschema_theme_services', _('Services')), 
+                ('home.about', _('About')) ) }} 
+            {% endblock %}
+        </ul>
+    </nav>
 {% endblock %}
 
 {% block header_site_search %}
