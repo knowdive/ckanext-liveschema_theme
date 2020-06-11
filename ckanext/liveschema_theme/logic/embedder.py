@@ -24,7 +24,9 @@ def embedKnowledge(data_dict):
 
     # Set visibility of loading gear
     loading='src/ckanext-liveschema_theme/ckanext/liveschema_theme/fanstatic/loading.css' 
-    loadingFile = open(loading, 'w+')
+    loadingFile = open(loading, 'w')
+    loadingFile.write(data_dict["loading"])
+    loadingFile.close()
 
 	# Name of folder for intermediate results
     path = "src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/resources/" + data_dict["dataset_name"] + "/"
@@ -47,7 +49,7 @@ def embedKnowledge(data_dict):
 			train.write(subj + "\t" + pred + "\t" + obj + "\n") 	
 
     # Call function with python3 to execute real embedder
-    out = subprocess32.call("python3 /usr/lib/ckan/default/src/ckanext-liveschema_theme/ckanext/liveschema_theme/logic/knowledgeEmbedder.py " + data_dict["dataset_name"] + 
+    out = subprocess32.call("python3 src/ckanext-liveschema_theme/ckanext/liveschema_theme/logic/knowledgeEmbedder.py " + data_dict["dataset_name"] + 
      " !" + data_dict["options"]["strModel"] + " !" + data_dict["options"]["embedding_dim"] + " !" + data_dict["options"]["normalization_of_entities"] + 
      " !" + data_dict["options"]["scoring_function"] + " !" + data_dict["options"]["margin_loss"] + " !" + data_dict["options"]["random_seed"] + 
      " !" + data_dict["options"]["num_epochs"] + " !" + data_dict["options"]["learning_rate"] + " !" + data_dict["options"]["batch_size"] + 

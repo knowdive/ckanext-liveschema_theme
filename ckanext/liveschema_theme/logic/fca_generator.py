@@ -16,7 +16,9 @@ def generateFCA(data_dict):
 
     # Set visibility of loading gear
     loading='src/ckanext-liveschema_theme/ckanext/liveschema_theme/fanstatic/loading.css' 
-    loadingFile = open(loading, 'w+')
+    loadingFile = open(loading, 'w')
+    loadingFile.write(data_dict["loading"])
+    loadingFile.close()
 
     # Create the dataframe from the CSV file
     triples = pd.read_csv(data_dict["dataset_link"])

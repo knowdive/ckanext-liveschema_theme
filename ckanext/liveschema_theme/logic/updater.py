@@ -33,7 +33,9 @@ def updateLiveSchema(data_dict):
 
     # Set visibility of loading gear
     loading='src/ckanext-liveschema_theme/ckanext/liveschema_theme/fanstatic/loading.css' 
-    loadingFile = open(loading, 'w+')
+    loadingFile = open(loading, 'w')
+    loadingFile.write(data_dict["loading"])
+    loadingFile.close()
 
     # Get the list of catalogs and datasets to use to check the current state of LiveSchema
     catalogs = toolkit.get_action('organization_list')(data_dict={})

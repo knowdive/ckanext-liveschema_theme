@@ -180,8 +180,7 @@ class LiveSchemaController(BaseController):
                 data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_Emb_"+strModel+".xlsx", "description": description, "resource_type": "Emb"})
 
             # Execute the embedder action
-            get_action('ckanext_liveschema_theme_embedder')(context, data_dict={"res_id": EmbResource["id"], "res_id_model": ModelResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, "options": options, 'apikey': c.userobj.apikey})
-
+            get_action('ckanext_liveschema_theme_embedder')(context, data_dict={"res_id": EmbResource["id"], "res_id_model": ModelResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, "options": options, 'apikey': c.userobj.apikey, 'loading': "/dataset/embedding/" + dataset_name })
             # Go to the dataset page
             LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
             return redirect_to(controller=LiveSchemaController, action='embedding',
@@ -250,7 +249,7 @@ class LiveSchemaController(BaseController):
                 data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_FCA.csv", "description": description, "resource_type": "FCA"})
 
             # Execute the fca_generator action
-            get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, "strPredicates": strPredicates, 'apikey': c.userobj.apikey})
+            get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, "strPredicates": strPredicates, 'apikey': c.userobj.apikey, 'loading': "/dataset/fca/" + dataset_name})
 
             # Go to the dataset page
             LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
@@ -306,7 +305,7 @@ class LiveSchemaController(BaseController):
                 # [TODO] Remove dataset_link from the inputs
                 # [TODO] Change also visualization and maybe also FCA
                 # Execute the fca_generator action
-                get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": resCSV, "strPredicates": "", 'apikey': c.userobj.apikey})
+                get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": resCSV, "strPredicates": "", 'apikey': c.userobj.apikey, 'loading': "/dataset/fca/" + dataset_name})
 
             # Check if the user has the access to this page
             try:
@@ -332,7 +331,7 @@ class LiveSchemaController(BaseController):
                 data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_Cue.csv", "description": "Cue metrics of the dataset", "resource_type": "Cue"})
 
             # Execute the Cue generator action
-            get_action('ckanext_liveschema_theme_cue_generator')(context, data_dict={"res_id": CUEResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, 'apikey': c.userobj.apikey})
+            get_action('ckanext_liveschema_theme_cue_generator')(context, data_dict={"res_id": CUEResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, 'apikey': c.userobj.apikey, 'loading': "/dataset/cue/" + dataset_name})
 
             # Go to the dataset page
             LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
@@ -342,7 +341,6 @@ class LiveSchemaController(BaseController):
         # Render the page of the service
         return render('service/cue_generator.html',
                       {'id': id})
-
 
     # Define the behaviour of the visualization generator
     def visualization_generator(self, id = ""):
@@ -385,7 +383,7 @@ class LiveSchemaController(BaseController):
                     data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_FCA.csv", "description": "FCA Matrix containing the information of all the triples", "resource_type": "FCA"})
 
                 # Execute the fca_generator action
-                get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": resCSV, "strPredicates": "", 'apikey': c.userobj.apikey})
+                get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": resCSV, "strPredicates": "", 'apikey': c.userobj.apikey, 'loading': "/dataset/fca/" + dataset_name})
 
             # Check if the user has the access to this page
             try:
@@ -412,7 +410,7 @@ class LiveSchemaController(BaseController):
                 data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_Visualization.csv", "description": "Visualization input", "resource_type": "Visualization"})
 
             # Execute the Visualization generator action
-            get_action('ckanext_liveschema_theme_visualization_generator')(context, data_dict={"res_id": VISResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, 'apikey': c.userobj.apikey})
+            get_action('ckanext_liveschema_theme_visualization_generator')(context, data_dict={"res_id": VISResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, 'apikey': c.userobj.apikey, 'loading': "/dataset/visualization/" + dataset_name })
 
             # Go to the dataset page
             LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
@@ -453,7 +451,7 @@ class LiveSchemaController(BaseController):
                     catalogsSelection.append(value)
             
             # Execute the update action
-            get_action('ckanext_liveschema_theme_updater')(context, data_dict={"catalogsSelection": catalogsSelection, 'apikey': c.userobj.apikey})
+            get_action('ckanext_liveschema_theme_updater')(context, data_dict={"catalogsSelection": catalogsSelection, 'apikey': c.userobj.apikey, 'loading': "/dataset"})
 
             # Redirect to the index
             return redirect_to("../")

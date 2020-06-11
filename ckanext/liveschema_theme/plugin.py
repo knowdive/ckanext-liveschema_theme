@@ -110,8 +110,12 @@ def check_loading():
     import os.path
     # Set path to check
     loading = 'src/ckanext-liveschema_theme/ckanext/liveschema_theme/fanstatic/loading.css' 
-    # Return result if exists
-    return os.path.exists(loading)
+    # Return result if not exists
+    if not os.path.exists(loading):
+        return False
+    # Otherwise return the first line
+    with open(loading) as f:
+        return f.readline()
 
 
 class LiveSchemaThemePlugin(plugins.SingletonPlugin):
