@@ -79,7 +79,20 @@ def embedKnowledge(data_dict):
         embeddings = xlsxwriter.Workbook(path + embeddingName)
         # Add bold cell format
         bold = embeddings.add_format({'bold': True})
+       
+        
+        # Create the sheet for the EntitiesToEntities relations
+        entities = embeddings.add_worksheet("Entities To Entities")
 
+        # Create the sheet for the Entities embeddings
+        entityEmb = embeddings.add_worksheet("Entities")
+
+        # Create the sheet for the RelationsToRelations 
+        relations = embeddings.add_worksheet("Relations to Relations")
+
+        # Create the sheet for the Relations embeddings
+        relationEmb = embeddings.add_worksheet("Relations")
+        
 
         # Retrieve Entities Embedding from json file
         with open(path + 'entities_to_embeddings.json') as entitiesE:
@@ -88,11 +101,8 @@ def embedKnowledge(data_dict):
         # Get all entities names from embeddings, sorted
         entitiesNames = sorted(entitiesEJSON.keys(), cmp=locale.strcoll)    
 
-        # Create the sheet for the Entities embeddings
-        entityEmb = embeddings.add_worksheet("Entities")
-        # Create the sheet for the EntitiesToEntities relations
-        entities = embeddings.add_worksheet("Entities To Entities")
-        entities.write(0, 0, 'Entity|Entity', bold)  # Cell is bold
+        # Header Cell of Entities is bold
+        entities.write(0, 0, 'Entity|Entity', bold)  
         index = 1
         # Iterate over the data and write it out row by row.
         for entity in entitiesNames:
@@ -128,11 +138,8 @@ def embedKnowledge(data_dict):
         # Get all relations names from embeddings, sorted
         relationsNames = sorted(relationsEJSON.keys(), cmp=locale.strcoll)
 
-        # Create the sheet for the Relations embeddings
-        relationEmb = embeddings.add_worksheet("Relations")
-        # Create the sheet for the RelationsToRelations 
-        relations = embeddings.add_worksheet("Relations to Relations")
-        relations.write(0, 0, 'Relation|Relation', bold)  # Cell is bold
+        # Header Cell is bold
+        relations.write(0, 0, 'Relation|Relation', bold)
         index = 1
         # Iterate over the data and write it out row by row.
         for relation in relationsNames:

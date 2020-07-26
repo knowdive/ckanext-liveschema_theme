@@ -59,7 +59,7 @@ def generateCue(data_dict):
             i+=1
 
     # Create the DataFrame used to save the Cues
-    cue = pd.DataFrame(columns=["Class","Cue1", "Cue2", "Cue3", "Cue4", "Cue5", "Cue6"])
+    cue = pd.DataFrame(columns=["eType","Cue_e", "Cue_er", "Cue_ec", "Cue_c", "Cue_cr", "Cue_cc"])
 
     # Iterate for every column present on data
     for column in data:
@@ -77,13 +77,13 @@ def generateCue(data_dict):
             
             # Calculate the metrics of that Class
             cue4 = data[className].sum()
-            cue5 = cue4 / data[column].sum()
+            cue5 = ( cue4  / data[column].sum()) if data[column].sum() != 0 else 0
             cue6 = 1 - cue5
             # Save the metrics of that Class
-            cue.at[column[10:-5], 'Class'] = column[10:-5]
-            cue.at[column[10:-5], 'Cue4'] = cue4
-            cue.at[column[10:-5], 'Cue5'] = cue5
-            cue.at[column[10:-5], 'Cue6'] = cue6
+            cue.at[column[10:-5], 'eType'] = column[10:-5]
+            cue.at[column[10:-5], 'Cue_c'] = cue4
+            cue.at[column[10:-5], 'Cue_cr'] = cue5
+            cue.at[column[10:-5], 'Cue_cc'] = cue6
 
             # Create the new column for the Cues in the input DataFrame, and copy the values for every Element 
             index = data.columns.get_loc(column)
@@ -92,14 +92,14 @@ def generateCue(data_dict):
             data.insert(index, className + "_123", tempColumn)
 
     # Calculate the Knowledge metrics of the input
-    cue4 = cue["Cue4"].sum()
-    cue5 = cue4 / data["total_456"].sum()
+    cue4 = cue["Cue_c"].sum()
+    cue5 = (cue4 / data["total_456"].sum()) if data["total_456"].sum() != 0 else 0
     cue6 = 1 - cue5
     # Save the Knowledge metrics of the input
-    cue.at["KNOWLEDGE", 'Class'] = "KNOWLEDGE"
-    cue.at["KNOWLEDGE", 'Cue4'] = cue4
-    cue.at["KNOWLEDGE", 'Cue5'] = cue5
-    cue.at["KNOWLEDGE", 'Cue6'] = cue6
+    cue.at["KNOWLEDGE", 'eType'] = "KNOWLEDGE"
+    cue.at["KNOWLEDGE", 'Cue_c'] = cue4
+    cue.at["KNOWLEDGE", 'Cue_cr'] = cue5
+    cue.at["KNOWLEDGE", 'Cue_cc'] = cue6
 
     # Create the new column for the Cues in the input DataFrame, and copy the values from the original column
     index = data.columns.get_loc("total_456")
@@ -113,7 +113,6 @@ def generateCue(data_dict):
         for column in data:
             # Check if the Name is present on that Element/row
             if(("in class" in column and "_456" in column) and row[column]): 
-
                 # Format data for another kind of cue Analysis
                 if(row[column] > 1):
                     data.at[index, "total_123"] = row["total_123"] - row[column] + 1 
@@ -132,21 +131,21 @@ def generateCue(data_dict):
             
             # Calculate the metrics of that Class
             cue1 = data[className].sum()
-            cue2 = cue1 / data[column].sum()
+            cue2 = (cue1 / data[column].sum()) if data[column].sum() != 0 else 0
             cue3 = 1 - cue2
             # Save the metrics of that Class
-            cue.at[column[10:-5], 'Cue1'] = cue1
-            cue.at[column[10:-5], 'Cue2'] = cue2
-            cue.at[column[10:-5], 'Cue3'] = cue3
+            cue.at[column[10:-5], 'Cue_e'] = cue1
+            cue.at[column[10:-5], 'Cue_er'] = cue2
+            cue.at[column[10:-5], 'Cue_ec'] = cue3
 
     # Calculate the Knowledge metrics of the input
-    cue1 = cue["Cue1"].sum()
-    cue2 = cue1 / data["total_123"].sum()
+    cue1 = cue["Cue_e"].sum()
+    cue2 = (cue1 / data["total_123"].sum()) if data["total_123"].sum() != 0 else 0
     cue3 = 1 - cue2
     # Save the Knowledge metrics of the input
-    cue.at["KNOWLEDGE", 'Cue1'] = cue1
-    cue.at["KNOWLEDGE", 'Cue2'] = cue2
-    cue.at["KNOWLEDGE", 'Cue3'] = cue3
+    cue.at["KNOWLEDGE", 'Cue_e'] = cue1
+    cue.at["KNOWLEDGE", 'Cue_er'] = cue2
+    cue.at["KNOWLEDGE", 'Cue_ec'] = cue3
     
     # Parse the Cue data into the csv file
     cue.to_csv(os.path.normpath(os.path.expanduser("src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/" + data_dict["dataset_name"]+"_Cue.csv")))

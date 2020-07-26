@@ -4,11 +4,23 @@
         {{ _('What is the Visualization Generator?') }}
     </h2>
     <div class="module-content">
-        <p>
-            {% trans %}
-            The Visualization Generator is tasked with generating the input file
-            used by the Visualization tool <a href=https://asntech.shinyapps.io/intervene>Intervene</a>
-            {% endtrans %}
-        </p>
+            The Visualization service is aimed at providing a visualization toolkit in order to better understand the source schema. 
+            <br />
+            It provides as output a resource containing all the elements of each Class.
+            <br /><br />
+            In order to visualize the datasets, we rely on the <a href="https://asntech.shinyapps.io/intervene/" target="blank">Intervene environment</a>.
+            <br />
+            Two outputs can be produced, using our resource as input:
+            <ul>
+                <li>
+                    Knowledge Lotuses, namely the Venn intersections between the main entity types of a schema;
+                </li>
+                <li>
+                    Upset plots.
+                </li>
+            </ul>
+            These formats enable us to discover the relations and cross-references existing between different Classes of the dataset.
+            <br /><br />
+            More information can be obtained here: <a href="https://intervene.readthedocs.io/" target="blank">Intervene documentation</a>.
     </div>
 </div>

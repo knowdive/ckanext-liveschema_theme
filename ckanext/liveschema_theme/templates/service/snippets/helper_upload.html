@@ -5,10 +5,13 @@
     </h2>
     <div class="module-content">
         <p>
-            {% trans %}
-            With the service Upload Dataset, you will be able to submit your DataSet to LiveSchema.
-            Doing so you will be able to use all its functionalities on your data.
-            {% endtrans %}
+            The Dataset Uploader is used to submit new datasets. 
+            <br />
+            This service can be run by subscribed <a href="{{ h.url_for('user.read', id=c.userobj.name) }}">users</a> (please see the subscription page for permission policies). 
+            <br /><br />
+            Once the dataset is uploaded to LiveSchema, a corresponding page with customizable data and related features will be available. 
+            <br />
+            Moreover, the dataset can be used as input of the available LiveSchema services and functionalities.  
         </p>
     </div>
 </div>

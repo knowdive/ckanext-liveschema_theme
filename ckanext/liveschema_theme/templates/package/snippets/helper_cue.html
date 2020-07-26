@@ -4,12 +4,46 @@
         {{ _('What is a Cue?') }}
     </h2>
     <div class="module-content">
-        <p>
-            A Cue is a key insight for analyzing a resource internal diversity based upon <a href="https://commonweb.unifr.ch/artsdean/pub/gestens/f/as/files/4610/9778_083247.pdf">Rosch’s cue validity</a>.
-            <br />
-            This notion was used to define the set of basic level categories, namely those categories which maximize the number of characteristics shared by their members and minimize the number of characteristics shared with the members of their sibling categories.
-            <br />
-            More detailed information can be obtained here: <a href="https://www.researchgate.net/publication/335310353_On_Knowledge_Diversity">On Knowledge Diversity</a>
-        </p>
+        The notion of “Cue” was used by <a href="https://commonweb.unifr.ch/artsdean/pub/gestens/f/as/files/4610/9778_083247.pdf" target="blank">Rosch</a> to define the set of basic level categories, namely those categories which:
+        <ul>
+            <li>
+                maximize the number of characteristics shared by their members;
+            </li>
+            <li>
+                minimize the number of characteristics shared with the members of their sibling categories.
+            </li>
+        </ul>
+        The “Cue” is a key insight for analyzing a resource internal diversity and unity based.
+        <br />
+        Intuitively:
+        <ol type="i">
+            <li>
+                unity accounts for the properties that are shared across entity types inside a schema;
+            </li>
+            <li>
+                diversity accounts for the properties that are not shared across entity types inside a schema.
+            </li>
+        </ol>
+        We have 6 types of Cue:
+        <ul>
+            <li>
+                <strong>Cue_e</strong> provides the sum of all the properties cue for a given eType;
+            </li>
+            <li>
+                <strong>Cue_er</strong> provides the level of diversity of any eType (1 = max, 0 = min);
+            </li>
+            <li>
+                <strong>Cue_ec</strong> provides the level of unity of any eType  (1 = max, 0 = min);
+            </li>
+            <li>
+                <strong>Cue_c</strong> provides the sum of all the properties cue for a given context/schema;
+            </li>
+            <li>
+                <strong>Cue_cr</strong>: provides the level of diversity of any context (1 = max, 0 = min);
+            </li>
+            <li>
+                <strong>Cue_cc</strong>: provides the level of unity of any context (1 = max, 0 = min).
+            </li>
+        </ul>
     </div>
 </div>

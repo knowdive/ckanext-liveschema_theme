@@ -584,7 +584,7 @@ def checkPackage(datasets, package):
 
     # Check License, if it's non usable then return without creating the package
     nonUsableLicenses = ["http://unitsofmeasure.org/trac/wiki/TermsOfUse"]
-    if(package["license_id"] in nonUsableLicenses):
+    if(("license_id" in package.keys() and package["license_id"] in nonUsableLicenses) or ("license_url" in package.keys() and package["license_url"] in nonUsableLicenses) ):
         return
 
     # Boolean used to verify if the online resources need to be updated

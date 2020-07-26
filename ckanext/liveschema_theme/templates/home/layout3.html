@@ -5,12 +5,12 @@
       <br />
       <div class="module-content box">
           <header>
-            <h1 class="page-heading">Biggest Catalogs</h1>
+            <h1 class="page-heading">Catalogs</h1>
               <ul style="overflow-y: auto;height: 350px;">
                 {% for org in h.liveschema_theme_most_popular_catalogs() %}
                   {% if org.package_count != 0 %}
                     <li>
-                      <a href="{{ h.url_for('organization_read', action='read', id=org.name) }}">
+                      <a href="/organization/about/{{ org.name }}">
                         <h3>{{ org.title }}</h3>
                       </a>
                       {% if org.description %}
@@ -20,7 +20,7 @@
                       {% else %}
                         <p>{{ _('This catalog has no description') }}</p>
                       {% endif %}
-                        <strong><a href="/dataset?organization={{ org.name }}">{{ org.package_count}} {% if org.package_count==1 %}dataset{% else %}datasets{% endif %}</a></strong>
+                        <strong><a href="{{ h.url_for('organization_read', action='read', id=org.name) }}">{{ org.package_count}} {% if org.package_count==1 %}dataset{% else %}datasets{% endif %}</a></strong>
                     </li>
                     <br />
                   {% endif %}

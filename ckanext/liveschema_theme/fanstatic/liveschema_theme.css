@@ -67,6 +67,14 @@
     color: rgba(58, 58, 58, 1);
 }
 
+/* Loading Gif */
+#LoadingGif {
+    max-height: 50px;
+    padding: 5px;
+    margin: 5px;
+    background-color: rgba(2, 116, 190, 1);
+}
+
 
 /* ===========================================
    Container

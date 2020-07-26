@@ -155,7 +155,19 @@ class LiveSchemaController(BaseController):
             }
 
             # Add the description of the Embedding specifying the Model
-            description = "Knowledge Embedding obtained with Model: " + strModel
+            description = "Knowledge Embedding obtained with options:\n" + \
+                          " - Model: " + str(strModel) + "\n" + \
+                          " - embedding_dim: " + str(embedding_dim) + "\n" + \
+                          " - normalization_of_entities: " + str(normalization_of_entities) + "\n" + \
+                          " - scoring_function: " + str(scoring_function) + "\n" + \
+                          " - margin_loss: " + str(margin_loss) + "\n" + \
+                          " - random_seed: " + str(random_seed) + "\n" + \
+                          " - num_epochs: " + str(num_epochs) + "\n" + \
+                          " - learning_rate: " + str(learning_rate) + "\n" + \
+                          " - batch_size: " + str(batch_size) + "\n" + \
+                          " - test_set_ratio: " + str(test_set_ratio) + "\n" + \
+                          " - filter_negative_triples: " + str(filter_negative_triples) + "\n" + \
+                          " - maximum_number_of_hpo_iters: " + str(maximum_number_of_hpo_iters)
 
             dataset = toolkit.get_action('package_show')(
                 data_dict={"id": dataset_name})
@@ -180,7 +192,7 @@ class LiveSchemaController(BaseController):
                 data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_Emb_"+strModel+".xlsx", "description": description, "resource_type": "Emb"})
 
             # Execute the embedder action
-            get_action('ckanext_liveschema_theme_embedder')(context, data_dict={"res_id": EmbResource["id"], "res_id_model": ModelResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, "options": options, 'apikey': c.userobj.apikey, 'loading': "/dataset/embedding/" + dataset_name })
+            get_action('ckanext_liveschema_theme_embedder')(context, data_dict={"res_id": EmbResource["id"], "res_id_model": ModelResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, "options": options, 'apikey': c.userobj.apikey, 'loading': "/dataset/embedding/" + dataset_name + "?GeneratingEmbedding"})
             # Go to the dataset page
             LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
             return redirect_to(controller=LiveSchemaController, action='embedding',
@@ -249,7 +261,7 @@ class LiveSchemaController(BaseController):
                 data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_FCA.csv", "description": description, "resource_type": "FCA"})
 
             # Execute the fca_generator action
-            get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, "strPredicates": strPredicates, 'apikey': c.userobj.apikey, 'loading': "/dataset/fca/" + dataset_name})
+            get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, "strPredicates": strPredicates, 'apikey': c.userobj.apikey, 'loading': "/dataset/fca/" + dataset_name + "?Generating FCA"})
 
             # Go to the dataset page
             LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
@@ -305,7 +317,7 @@ class LiveSchemaController(BaseController):
                 # [TODO] Remove dataset_link from the inputs
                 # [TODO] Change also visualization and maybe also FCA
                 # Execute the fca_generator action
-                get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": resCSV, "strPredicates": "", 'apikey': c.userobj.apikey, 'loading': "/dataset/fca/" + dataset_name})
+                get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": resCSV, "strPredicates": "", 'apikey': c.userobj.apikey, 'loading': "/dataset/fca/" + dataset_name + "?GeneratingFCA"})
 
             # Check if the user has the access to this page
             try:
@@ -331,7 +343,7 @@ class LiveSchemaController(BaseController):
                 data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_Cue.csv", "description": "Cue metrics of the dataset", "resource_type": "Cue"})
 
             # Execute the Cue generator action
-            get_action('ckanext_liveschema_theme_cue_generator')(context, data_dict={"res_id": CUEResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, 'apikey': c.userobj.apikey, 'loading': "/dataset/cue/" + dataset_name})
+            get_action('ckanext_liveschema_theme_cue_generator')(context, data_dict={"res_id": CUEResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, 'apikey': c.userobj.apikey, 'loading': "/dataset/cue/" + dataset_name + "?GeneratingCue"})
 
             # Go to the dataset page
             LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
@@ -383,7 +395,7 @@ class LiveSchemaController(BaseController):
                     data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_FCA.csv", "description": "FCA Matrix containing the information of all the triples", "resource_type": "FCA"})
 
                 # Execute the fca_generator action
-                get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": resCSV, "strPredicates": "", 'apikey': c.userobj.apikey, 'loading': "/dataset/fca/" + dataset_name})
+                get_action('ckanext_liveschema_theme_fca_generator')(context, data_dict={"res_id": FCAResource["id"], "dataset_name": dataset_name ,"dataset_link": resCSV, "strPredicates": "", 'apikey': c.userobj.apikey, 'loading': "/dataset/fca/" + dataset_name + "?GeneratingFCA"})
 
             # Check if the user has the access to this page
             try:
@@ -410,7 +422,7 @@ class LiveSchemaController(BaseController):
                 data_dict={"package_id": dataset_name, "format": "temp", "name": dataset_name+"_Visualization.csv", "description": "Visualization input", "resource_type": "Visualization"})
 
             # Execute the Visualization generator action
-            get_action('ckanext_liveschema_theme_visualization_generator')(context, data_dict={"res_id": VISResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, 'apikey': c.userobj.apikey, 'loading': "/dataset/visualization/" + dataset_name })
+            get_action('ckanext_liveschema_theme_visualization_generator')(context, data_dict={"res_id": VISResource["id"], "dataset_name": dataset_name ,"dataset_link": dataset_link, 'apikey': c.userobj.apikey, 'loading': "/dataset/visualization/" + dataset_name + "?GeneratingVisualization"})
 
             # Go to the dataset page
             LiveSchemaController = 'ckanext.liveschema_theme.controller:LiveSchemaController'
@@ -451,7 +463,7 @@ class LiveSchemaController(BaseController):
                     catalogsSelection.append(value)
             
             # Execute the update action
-            get_action('ckanext_liveschema_theme_updater')(context, data_dict={"catalogsSelection": catalogsSelection, 'apikey': c.userobj.apikey, 'loading': "/dataset"})
+            get_action('ckanext_liveschema_theme_updater')(context, data_dict={"catalogsSelection": catalogsSelection, 'apikey': c.userobj.apikey, 'loading': "/dataset" + "?Updating"})
 
             # Redirect to the index
             return redirect_to("../")
@@ -583,39 +595,41 @@ class LiveSchemaController(BaseController):
         # Render the page of the service
         return render('service/uploader.html')
     
-    # Define the behaviour of the graph visualization tool
-    def graph(self, id):
+    # Define the behaviour of the query catalog service
+    def query_catalog(self):
         # Build the context using the information obtained by session and user
         context = {'model': model, 'session': model.Session,
                    'user': c.user, 'for_view': True,
                    'auth_user_obj': c.userobj}
 
-        # Declare link variable to be obtained 
-        link = ''
+        # If the page has to handle the form resulting from the service
+        if request.method == 'POST' and "query" in request.params.keys():
+            # Get the given query
+            query = request.params['query']
 
-        # Try to access the information
-        try:
-            # Define the data_dict to pass to the package_show action
-            data_dict = {'id': id}
-            # get the information about the desired package
-            c.pkg_dict = get_action('package_show')(context, data_dict)
+            # Execute the query action
+            result = list()
+            if query:
+                CKAN = helpers.get_site_protocol_and_host()
+                CKAN_URL = CKAN[0]+"://" + CKAN[1]
+                result = get_action('ckanext_liveschema_theme_query')(context, data_dict={'TTL_Resource': {'name': "Catalog", 'url': CKAN_URL+"/catalog.ttl"}, "query": query})
 
-            # Get the dataset type of the dataset
-            dataset_type = c.pkg_dict['type'] or 'dataset'
+            # Go to the dataset page
+            return render('service/query_catalog.html',
+                        {'query': query,  'result': result, 'number': len(result), 'pkg' : c.pkg_dict}) 
+        # Example query
+        query = "PREFIX dcat:  <http://www.w3.org/ns/dcat#> \n" + \
+                "# Get the title of all the Datasets of LiveSchema \n" + \
+                "SELECT ?title \n" + \
+                "WHERE { \n" + \
+                "\t?vocab a dcat:Dataset . \n" + \
+                "\t?vocab dct:title ?title. \n" + \
+                "} ORDER BY ?title"
+        # Render the page of the query catalog page
+        return render('service/query_catalog.html',
+                    {'query': query, 'pkg' : c.pkg_dict}) 
 
-            # Set the link for the information
-            #[TODO] Once deployed, link should have the url of the LiveSchema's relative resource instead of the internal url
-            link = c.pkg_dict['url']
-        # Otherwise return the relative error codes
-        except NotFound:
-            abort(404, _('Dataset not found'))
-        except NotAuthorized:
-            abort(403, _('Unauthorized to read dataset %s') % id)
 
-        # Render the page of the service
-        return render('package/graph.html',
-                      {'dataset_type': dataset_type, 'link': link})
-   
     # Define the behaviour of the package Embedding tool
     def embedding(self, id):
         # Build the context using the information obtained by session and user
@@ -680,7 +694,6 @@ class LiveSchemaController(BaseController):
         return render('package/fca.html',
                       {'dataset_type': dataset_type, 'FCAList': FCAList, 'pkg' : c.pkg_dict}) 
 
-
     # Define the behaviour of the package Cue tool
     def cue(self, id):
         # Build the context using the information obtained by session and user
@@ -713,13 +726,13 @@ class LiveSchemaController(BaseController):
                     if "format" in res.keys() and res["format"] == "CUE":
                         CueMatrix = pd.read_csv(res["url"])
 
-                        termList = CueMatrix["Class"]
-                        Cue1List = CueMatrix["Cue1"]
-                        Cue2List = CueMatrix["Cue2"]
-                        Cue3List = CueMatrix["Cue3"]
-                        Cue4List = CueMatrix["Cue4"]
-                        Cue5List = CueMatrix["Cue5"]
-                        Cue6List = CueMatrix["Cue6"]
+                        termList = CueMatrix["eType"]
+                        Cue1List = CueMatrix["Cue_e"]
+                        Cue2List = CueMatrix["Cue_er"]
+                        Cue3List = CueMatrix["Cue_ec"]
+                        Cue4List = CueMatrix["Cue_c"]
+                        Cue5List = CueMatrix["Cue_cr"]
+                        Cue6List = CueMatrix["Cue_cc"]
 
         # Otherwise return the relative error codes
         except NotFound:
@@ -811,41 +824,39 @@ class LiveSchemaController(BaseController):
             return render('package/no_visualization.html',
                         {'dataset_type': dataset_type, 'visualizationResource': visualizationResource, 'pkg': c.pkg_dict}) 
 
-    # Define the behaviour of the query catalog service
-    def query_catalog(self):
+    # Define the behaviour of the graph visualization tool
+    def graph(self, id):
         # Build the context using the information obtained by session and user
         context = {'model': model, 'session': model.Session,
                    'user': c.user, 'for_view': True,
                    'auth_user_obj': c.userobj}
 
-        # If the page has to handle the form resulting from the service
-        if request.method == 'POST' and "query" in request.params.keys():
-            # Get the given query
-            query = request.params['query']
+        # Declare link variable to be obtained 
+        link = ''
 
-            # Execute the query action
-            result = list()
-            if query:
-                CKAN = helpers.get_site_protocol_and_host()
-                CKAN_URL = CKAN[0]+"://" + CKAN[1]
-                result = get_action('ckanext_liveschema_theme_query')(context, data_dict={'TTL_Resource': {'name': "Catalog", 'url': CKAN_URL+"/catalog.ttl"}, "query": query})
+        # Try to access the information
+        try:
+            # Define the data_dict to pass to the package_show action
+            data_dict = {'id': id}
+            # get the information about the desired package
+            c.pkg_dict = get_action('package_show')(context, data_dict)
 
-            # Go to the dataset page
-            return render('service/query_catalog.html',
-                        {'query': query,  'result': result, 'number': len(result), 'pkg' : c.pkg_dict}) 
-        # Example query
-        query = "PREFIX dcat:  <http://www.w3.org/ns/dcat#> \n" + \
-                "# Get the title of all the Datasets of LiveSchema \n" + \
-                "SELECT ?title \n" + \
-                "WHERE { \n" + \
-                "\t?vocab a dcat:Dataset . \n" + \
-                "\t?vocab dct:title ?title. \n" + \
-                "} ORDER BY ?title"
-        # Render the page of the query catalog page
-        return render('service/query_catalog.html',
-                    {'query': query, 'pkg' : c.pkg_dict}) 
+            # Get the dataset type of the dataset
+            dataset_type = c.pkg_dict['type'] or 'dataset'
 
+            # Set the link for the information
+            #[TODO] Once deployed, link should have the url of the LiveSchema's relative resource instead of the internal url
+            link = c.pkg_dict['url']
+        # Otherwise return the relative error codes
+        except NotFound:
+            abort(404, _('Dataset not found'))
+        except NotAuthorized:
+            abort(403, _('Unauthorized to read dataset %s') % id)
 
+        # Render the page of the service
+        return render('package/graph.html',
+                      {'dataset_type': dataset_type, 'link': link})
+   
     # Define the behaviour of the package query tool
     def query(self, id):
         # Build the context using the information obtained by session and user
@@ -895,7 +906,6 @@ class LiveSchemaController(BaseController):
         # Render the page of the query page
         return render('package/query.html',
                     {'dataset_type': dataset_type, 'TTL_Resource': TTL_Resource, 'query': query, 'pkg': c.pkg_dict}) 
-
 
     # Define the behaviour of the reset resources 
     def reset(self, id):
@@ -971,6 +981,23 @@ class LiveSchemaController(BaseController):
         return redirect_to(controller='package', action='read',
             id=id)
 
+
     # Define the behaviour of the contact service
     def contact(self):
+        # If the page has to handle the form resulting from the service
+        if request.method == 'POST' and "mail" in request.params.keys() and request.params['mail']:
+            # [TODO] Send mail
+            #TMP --> Write on file
+            # Name of folder of results
+            path = "src/ckanext-liveschema_theme/ckanext/liveschema_theme/public/"
+            with open(path + "tmp.txt", "a+") as tmp:
+                tmp.write("\n")
+                tmp.write("Name: \t\t\t\"" + str(request.params["name"]) + "\"\n")
+                tmp.write("eMail: \t\t\t\"" + str(request.params["mail"]) + "\"\n")
+                tmp.write("Institution: \t\"" + str(request.params["institution"]) + "\"\n")
+                tmp.write("Message: \t\t\"" + str(request.params["message"]) + "\"\n")
+                tmp.write("")
+            # Redirect to the index
+            return redirect_to("../")
+        # Render contact page
         return render('service/contact.html')
