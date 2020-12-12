@@ -117,7 +117,7 @@ def scrapeFinto(catalogs, datasets):
     # Iterate over each category
     for category in categories:
         # Get the of the tag from the title of category
-        tagName = category("h2")[0].text
+        tagName = category("h3")[0].text
         # Iterate over each vocabulary in that category
         for vocab in category("a"):
             # Get the page of the vocabulary
@@ -138,43 +138,48 @@ def scrapeFinto(catalogs, datasets):
 
             # Iterate over each row of the metadata table to obtain title, description, last modified, language, homepage, uri, publisher, creator, license if available
             agents = list()
-            for tr in soupVoc("table", {"class":"table"})[0].find_all("tr"):
-                th = tr.find_all("th")  
-                if th and th[0].text == "TITLE":
-                    title = tr.find_all("td")[0].text
+            for div in soupVoc("div", {"class":"table"})[0].find_all("div", class_="row"):
+                label = div.find_all("div", class_="property-label versal")
+                value = div.find_all("div", class_="property-value-column versal")
+                if(value and value[0].text):
+                    value = value[0].text
+                else: 
+                    value = False
+                if label and label[0].text == "TITLE" and value:
+                    title = value
                     package["title"] = title
-                if th and th[0].text == "DESCRIPTION":
-                    description = tr.find_all("td")[0].text
+                if label and label[0].text == "DESCRIPTION" and value:
+                    description = value
                     package["notes"] = description
-                if th and th[0].text == "LAST MODIFIED":
-                    lastModified = tr.find_all("td")[0].text
+                if label and label[0].text == "LAST MODIFIED" and value:
+                    lastModified = value
                     package["extras"].append({"key": "issued", "value": lastModified})
-                if th and th[0].text == "LANGUAGE":
-                    language = tr.find_all("td")[0].text
+                if label and label[0].text == "LANGUAGE" and value:
+                    language = value
                     language = ", ".join(language[1:-1].split("\n"))
                     package["extras"].append({"key": "language", "value": language})
-                if th and th[0].text == "HOMEPAGE":
-                    homepage = tr.find_all("td")[0].text
+                if label and label[0].text == "HOMEPAGE" and value:
+                    homepage = value
                     package["extras"].append({"key": "contact_uri", "value": homepage})
-                if th and th[0].text == "URI":
-                    uri = tr.find_all("td")[0].text
+                if label and label[0].text == "URI" and value:
+                    uri = value
                     package["extras"].append({"key": "uri", "value": uri})
-                if th and th[0].text == "PUBLISHER":
-                    publisher = tr.find_all("td")[0].text
+                if label and label[0].text == "PUBLISHER" and value:
+                    publisher = value
                     publisher = publisher.split("\n")
                     publisher = [publi for publi in publisher if publi] 
                     package["maintainer"] = ", ".join(publisher)
                     for publi in publisher:
                         agents.append(addAgent(publi, ""))
-                if th and th[0].text == "CREATOR":
-                    creator = tr.find_all("td")[0].text
+                if label and label[0].text == "CREATOR" and value:
+                    creator = value
                     creator = creator.split("\n")
                     creator = [crea for crea in creator if crea] 
                     package["author"] = ", ".join(creator)
                     for crea in creator:
                         agents.append(addAgent(crea, ""))
-                if th and th[0].text == "LICENSE":
-                    lic = tr.find_all("td")[0].text
+                if label and label[0].text == "LICENSE" and value:
+                    lic = value
                     package["license_id"] = lic
                     for license_ in licenses:
                         if(len(license_["url"])>7 and len(lic)>7 and (lic[6:-5] in license_["url"][6:-5] or license_["url"][6:-5] in lic[6:-5])):
@@ -831,6 +836,7 @@ def addAgent(agentTitle, agentLink):
     # Format the agentName to CKAN specifics
     agentName = agentTitle.lower().replace(" ","-").replace(".","-").replace(";","-")
     agentName = "".join([i for i in agentName if (i in string.ascii_lowercase or i.isdigit() or i == "-")])
+    agentName = agentName[:99]
     # Get the list of the Agents alredy on LiveSchema 
     agents = toolkit.get_action('group_list')(data_dict={})
     # Check if the Agent has already been created
