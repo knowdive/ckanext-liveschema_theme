@@ -35,7 +35,24 @@ def embedKnowledge(data_dict):
 		os.makedirs(path)
 
     # Create the dataframe from the CSV file
-    triples = pd.read_csv(data_dict["dataset_link"])
+    triples = pd.read_csv(data_dict["dataset_link"], nrows=10001)
+
+    if(len(triples) > 10000):
+        # Get the final version of the package
+        CKANpackage = toolkit.get_action('package_show')(
+                data_dict={"id": data_dict["dataset_name"]})
+        # Iterate over all the resources
+        for resource in CKANpackage["resources"]:
+            # Remove eventual temp resources left in case of error
+            if resource["format"] == "temp":
+                toolkit.get_action("resource_delete")(context={"ignore_auth": True}, data_dict={"id":resource["id"]})
+
+        # Remove visibility of loading gear
+        if(os.path.isfile(loading)):
+            os.remove(loading)
+        
+        # Return without continuing the execution
+        return
 
 	# Name of the training file
     parsedTSV = path + data_dict["dataset_name"] + ".tsv"
