@@ -3,7 +3,7 @@
 {% block header_logo %} 
     {% if g.site_logo %}
         <a class="logo" href="{{ h.url_for('home.index') }}">
-            <img src="http://datascientia.disi.unitn.it/wp-content/uploads/2019/03/DataScientia_logo-205x68.jpg" alt="{{ g.site_title }}" title="{{ g.site_title }}" />
+            <img src="http://liveschema.eu/images/DS-Logo.jpg" alt="{{ g.site_title }}" title="{{ g.site_title }}" />
         </a>
     {% else %}
         <h1>
@@ -16,7 +16,7 @@
 
     {% if h.check_loading() %}
         <a href="{{ h.check_loading() }}">
-            <img id="LoadingGif" src="https://visionhelp.files.wordpress.com/2017/02/brain_gears_loading_19206.gif?w=640" alt="Ongoing Operation" title="Ongoing Operation" />
+            <img id="LoadingGif" src="http://liveschema.eu/images/loading.gif" alt="Ongoing Operation" title="Ongoing Operation" />
         </a>
     {% endif %}
 {% endblock %}

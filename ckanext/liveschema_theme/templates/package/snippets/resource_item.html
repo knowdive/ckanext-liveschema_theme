@@ -76,7 +76,7 @@
     <span class="heading" >
       {{ h.resource_display_name(res) | truncate(50) }}
     </span>
-    <img src="https://www.taskbox.io/assets/img/animated/gears.gif" class="format-label" id="tempImage"></img>
+    <img src="http://liveschema.eu/images/gears.gif" class="format-label" id="tempImage"></img>
     <p class="description">
       {% if res.description %}
         {{ h.markdown_extract(h.get_translated(res, 'description'), extract_length=80) }}
